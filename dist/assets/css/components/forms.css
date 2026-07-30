@@ -1,0 +1,222 @@
+/* Complete input-state system and expandable selection controls. */
+.field {
+  --field-accent: var(--gold);
+}
+
+.field input,
+.field select,
+.field textarea,
+.search-field,
+.expandable-select > button {
+  min-height: var(--touch-target);
+  transition: var(--transition-interactive);
+}
+
+.field-message {
+  display: block;
+  min-height: 18px;
+  margin-top: var(--space-1);
+  color: var(--muted);
+}
+
+.field--error {
+  --field-accent: var(--danger);
+}
+
+.field--success {
+  --field-accent: var(--success);
+}
+
+.field--error input,
+.field--error textarea,
+.field--error select,
+.field--success input,
+.field--success textarea,
+.field--success select {
+  border-color: color-mix(in srgb, var(--field-accent) 55%, transparent);
+}
+
+.field--error .field-message {
+  color: var(--danger);
+}
+
+.field--success .field-message {
+  color: var(--success);
+}
+
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.search-combobox {
+  position: relative;
+}
+
+.search-field {
+  transition: var(--transition-interactive);
+}
+
+.search-field:focus-within {
+  transform: scale(1.01);
+}
+
+.search-clear {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+.search-suggestions {
+  position: absolute;
+  z-index: 16;
+  top: calc(100% - 8px);
+  right: 0;
+  left: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-fill-strong);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--blur-md));
+  animation: scale-in var(--duration-fast) var(--ease) both;
+}
+
+.search-suggestions button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+}
+
+.search-suggestions button:hover,
+.search-suggestions button:focus-visible {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.expandable-select {
+  position: relative;
+}
+
+.expandable-select > button {
+  display: flex;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: left;
+}
+
+.expandable-select > button small,
+.expandable-select > button strong {
+  display: block;
+}
+
+.expandable-select > button small {
+  margin-bottom: 2px;
+}
+
+.expandable-select > button[aria-expanded="true"] {
+  border-color: var(--gold-border);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.07);
+}
+
+.expandable-select__options {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.expandable-select__options button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  text-align: left;
+}
+
+.expandable-select__options button:hover,
+.expandable-select__options button[aria-selected="true"] {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold);
+}
+
+.check-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: var(--space-3);
+  border: 0;
+}
+
+.check-list legend {
+  margin-bottom: var(--space-2);
+  color: var(--gray);
+  font-size: 0.78rem;
+  font-weight: var(--weight-bold);
+}
+
+.check-control {
+  display: flex;
+  min-height: var(--touch-target);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.check-control input {
+  position: absolute;
+  opacity: 0;
+}
+
+.check-control > span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  transition: var(--transition-interactive);
+}
+
+.check-control--radio > span {
+  border-radius: 50%;
+}
+
+.check-control input:checked + span {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: inset 0 0 0 4px var(--surface);
+}
+
+.check-control:not(.check-control--radio) input:checked + span::after {
+  color: #111015;
+  content: "✓";
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.check-control input:focus-visible + span {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}

@@ -1,7 +1,7 @@
 /**
  * Minimal single-page navigation with history support and accessible state.
  */
-const routes = new Set(["home", "builder", "prompt", "saved", "settings"]);
+const routes = new Set(["home", "builder", "prompt", "saved", "settings", "components"]);
 
 export function createNavigation({ onRouteChange } = {}) {
   const screens = [...document.querySelectorAll("[data-screen]")];
@@ -21,6 +21,7 @@ export function createNavigation({ onRouteChange } = {}) {
     window.scrollTo({ top: 0, behavior: "instant" });
     document.title = target === "home" ? "Vyrelix" : `${target[0].toUpperCase()}${target.slice(1)} · Vyrelix`;
     onRouteChange?.(target);
+    document.dispatchEvent(new CustomEvent("vyrelix:route", { detail: { route: target } }));
   }
 
   document.addEventListener("click", (event) => {

@@ -1,6 +1,7 @@
 /* Product-level composition and finishing details. */
 html { background: #050507; scroll-behavior: smooth; }
 body { overscroll-behavior-y: none; }
+body.has-overlay { overflow: hidden; touch-action: none; }
 .ambient { position: fixed; z-index: 0; width: 240px; height: 240px; border-radius: 50%; filter: blur(80px); opacity: .08; pointer-events: none; }
 .ambient-one { top: -100px; right: -100px; background: var(--gold); }
 .ambient-two { bottom: 30%; left: -180px; background: #7656a8; }

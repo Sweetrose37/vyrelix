@@ -10,6 +10,15 @@ import { showToast, openDialog, closeDialog, openSheet, closeSheet, renderSaved 
 import { validateRequired } from "../utilities/validators.js";
 import { createId, debounce } from "../utilities/helpers.js";
 import { clamp } from "../utilities/random.js";
+import { initializeButtons } from "./components/buttons.js";
+import { initializeCards } from "./components/cards.js";
+import { initializeForms, createSearchController } from "./components/forms.js";
+import { initializeModals, openModal } from "./components/modals.js";
+import { initializeDrawers } from "./components/drawer.js";
+import { initializeBottomSheets } from "./components/bottomSheet.js";
+import { initializeTabs } from "./components/tabs.js";
+import { initializeLoading, setButtonLoading } from "./components/loading.js";
+import { initializeGestures } from "./components/gestures.js";
 
 const state = { step: 1, intensity: 3, filter: "all", query: "" };
 const form = document.querySelector("#character-form");
@@ -133,7 +142,6 @@ function bindEvents() {
       : "Your Phase 1A data stays in this browser's local storage. Vyrelix does not send it to a server.");
   }));
   document.querySelector("#notifications-button").addEventListener("click", () => showToast("You’re all caught up"));
-  document.querySelector("#saved-search").addEventListener("input", debounce((event) => { state.query = event.target.value.trim().toLowerCase(); refreshSaved(); }, 120));
   document.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
     state.filter = button.dataset.filter;
     document.querySelectorAll("[data-filter]").forEach((item) => {
@@ -161,10 +169,32 @@ function bindEvents() {
 navigation = createNavigation({ onRouteChange: (route) => { if (route === "saved") refreshSaved(); } });
 const settings = initializeSettings(() => openDialog("Clear local storage?", "This removes all saved characters, prompts, history, and preferences from this device.", { destructive: true }));
 document.querySelector("#confirm-clear").addEventListener("click", () => {
-  storage.clear(); refreshSaved(); settings.reset(); closeDialog(); showToast("Local storage cleared");
+  const action = document.querySelector("#dialog").dataset.action;
+  if (action === "clear-storage") {
+    storage.clear(); refreshSaved(); settings.reset(); closeDialog(); showToast("Local storage cleared", "deleted");
+  } else {
+    closeDialog();
+    showToast(action === "demo-delete" ? "Delete pattern confirmed" : "Action confirmed", action === "demo-delete" ? "deleted" : "success");
+  }
 });
 initializeRipples();
 bindEvents();
+initializeModals();
+initializeBottomSheets();
+initializeDrawers();
+initializeTabs();
+initializeForms();
+initializeLoading();
+initializeButtons({ showToast, openModal, setLoading: setButtonLoading });
+initializeCards({ openModal });
+createSearchController({
+  input: document.querySelector("#saved-search"),
+  suggestions: document.querySelector("#search-suggestions"),
+  clearButton: document.querySelector("[data-search-clear]"),
+  getItems: () => [...storage.getCharacters(), ...storage.getPrompts()],
+  onQuery: debounce((query) => { state.query = query; refreshSaved(); }, 100)
+});
+initializeGestures({ showToast, onPullRefresh: refreshSaved });
 updateBuilder();
 refreshSaved();
 launch();

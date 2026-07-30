@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="./css/typography.css">
     <link rel="stylesheet" href="./css/layout.css">
     <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/components/buttons.css">
+    <link rel="stylesheet" href="./css/components/cards.css">
+    <link rel="stylesheet" href="./css/components/forms.css">
+    <link rel="stylesheet" href="./css/components/modals.css">
+    <link rel="stylesheet" href="./css/components/navigation.css">
+    <link rel="stylesheet" href="./css/components/toast.css">
+    <link rel="stylesheet" href="./css/components/animations.css">
     <link rel="stylesheet" href="./css/animations.css">
     <link rel="stylesheet" href="./css/utilities.css">
     <link rel="stylesheet" href="./css/mobile.css">
@@ -224,10 +231,14 @@
               <div><p class="eyebrow">Local collection</p><h1 class="large-title" id="saved-title">Saved</h1></div>
               <span class="badge" id="saved-count">0 items</span>
             </div>
+            <div class="search-combobox" data-search-root>
             <label class="search-field">
               <span aria-hidden="true">⌕</span>
-              <input type="search" id="saved-search" placeholder="Search your collection" aria-label="Search saved items">
+              <input type="search" id="saved-search" placeholder="Search your collection" aria-label="Search saved items" aria-controls="search-suggestions" aria-expanded="false" autocomplete="off">
+              <button class="search-clear is-hidden" type="button" aria-label="Clear search" data-search-clear>×</button>
             </label>
+            <div class="search-suggestions is-hidden" id="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
+            </div>
             <div class="segmented" role="tablist" aria-label="Saved item type">
               <button class="is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
               <button type="button" role="tab" aria-selected="false" data-filter="character">Characters</button>
@@ -258,9 +269,151 @@
               <div class="divider"></div>
               <button class="settings-link" type="button" data-dialog="privacy"><span>Privacy</span><span aria-hidden="true">›</span></button>
               <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption">1.0.0 · Phase 1A</span></div>
+              <button class="settings-link" type="button" data-route="components"><span>UI Library</span><span class="settings-link__meta">Components <span aria-hidden="true">›</span></span></button>
+              <div class="divider"></div>
+              <div class="settings-link"><span>Version</span><span class="caption">1.1.0 · UI System</span></div>
             </section>
             <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
+          </section>
+
+          <section class="screen ui-library" data-screen="components" aria-labelledby="components-title">
+            <div class="screen-heading screen-heading--compact">
+              <button class="icon-button" type="button" data-route="settings" aria-label="Back to settings">‹</button>
+              <div class="screen-heading__center">
+                <p class="eyebrow">Vyrelix system</p>
+                <h1 class="medium-title" id="components-title">UI Library</h1>
+              </div>
+              <span class="badge">v1</span>
+            </div>
+
+            <div class="scroll-tabs" data-tabs role="tablist" aria-label="UI library sections">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <button class="is-active" type="button" role="tab" aria-selected="true" data-tab="actions">Actions</button>
+              <button type="button" role="tab" aria-selected="false" data-tab="content">Cards</button>
+              <button type="button" role="tab" aria-selected="false" data-tab="inputs">Inputs</button>
+              <button type="button" role="tab" aria-selected="false" data-tab="feedback">Feedback</button>
+            </div>
+
+            <div class="tab-panels">
+              <section class="tab-panel is-active" data-tab-panel="actions" role="tabpanel">
+                <div class="component-intro">
+                  <p class="section-title">Button library</p>
+                  <p class="caption">48px minimum targets, responsive feedback, and complete semantic states.</p>
+                </div>
+                <div class="component-stack">
+                  <button class="button button--primary button--wide ripple" type="button" data-demo-toast="success">Primary action</button>
+                  <button class="button button--generate button--wide ripple" type="button" data-demo-loading>
+                    <span class="button__spark" aria-hidden="true">✦</span><span>Generate button</span>
+                  </button>
+                  <div class="button-row">
+                    <button class="button button--secondary ripple" type="button">Secondary</button>
+                    <button class="button button--outlined ripple" type="button">Outlined</button>
+                  </div>
+                  <div class="button-row">
+                    <button class="button button--success ripple" type="button" data-demo-toast="saved">Save</button>
+                    <button class="button button--danger ripple" type="button" data-demo-modal="delete">Delete</button>
+                  </div>
+                  <div class="icon-action-row" aria-label="Icon button examples">
+                    <button class="icon-button icon-button--favorite" type="button" data-favorite aria-label="Add to favorites" aria-pressed="false">♡</button>
+                    <button class="icon-button" type="button" data-demo-toast="copied" aria-label="Copy">⌘</button>
+                    <button class="icon-button" type="button" data-demo-toast="success" aria-label="Share">↗</button>
+                    <button class="icon-button icon-button--danger" type="button" data-demo-modal="delete" aria-label="Delete">×</button>
+                  </div>
+                  <button class="button button--ghost button--wide" type="button">Ghost button</button>
+                  <button class="button button--primary button--wide" type="button" disabled>Disabled button</button>
+                  <button class="button button--primary button--wide is-loading" type="button" aria-label="Loading" aria-busy="true">Loading</button>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-tab-panel="content" role="tabpanel" hidden>
+                <div class="component-intro"><p class="section-title">Card library</p><p class="caption">Composable surfaces for future character, media, history, and prompt content.</p></div>
+                <div class="component-stack">
+                  <article class="card card--standard"><span class="badge badge--soft">Standard</span><h3>Foundation surface</h3><p class="caption">A calm container for grouped content.</p></article>
+                  <article class="card card--glass card--showcase"><div class="card-orb" aria-hidden="true"></div><div><span class="badge">Glass</span><h3>Atmospheric layer</h3><p class="caption">Blurred depth for premium moments.</p></div></article>
+                  <button class="card card--elevated card--interactive history-card" type="button" data-demo-modal="info">
+                    <span class="history-card__time">09:42</span><span><strong>History card</strong><small>Reusable activity summary</small></span><span aria-hidden="true">›</span>
+                  </button>
+                  <article class="card character-card" data-gesture-card tabindex="0" aria-label="Character card example. Swipe left or right, double tap to favorite, or hold for actions.">
+                    <div class="character-card__art" role="img" aria-label="Abstract placeholder portrait of Lyra Voss"><span>LV</span></div>
+                    <div class="character-card__overlay"><span class="badge">Character</span><h3>Lyra Voss</h3><p>Void navigator</p></div>
+                    <button class="icon-button icon-button--favorite" type="button" data-favorite aria-label="Favorite Lyra Voss" aria-pressed="false">♡</button>
+                  </article>
+                  <article class="card prompt-card">
+                    <div class="prompt-card__label"><span aria-hidden="true">⌁</span><strong>Prompt card</strong></div>
+                    <p>Portrait at blue hour, sculpted rim light, quiet and cinematic.</p>
+                    <button class="button button--copy" type="button" data-demo-toast="copied" aria-label="Copy example prompt">Copy</button>
+                  </article>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-tab-panel="inputs" role="tabpanel" hidden>
+                <div class="component-intro"><p class="section-title">Input system</p><p class="caption">Focused, success, error, helper, and disabled states share one field contract.</p></div>
+                <div class="component-stack">
+                  <label class="field field--success"><span>Character title</span><input value="Lyra Voss" aria-label="Example successful character title"><small class="field-message">Name is available</small></label>
+                  <label class="field field--error"><span>Required field</span><input value="" aria-label="Example invalid required field" aria-invalid="true"><small class="field-message">Enter a value to continue</small></label>
+                  <label class="field"><span>Disabled field</span><input value="Unavailable in this phase" aria-label="Disabled field example" disabled><small class="field-message">This control is intentionally disabled</small></label>
+                  <div class="expandable-select" data-expandable-select>
+                    <button type="button" aria-expanded="false" aria-controls="mood-options"><span><small>Mood</small><strong data-select-value>Choose a direction</strong></span><span aria-hidden="true">⌄</span></button>
+                    <div class="expandable-select__options" id="mood-options" role="listbox" hidden>
+                      <button type="button" role="option" data-value="Dreamlike">Dreamlike</button>
+                      <button type="button" role="option" data-value="Tense">Tense</button>
+                      <button type="button" role="option" data-value="Triumphant">Triumphant</button>
+                    </div>
+                  </div>
+                  <fieldset class="check-list">
+                    <legend>Controls</legend>
+                    <label class="check-control"><input type="checkbox" checked><span aria-hidden="true"></span>Checkbox</label>
+                    <label class="check-control check-control--radio"><input type="radio" name="demo-radio" checked><span aria-hidden="true"></span>Radio one</label>
+                    <label class="check-control check-control--radio"><input type="radio" name="demo-radio"><span aria-hidden="true"></span>Radio two</label>
+                  </fieldset>
+                  <label class="switch-row"><span><strong>Premium switch</strong><small>Animated boolean control</small></span><input type="checkbox" role="switch" aria-label="Premium switch example" checked><i aria-hidden="true"></i></label>
+                  <label class="field range-field"><span><span>Slider</span><output data-range-output>64%</output></span><input type="range" min="0" max="100" value="64" aria-label="Example slider" data-range></label>
+                  <div class="number-picker" data-stepper data-min="1" data-max="5">
+                    <div><strong>Stepper</strong><small>Bounded quantity control</small></div>
+                    <button type="button" data-step="-1" aria-label="Decrease value">−</button><output>3</output><button type="button" data-step="1" aria-label="Increase value">+</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="tab-panel" data-tab-panel="feedback" role="tabpanel" hidden>
+                <div class="component-intro"><p class="section-title">Feedback & overlays</p><p class="caption">Accessible status, progress, loading, sheets, drawers, and dialog patterns.</p></div>
+                <div class="component-stack">
+                  <div class="button-row">
+                    <button class="button button--secondary" type="button" data-demo-sheet="half">Half sheet</button>
+                    <button class="button button--outlined" type="button" data-demo-sheet="full">Full sheet</button>
+                  </div>
+                  <div class="button-row">
+                    <button class="button button--secondary" type="button" data-open-drawer="side">Side drawer</button>
+                    <button class="button button--outlined" type="button" data-open-drawer="history">History</button>
+                  </div>
+                  <div class="button-row">
+                    <button class="button button--secondary" type="button" data-open-drawer="settings">Settings drawer</button>
+                    <button class="button button--outlined" type="button" data-open-drawer="bottom">Bottom drawer</button>
+                  </div>
+                  <div class="button-row">
+                    <button class="button button--success" type="button" data-demo-modal="success">Success modal</button>
+                    <button class="button button--danger" type="button" data-demo-modal="error">Error modal</button>
+                  </div>
+                  <div class="modal-demo-grid">
+                    <button type="button" data-demo-modal="confirm">Confirm</button>
+                    <button type="button" data-demo-modal="info">Info</button>
+                    <button type="button" data-demo-modal="image">Image</button>
+                    <button type="button" data-demo-modal="prompt">Prompt</button>
+                  </div>
+                  <div class="loading-specimen" aria-label="Loading component examples">
+                    <span class="spinner" role="status" aria-label="Loading"></span>
+                    <div class="progress progress--indeterminate" role="progressbar" aria-label="Indeterminate progress"><span></span></div>
+                  </div>
+                  <div class="skeleton-card" aria-hidden="true"><span class="skeleton skeleton--image"></span><span><i class="skeleton skeleton--line"></i><i class="skeleton skeleton--line skeleton--short"></i></span></div>
+                  <div class="generate-loader" role="status" aria-label="Preparing generation">
+                    <span aria-hidden="true">✦</span><div><strong>Generate animation</strong><small>Visual state only — no AI is active.</small></div>
+                  </div>
+                  <div class="empty-state empty-state--compact"><div class="empty-state__icon" aria-hidden="true">⌕</div><h3>No search results</h3><p class="caption">Try a different name or category.</p></div>
+                </div>
+              </section>
+            </div>
+
+            <button class="fab floating" type="button" data-demo-toast="success" aria-label="Floating action button example">+</button>
           </section>
         </main>
 
@@ -275,9 +428,10 @@
 
     <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-    <div class="modal-backdrop is-hidden" id="modal-backdrop">
-      <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-        <div class="dialog__icon" aria-hidden="true">V</div>
+    <div class="modal-backdrop is-hidden" id="modal-backdrop" data-modal-backdrop>
+      <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-copy">
+        <div class="dialog__preview is-hidden" id="dialog-preview" role="img" aria-label="Preview placeholder"></div>
+        <div class="dialog__icon" id="dialog-icon" aria-hidden="true">V</div>
         <h2 class="medium-title" id="dialog-title">Vyrelix</h2>
         <p class="body-text" id="dialog-copy"></p>
         <div class="button-row">
@@ -287,8 +441,8 @@
       </section>
     </div>
 
-    <div class="sheet-backdrop is-hidden" id="sheet-backdrop">
-      <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-backdrop is-hidden" id="sheet-backdrop" data-sheet-backdrop>
+      <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" data-sheet>
         <button class="sheet-handle" type="button" data-close-sheet aria-label="Close prompt anatomy"></button>
         <h2 class="medium-title" id="sheet-title">Prompt anatomy</h2>
         <ol class="anatomy-list">
@@ -298,6 +452,34 @@
         </ol>
         <button class="button button--primary button--wide" type="button" data-close-sheet>Got it</button>
       </section>
+    </div>
+
+    <div class="drawer-backdrop is-hidden" data-drawer-backdrop>
+      <aside class="drawer drawer--side" data-drawer="side" role="dialog" aria-modal="true" aria-labelledby="side-drawer-title">
+        <div class="drawer__heading"><h2 class="medium-title" id="side-drawer-title">Workspace</h2><button class="icon-button" type="button" data-close-drawer aria-label="Close drawer">×</button></div>
+        <button class="drawer-link is-active" type="button"><span aria-hidden="true">✦</span><span><strong>UI Library</strong><small>Reusable foundations</small></span></button>
+        <button class="drawer-link" type="button" data-route="settings"><span aria-hidden="true">⚙</span><span><strong>Settings</strong><small>Experience preferences</small></span></button>
+      </aside>
+      <aside class="drawer drawer--settings" data-drawer="settings" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
+        <div class="drawer__heading"><h2 class="medium-title" id="settings-drawer-title">Quick settings</h2><button class="icon-button" type="button" data-close-drawer aria-label="Close settings drawer">×</button></div>
+        <label class="switch-row"><span><strong>Animations</strong><small>Motion preference example</small></span><input type="checkbox" role="switch" aria-label="Drawer animation example" checked><i aria-hidden="true"></i></label>
+        <div class="divider"></div>
+        <label class="switch-row"><span><strong>Compact cards</strong><small>Density preference example</small></span><input type="checkbox" role="switch" aria-label="Compact card example"><i aria-hidden="true"></i></label>
+      </aside>
+      <aside class="drawer drawer--bottom" data-drawer="bottom" role="dialog" aria-modal="true" aria-labelledby="bottom-drawer-title">
+        <button class="sheet-handle" type="button" data-close-drawer aria-label="Close bottom drawer"></button>
+        <h2 class="medium-title" id="bottom-drawer-title">Bottom drawer</h2>
+        <p class="body-text">A flexible action surface that stays within comfortable thumb reach.</p>
+        <button class="button button--primary button--wide" type="button" data-close-drawer>Done</button>
+      </aside>
+      <aside class="drawer drawer--bottom" data-drawer="history" role="dialog" aria-modal="true" aria-labelledby="history-drawer-title">
+        <button class="sheet-handle" type="button" data-close-drawer aria-label="Close history drawer"></button>
+        <h2 class="medium-title" id="history-drawer-title">Recent history</h2>
+        <div class="drawer-history">
+          <article><span>09:42</span><div><strong>Opened UI Library</strong><small>Component exploration</small></div></article>
+          <article><span>09:38</span><div><strong>Saved a draft</strong><small>Local activity example</small></div></article>
+        </div>
+      </aside>
     </div>
 
     <script type="module" src="./js/app.js"></script>

@@ -1,50 +1,65 @@
 /**
  * Shared UI feedback: toasts, dialogs, bottom sheets, and saved-list rendering.
  */
-import { escapeHTML } from "../utilities/helpers.js";
+import { showToast as showComponentToast } from "./components/toast.js";
+import { openModal, closeModal } from "./components/modals.js";
+import { openBottomSheet, closeBottomSheet } from "./components/bottomSheet.js";
+import { createEmptyState } from "./components/loading.js";
+import { renderInBatches } from "./components/cards.js";
 
-const toastRegion = document.querySelector("#toast-region");
-const modal = document.querySelector("#modal-backdrop");
-const sheet = document.querySelector("#sheet-backdrop");
-
-export function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.textContent = message;
-  toastRegion.append(toast);
-  window.setTimeout(() => toast.remove(), 2800);
+export function showToast(message, type = "success") {
+  return showComponentToast(message, type);
 }
 
 export function openDialog(title, copy, { destructive = false } = {}) {
-  document.querySelector("#dialog-title").textContent = title;
-  document.querySelector("#dialog-copy").textContent = copy;
-  document.querySelector("#confirm-clear").classList.toggle("is-hidden", !destructive);
-  modal.classList.remove("is-hidden");
-  document.querySelector("[data-close-modal]").focus();
+  openModal(destructive ? "confirm" : "info", {
+    title,
+    copy,
+    destructive,
+    action: destructive ? "clear-storage" : "",
+    confirmLabel: destructive ? "Clear data" : "Continue"
+  });
 }
 
 export function closeDialog() {
-  modal.classList.add("is-hidden");
+  closeModal();
 }
 
 export function openSheet() {
-  sheet.classList.remove("is-hidden");
-  sheet.querySelector("[data-close-sheet]").focus();
+  openBottomSheet();
 }
 
 export function closeSheet() {
-  sheet.classList.add("is-hidden");
+  closeBottomSheet();
 }
 
 export function renderSaved(items, container) {
   if (!items.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-state__icon" aria-hidden="true">✦</div><h3>Nothing saved yet</h3><p class="caption">Characters and prompt drafts you save will appear here.</p></div>`;
+    const hasQuery = Boolean(document.querySelector("#saved-search")?.value.trim());
+    container.replaceChildren(createEmptyState(hasQuery ? "search" : "saved"));
     return;
   }
-  container.innerHTML = items.map((item) => `
-    <article class="card saved-item" data-kind="${escapeHTML(item.kind)}">
-      <span class="card-icon" aria-hidden="true">${item.kind === "character" ? "✦" : "⌁"}</span>
-      <span><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.subtitle)}</small></span>
-      <button type="button" data-delete-id="${escapeHTML(item.id)}" data-delete-kind="${escapeHTML(item.kind)}" aria-label="Delete ${escapeHTML(item.title)}">×</button>
-    </article>`).join("");
+  renderInBatches(items, (item) => {
+    const article = document.createElement("article");
+    const icon = document.createElement("span");
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    const subtitle = document.createElement("small");
+    const remove = document.createElement("button");
+    article.className = "card saved-item";
+    article.dataset.kind = item.kind;
+    icon.className = "card-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = item.kind === "character" ? "✦" : "⌁";
+    title.textContent = item.title;
+    subtitle.textContent = item.subtitle;
+    copy.append(title, subtitle);
+    remove.type = "button";
+    remove.dataset.deleteId = item.id;
+    remove.dataset.deleteKind = item.kind;
+    remove.setAttribute("aria-label", `Delete ${item.title}`);
+    remove.textContent = "×";
+    article.append(icon, copy, remove);
+    return article;
+  }, container);
 }
