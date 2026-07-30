@@ -1,6 +1,6 @@
 /**
  * Shared immutable datasets available to every studio without duplication.
- * Prompt-related datasets are placeholders only; no prompt generation exists in this phase.
+ * Prompt generation is implemented in the lazy prompt module; these remain lightweight launch datasets.
  */
 export const CORE_DATASETS = Object.freeze({
   identity: Object.freeze({

@@ -1,6 +1,6 @@
 # Vyrelix
 
-Vyrelix is a premium mobile-only AI Creative Studio foundation. Version 3 adds the Universal Visual Engine (UVE) to the Universal Creation Engine (UCE): reusable visual datasets, compatibility-aware selection and randomization, live Character Studio customization, visual presets, and future-studio adapters. It intentionally contains no AI generation, prompt generation, backend, or external API.
+Vyrelix is a premium mobile-only AI Creative Studio. Version 4 adds a complete local Prompt Generation Engine to the Universal Creation Engine (UCE) and Universal Visual Engine (UVE). Users can create Character projects, build compatible visual metadata, generate natural-language AI-ready prompts, preview, save, favorite, search, copy, and export them without an AI provider, backend, or external API.
 
 ## Technology
 
@@ -13,12 +13,15 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 - `js/core/` contains the Universal Creation Engine and its focused managers.
 - `js/project/` contains reusable project building, preview, templates, validation, statistics, import, and export modules.
 - `js/visual/` contains the lazily loaded Universal Visual Engine and its focused color, material, lighting, camera, style, composition, mood, validation, compatibility, storage, search, filter, template, randomizer, and preview modules.
+- `js/prompt/` contains the lazily loaded prompt composition, template, optimization, validation, negative prompt, history, search, storage, preview, and export facade modules.
+- `js/generator/` coordinates the nine-step generation pipeline, smart defaults, summaries, live preview, compatible randomization, and accessible Generate button.
+- `js/export/` provides copy, TXT, Markdown, and versioned JSON output.
 - `js/studios/` contains registry descriptors for Character Studio and every scaffolded future studio.
 - `js/data/core/` is the single shared dataset source available to all studios.
 - `js/data/visual/` contains normalized visual datasets, including a deterministic catalog of more than 1,000 named colors.
 - Existing `js/` modules continue to provide navigation, UI feedback, legacy storage compatibility, settings, animations, and focused component controllers.
 - `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
-- `docs/COMPONENTS.md` documents the UI system; `docs/UNIVERSAL_CREATION_ENGINE.md` documents the UCE; and `docs/UNIVERSAL_VISUAL_ENGINE.md` documents visual engines, datasets, compatibility, and extension.
+- `docs/COMPONENTS.md` documents the UI system; the UCE and UVE documents cover their shared engines; and `docs/PROMPT_GENERATION_ENGINE.md` documents the complete prompt pipeline and extension strategy.
 - `assets/` reserves organized locations for future logos, icons, imagery, backgrounds, and fonts.
 - `worker/` contains the production static-site request handler and security headers.
 - `scripts/` contains the dependency-free production build.
@@ -26,7 +29,7 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 
 ## Architecture
 
-Vyrelix uses a small single-page architecture. `app.js` composes the original shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the UVE loads only when Character Studio opens its visual workspace. CSS design tokens keep the gold-on-charcoal visual system consistent, while core and visual styles layer on top without changing existing class contracts.
+Vyrelix uses a small single-page architecture. `app.js` composes the shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the large UVE and prompt workspaces load only when their routes open. CSS design tokens keep the gold-on-charcoal visual system consistent while focused feature styles preserve existing class contracts.
 
 All saved content remains on the current device. Storage keys are versioned so future migrations can be introduced without collisions.
 
@@ -58,6 +61,4 @@ Character Studio is the first active studio. Creature, World, Scene, Environment
 
 ## Phase boundary
 
-Buttons in the prompt workspace save or copy user-authored drafts only. The Universal Randomizer creates seeded local metadata and does not call AI, generate prompts, transform content, or send data anywhere.
-
-The UI Library includes generate-button and generation-loader visuals because they are required reusable states. They are inert demonstrations and do not generate or transmit content.
+The Prompt Generation Engine produces text deterministically from user-controlled project metadata. The AI Image Generation panel is intentionally disabled: no AI provider is connected, and no project or prompt data is transmitted.

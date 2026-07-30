@@ -4,7 +4,7 @@
 
 The Universal Creation Engine (UCE) turns Vyrelix from a character-only workspace into a modular creative platform. Every creation is represented by the same Project model, managed by the same lifecycle services, stored through the same expandable adapter, and surfaced through reusable mobile components.
 
-No AI generation or prompt generation is included. Character Studio is the only active studio. Other studios are registered, visible as Coming Soon, and ready to receive feature modules without changes to the engine.
+No AI provider or image generation is connected. Version 4 adds a separate, lazy prompt-generation module that consumes UCE projects without changing their lifecycle. Character Studio is the only active studio; other studios remain registered and ready for future modules.
 
 ## Architecture
 

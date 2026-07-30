@@ -22,8 +22,15 @@ export const storage = {
   saveSettings: (value) => write(STORAGE_KEYS.settings, value),
   getCharacters: () => read(STORAGE_KEYS.characters, []),
   saveCharacters: (value) => write(STORAGE_KEYS.characters, value),
-  getPrompts: () => read(STORAGE_KEYS.prompts, []),
+  getPrompts: () => {
+    const records = [...read(STORAGE_KEYS.promptRecords, []), ...read(STORAGE_KEYS.prompts, [])];
+    return [...new Map(records.map((item) => [item.id, item])).values()];
+  },
   savePrompts: (value) => write(STORAGE_KEYS.prompts, value),
+  removePrompt: (id) => {
+    write(STORAGE_KEYS.prompts, read(STORAGE_KEYS.prompts, []).filter((item) => item.id !== id));
+    write(STORAGE_KEYS.promptRecords, read(STORAGE_KEYS.promptRecords, []).filter((item) => item.id !== id));
+  },
   getFavorites: () => read(STORAGE_KEYS.favorites, []),
   saveFavorites: (value) => write(STORAGE_KEYS.favorites, value),
   getRecentActivity: () => read(STORAGE_KEYS.activity, []),

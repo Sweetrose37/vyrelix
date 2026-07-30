@@ -27,6 +27,7 @@ const form = document.querySelector("#character-form");
 const savedList = document.querySelector("#saved-list");
 let navigation;
 let visualStudioPromise = null;
+let promptStudioPromise = null;
 
 function launch() {
   const splash = document.querySelector("#splash");
@@ -99,7 +100,7 @@ function saveCharacter() {
   refreshSaved();
   document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
   showToast("Character saved on this device");
-  navigation.navigate("saved");
+  navigation.navigate("prompt");
 }
 
 async function ensureVisualStudio() {
@@ -127,6 +128,26 @@ async function ensureVisualStudio() {
     throw error;
   });
   return visualStudioPromise;
+}
+
+/**
+ * Lazily opens the complete local prompt-generation workspace.
+ */
+async function ensurePromptStudio() {
+  if (promptStudioPromise) return promptStudioPromise;
+  promptStudioPromise = import("./prompt/promptUI.js").then(({ initializePromptStudio }) =>
+    initializePromptStudio({
+      engine: creationEngine,
+      navigate: navigation.navigate,
+      showToast,
+      onPromptsChanged: refreshSaved
+    })
+  ).catch((error) => {
+    promptStudioPromise = null;
+    showToast("Prompt Studio could not be loaded", "error");
+    throw error;
+  });
+  return promptStudioPromise;
 }
 
 function handleNext() {
@@ -196,8 +217,8 @@ function bindEvents() {
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
     const isAbout = button.dataset.dialog === "about";
     openDialog(isAbout ? "About Vyrelix" : "Privacy", isAbout
-      ? "Vyrelix is a focused workspace for developing original characters and visual ideas. AI features are intentionally not included in Phase 1A."
-      : "Your Phase 1A data stays in this browser's local storage. Vyrelix does not send it to a server.");
+      ? "Vyrelix is a focused workspace for developing original characters, visual systems, and professional AI-ready prompts without connecting an AI provider."
+      : "Your projects and generated prompts stay in this browser's local storage. Vyrelix does not send them to a server.");
   }));
   document.querySelector("#notifications-button").addEventListener("click", () => showToast("You’re all caught up"));
   document.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
@@ -219,8 +240,8 @@ function bindEvents() {
     if (!button) return;
     const method = button.dataset.deleteKind === "character" ? "Characters" : "Prompts";
     const getter = storage[`get${method}`];
-    const setter = storage[`save${method}`];
-    setter(getter().filter((item) => item.id !== button.dataset.deleteId));
+    if (method === "Prompts") storage.removePrompt(button.dataset.deleteId);
+    else storage[`save${method}`](getter().filter((item) => item.id !== button.dataset.deleteId));
     refreshSaved();
     showToast("Item removed");
   });
@@ -304,6 +325,11 @@ document.addEventListener("click", (event) => {
 navigation = createNavigation({ onRouteChange: (route) => {
   if (route === "saved") refreshSaved();
   if (route === "visual") ensureVisualStudio();
+  if (["prompt", "prompt-preview", "prompt-history", "ai-image", "test-mode"].includes(route)) {
+    ensurePromptStudio().then((controller) => {
+      if (route === "prompt-history") controller.renderHistory();
+    });
+  }
 } });
 migrateLegacyCharacters();
 initializeDashboard({ engine: creationEngine, navigate: navigation.navigate, showToast });

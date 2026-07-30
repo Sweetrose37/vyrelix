@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="./css/visual/visual.css">
     <link rel="stylesheet" href="./css/visual/preview.css">
     <link rel="stylesheet" href="./css/visual/selectors.css">
+    <link rel="stylesheet" href="./css/prompt/prompt.css">
+    <link rel="stylesheet" href="./css/prompt/preview.css">
   </head>
   <body>
     <noscript>Vyrelix requires JavaScript to run.</noscript>
@@ -97,6 +99,11 @@
                     <strong>New character</strong>
                     <small>Start a universal project</small>
                   </span>
+                  <span aria-hidden="true">›</span>
+                </button>
+                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open Prompt Studio">
+                  <span class="card-icon" aria-hidden="true">⌁</span>
+                  <span><strong>Prompt Studio</strong><small>Generate from a saved project</small></span>
                   <span aria-hidden="true">›</span>
                 </button>
                 <button class="card card--interactive quick-card" type="button" data-random-character aria-label="Create a random character project">
@@ -321,7 +328,7 @@
             </div>
           </section>
 
-          <section class="screen" data-screen="prompt" aria-labelledby="prompt-title">
+          <section class="screen prompt-legacy" data-screen="prompt-legacy" aria-labelledby="prompt-title">
             <div class="screen-heading">
               <div>
                 <p class="eyebrow">Composition board</p>
@@ -346,6 +353,82 @@
             <button class="card card--interactive full-card" type="button" id="open-sheet">
               <span class="card-icon" aria-hidden="true">⌁</span><span><strong>Prompt anatomy</strong><small>Learn how a strong visual prompt is structured</small></span><span aria-hidden="true">›</span>
             </button>
+          </section>
+
+          <section class="screen prompt-studio" data-screen="prompt" aria-labelledby="prompt-studio-title">
+            <div class="screen-heading">
+              <div><p class="eyebrow">Local generation engine</p><h1 class="large-title" id="prompt-studio-title">Prompt Studio</h1></div>
+              <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
+            </div>
+            <div class="notice"><span aria-hidden="true">✓</span><p>Build professional prompts locally. No AI provider is connected and nothing leaves this device.</p></div>
+            <form id="prompt-form" class="prompt-form">
+              <label class="field"><span>Project <b aria-hidden="true">*</b></span><select name="projectId" required aria-label="Project to generate from"><option value="">Choose a saved project</option></select></label>
+              <div class="prompt-form__pair">
+                <label class="field"><span>Prompt type</span><select name="promptType" aria-label="Prompt type"></select></label>
+                <label class="field"><span>Seed</span><input name="seed" type="number" inputmode="numeric" min="1" max="2147483647" placeholder="Project seed" aria-label="Prompt seed"></label>
+              </div>
+              <label class="field"><span>Subject focus</span><input name="subject" type="text" maxlength="120" placeholder="Uses the project title by default" aria-label="Subject focus"></label>
+              <label class="field"><span>Environment</span><input name="environment" type="text" maxlength="160" placeholder="A rainlit observatory above the clouds" aria-label="Prompt environment"></label>
+              <div class="prompt-form__pair">
+                <label class="field"><span>Lighting</span><select name="lighting" aria-label="Prompt lighting"><option>Soft daylight</option><option>Blue hour</option><option>Rim light</option><option>Volumetric glow</option><option>Cinematic balanced lighting</option></select></label>
+                <label class="field"><span>Camera</span><select name="camera" aria-label="Prompt camera"><option>Eye level</option><option>Low angle</option><option>Wide establishing</option><option>Close portrait</option></select></label>
+              </div>
+              <label class="field"><span>Composition</span><select name="composition" aria-label="Prompt composition"><option>Clear visual hierarchy</option><option>Centered</option><option>Rule of thirds</option><option>Symmetrical</option><option>Dynamic diagonal</option></select></label>
+              <label class="field"><span>Additional direction</span><textarea name="additional" rows="3" maxlength="320" placeholder="Atmosphere, storytelling details, or constraints…" aria-label="Additional prompt direction"></textarea></label>
+              <section class="negative-panel" aria-labelledby="negative-title">
+                <label class="switch-row"><span><strong id="negative-title">Negative prompt</strong><small>Prevent common visual defects</small></span><input type="checkbox" name="negativeEnabled" role="switch" aria-label="Enable negative prompt" checked><i aria-hidden="true"></i></label>
+                <label class="field"><span class="sr-only">Negative prompt terms</span><textarea name="negativePrompt" rows="3" aria-label="Edit negative prompt terms"></textarea></label>
+                <button class="text-button" type="button" data-save-negative>Save as preset</button>
+              </section>
+            </form>
+            <section class="prompt-live card" id="prompt-live-preview" aria-labelledby="live-preview-title">
+              <div class="prompt-preview__heading"><div><p class="eyebrow">Updates instantly</p><h2 class="section-title" id="live-preview-title">Live preview</h2></div><span data-prompt-length>Concise</span></div>
+              <p data-preview-prompt>Choose a project to preview a prompt.</p>
+              <p class="sr-only" data-preview-negative></p><p class="sr-only" data-preview-summary></p><p class="sr-only" data-preview-character></p>
+              <div class="prompt-metrics" aria-label="Live prompt metrics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
+            </section>
+            <div class="prompt-shortcuts">
+              <button class="card card--interactive" type="button" data-route="prompt-history"><span class="card-icon" aria-hidden="true">↶</span><span><strong>Prompt history</strong><small>Search, favorite, duplicate, rename, or delete</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-route="test-mode"><span class="card-icon" aria-hidden="true">◇</span><span><strong>Developer Test Mode</strong><small>Samples, demo data, and stress testing</small></span><span aria-hidden="true">›</span></button>
+            </div>
+            <div class="generate-dock"><button class="button button--generate button--wide ripple" type="button" id="generate-prompt" disabled><span class="button__spark" aria-hidden="true">✦</span><span data-generate-label>Generate prompt</span></button></div>
+          </section>
+
+          <section class="screen prompt-preview-screen" data-screen="prompt-preview" aria-labelledby="prompt-preview-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
+            <section class="prompt-output-card">
+              <div class="prompt-preview__heading"><span class="badge" data-preview-type>Ready</span><span data-prompt-length>Concise</span></div><h2 class="section-title">Formatted prompt</h2><p class="prompt-output" data-preview-prompt>Generate a prompt to see it here.</p>
+              <div class="prompt-action-grid"><button class="button button--copy" type="button" data-copy-part="prompt">Copy prompt</button><button class="button button--copy" type="button" data-copy-part="json">Copy JSON</button></div>
+            </section>
+            <section class="prompt-output-card"><h2 class="section-title">Negative prompt</h2><p class="prompt-output prompt-output--muted" data-preview-negative>Disabled</p><button class="button button--copy" type="button" data-copy-part="negative">Copy negative</button></section>
+            <section class="prompt-output-card"><h2 class="section-title">Project summary</h2><p class="prompt-output" data-preview-summary>No project selected.</p><h3 class="caption">Character summary</h3><p class="prompt-output prompt-output--muted" data-preview-character>No character summary available.</p><button class="button button--copy" type="button" data-copy-part="summary">Copy summary</button></section>
+            <div class="prompt-metrics prompt-metrics--large" aria-label="Prompt statistics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
+            <section class="export-panel" aria-labelledby="export-title"><div><p class="eyebrow">Portable files</p><h2 class="section-title" id="export-title">Export prompt</h2></div><div class="export-actions"><button type="button" data-export-format="txt">TXT</button><button type="button" data-export-format="md">Markdown</button><button type="button" data-export-format="json">JSON</button></div></section>
+            <button class="card card--interactive full-card" type="button" data-open-ai-panel><span class="card-icon" aria-hidden="true">◈</span><span><strong>AI Image Generation</strong><small>Prompt ready · API not connected</small></span><span aria-hidden="true">›</span></button>
+          </section>
+
+          <section class="screen prompt-history-screen" data-screen="prompt-history" aria-labelledby="prompt-history-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt history</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
+            <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="prompt-history-search" placeholder="Search prompts" aria-label="Search prompt history"></label>
+            <div class="prompt-history-list" id="prompt-history-list" aria-live="polite"></div>
+          </section>
+
+          <section class="screen ai-panel" data-screen="ai-image" aria-labelledby="ai-image-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt-preview" aria-label="Back to prompt preview">‹</button><div class="screen-heading__center"><p class="eyebrow">Future integration</p><h1 class="medium-title" id="ai-image-title">AI Image Generation</h1></div><span class="badge badge--soft">Offline</span></div>
+            <div class="ai-placeholder" role="status"><span aria-hidden="true">◈</span><h2 class="large-title">Prompt ready</h2><p class="body-text">Your professional prompt is prepared. Connect a provider in a future phase to generate imagery.</p><dl><div><dt>Provider</dt><dd>Not configured</dd></div><div><dt>API status</dt><dd>Not connected</dd></div></dl><button class="button button--generate button--wide" type="button" disabled>Generate image</button><small>No prompt or project data is transmitted.</small></div>
+          </section>
+
+          <section class="screen test-mode" data-screen="test-mode" aria-labelledby="test-mode-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Local diagnostics</p><h1 class="medium-title" id="test-mode-title">Developer Test Mode</h1></div><span class="badge">DEV</span></div>
+            <div class="notice"><span aria-hidden="true">i</span><p>These tools use local deterministic data and never call an AI service.</p></div>
+            <div class="test-action-list">
+              <button class="card card--interactive" type="button" data-test-action="sample-character"><span class="card-icon" aria-hidden="true">✦</span><span><strong>Generate Sample Character</strong><small>Create a compatible Character project</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-test-action="sample-prompt"><span class="card-icon" aria-hidden="true">⌁</span><span><strong>Generate Sample Prompt</strong><small>Run the current project through the pipeline</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-test-action="demo-project"><span class="card-icon" aria-hidden="true">◈</span><span><strong>Load Demo Project</strong><small>Prepare a complete reusable project object</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-test-action="stress"><span class="card-icon" aria-hidden="true">↻</span><span><strong>Stress Test Prompt Builder</strong><small>Validate 250 generated prompts</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive test-reset" type="button" data-test-action="reset"><span class="card-icon" aria-hidden="true">×</span><span><strong>Reset Demo Data</strong><small>Remove prompt test records and drafts</small></span><span aria-hidden="true">›</span></button>
+            </div>
+            <p class="test-status" id="test-mode-status" aria-live="polite">Test tools ready.</p>
           </section>
 
           <section class="screen" data-screen="saved" aria-labelledby="saved-title">
@@ -394,7 +477,7 @@
               <div class="divider"></div>
               <button class="settings-link" type="button" data-route="components"><span>UI Library</span><span class="settings-link__meta">Components <span aria-hidden="true">›</span></span></button>
               <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption">3.0.0 · Universal Visual Engine</span></div>
+              <div class="settings-link"><span>Version</span><span class="caption">4.0.0 · Prompt Generation Engine</span></div>
             </section>
             <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
           </section>
