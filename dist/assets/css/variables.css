@@ -1,0 +1,47 @@
+/* Global design tokens: color, space, shape, motion, and safe-area values. */
+:root {
+  color-scheme: dark;
+  --bg-primary: #0b0b0f;
+  --bg-secondary: #15151b;
+  --surface: #20202a;
+  --surface-raised: #292934;
+  --gold: #d4af37;
+  --gold-deep: #b58e2f;
+  --white: #ffffff;
+  --gray: #cfcfcf;
+  --muted: #90909d;
+  --danger: #ff5c5c;
+  --success: #33d17a;
+  --warning: #ffc857;
+  --border: rgba(255, 255, 255, 0.09);
+  --gold-border: rgba(212, 175, 55, 0.32);
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 280ms;
+  --nav-height: 76px;
+  --top-height: 64px;
+}
+
+[data-theme="soft"] {
+  color-scheme: light;
+  --bg-primary: #f4f1e9;
+  --bg-secondary: #ece7dc;
+  --surface: #fffdf8;
+  --surface-raised: #ffffff;
+  --white: #17151a;
+  --gray: #45434a;
+  --muted: #77727b;
+  --border: rgba(32, 28, 36, 0.1);
+  --shadow: 0 18px 45px rgba(60, 48, 24, 0.11);
+}

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0B0B0F">
+    <meta name="description" content="Vyrelix — a premium original character creation workspace.">
+    <title>Vyrelix</title>
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/typography.css">
+    <link rel="stylesheet" href="./css/layout.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/animations.css">
+    <link rel="stylesheet" href="./css/utilities.css">
+    <link rel="stylesheet" href="./css/mobile.css">
+    <link rel="stylesheet" href="./css/style.css">
+  </head>
+  <body>
+    <noscript>Vyrelix requires JavaScript to run.</noscript>
+
+    <div class="device-shell" id="app">
+      <div class="ambient ambient-one" aria-hidden="true"></div>
+      <div class="ambient ambient-two" aria-hidden="true"></div>
+
+      <section class="launch-screen" id="splash" aria-label="Vyrelix splash screen">
+        <div class="brand-mark brand-mark--large" aria-hidden="true"><span>V</span></div>
+        <h1 class="display-title">Vyrelix</h1>
+        <p class="caption launch-tagline">Imagine boldly. Create originally.</p>
+      </section>
+
+      <section class="launch-screen is-hidden" id="loading" aria-label="Loading Vyrelix">
+        <div class="brand-mark" aria-hidden="true"><span>V</span></div>
+        <div class="loading-copy">
+          <p class="section-title">Preparing your studio</p>
+          <div class="progress" role="progressbar" aria-label="Loading application" aria-valuemin="0" aria-valuemax="100">
+            <span id="launch-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="app-shell is-hidden" id="app-shell">
+        <header class="top-bar">
+          <button class="brand-lockup" type="button" data-route="home" aria-label="Go to Home">
+            <span class="brand-mark brand-mark--small" aria-hidden="true"><span>V</span></span>
+            <span>VYRELIX</span>
+          </button>
+          <button class="icon-button" type="button" id="notifications-button" aria-label="View notifications">
+            <span aria-hidden="true">◇</span><span class="notification-dot"></span>
+          </button>
+        </header>
+
+        <main class="screen-stack" id="screen-stack">
+          <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
+            <div class="hero">
+              <div class="eyebrow"><span></span> Character studio</div>
+              <h1 class="large-title" id="home-title">Bring your next<br><em>original</em> to life.</h1>
+              <p class="body-text text-muted">Shape memorable characters and prepare cinematic prompts in one focused workspace.</p>
+              <button class="button button--primary button--wide ripple" type="button" data-route="builder">
+                Start creating <span aria-hidden="true">→</span>
+              </button>
+            </div>
+
+            <section class="section-block" aria-labelledby="quick-title">
+              <div class="section-heading">
+                <h2 class="medium-title" id="quick-title">Quick start</h2>
+                <span class="badge">Phase 1A</span>
+              </div>
+              <div class="card-grid">
+                <button class="card card--interactive quick-card" type="button" data-route="builder" aria-label="Create a new character">
+                  <span class="card-icon" aria-hidden="true">✦</span>
+                  <span>
+                    <strong>New character</strong>
+                    <small>Build from a blank canvas</small>
+                  </span>
+                  <span aria-hidden="true">›</span>
+                </button>
+                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open prompt workspace">
+                  <span class="card-icon" aria-hidden="true">⌁</span>
+                  <span>
+                    <strong>Prompt workspace</strong>
+                    <small>Arrange your visual direction</small>
+                  </span>
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="section-block" aria-labelledby="activity-title">
+              <div class="section-heading">
+                <h2 class="medium-title" id="activity-title">Your studio</h2>
+                <button class="text-button" type="button" data-route="saved">View all</button>
+              </div>
+              <article class="card card--glass studio-card">
+                <div class="monogram-art" aria-label="Abstract character placeholder image">A</div>
+                <div class="studio-card__copy">
+                  <span class="badge badge--soft">Draft</span>
+                  <h3>Aria Nocturne</h3>
+                  <p class="caption">Celestial archivist · edited today</p>
+                </div>
+                <button class="icon-button icon-button--small" type="button" data-route="builder" aria-label="Continue editing Aria Nocturne">›</button>
+              </article>
+            </section>
+          </section>
+
+          <section class="screen" data-screen="builder" aria-labelledby="builder-title">
+            <div class="screen-heading">
+              <div>
+                <p class="eyebrow">Step <span id="step-number">01</span> / 03</p>
+                <h1 class="large-title" id="builder-title">Character builder</h1>
+              </div>
+              <button class="text-button" type="button" id="save-draft">Save</button>
+            </div>
+            <div class="progress progress--steps" role="progressbar" aria-label="Character builder progress" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
+              <span id="builder-progress"></span>
+            </div>
+
+            <form id="character-form" novalidate>
+              <div class="builder-step is-active" data-step="1">
+                <section class="form-section">
+                  <p class="section-title">Core identity</p>
+                  <label class="field">
+                    <span>Character name</span>
+                    <input type="text" name="name" placeholder="e.g. Aria Nocturne" maxlength="40" aria-label="Character name" required>
+                    <small class="field-error" data-error-for="name"></small>
+                  </label>
+                  <label class="field">
+                    <span>Archetype</span>
+                    <select name="archetype" aria-label="Character archetype">
+                      <option value="">Choose an archetype</option>
+                      <option>Guardian</option><option>Visionary</option><option>Outlaw</option>
+                      <option>Scholar</option><option>Trickster</option><option>Custom</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>One-line concept</span>
+                    <textarea name="concept" rows="3" maxlength="160" placeholder="A quiet cartographer who maps forgotten dreams…" aria-label="One-line character concept"></textarea>
+                    <small class="field-hint"><span id="concept-count">0</span>/160</small>
+                  </label>
+                </section>
+              </div>
+
+              <div class="builder-step" data-step="2">
+                <section class="form-section">
+                  <p class="section-title">Visual language</p>
+                  <fieldset class="choice-group">
+                    <legend>Presence</legend>
+                    <div class="chip-row">
+                      <label class="choice-chip"><input type="radio" name="presence" value="Ethereal"><span>Ethereal</span></label>
+                      <label class="choice-chip"><input type="radio" name="presence" value="Regal"><span>Regal</span></label>
+                      <label class="choice-chip"><input type="radio" name="presence" value="Rugged"><span>Rugged</span></label>
+                      <label class="choice-chip"><input type="radio" name="presence" value="Uncanny"><span>Uncanny</span></label>
+                    </div>
+                  </fieldset>
+                  <label class="field">
+                    <span>Signature color</span>
+                    <select name="color" aria-label="Signature color">
+                      <option>Burnished gold</option><option>Midnight blue</option><option>Crimson</option><option>Silver</option>
+                    </select>
+                  </label>
+                  <label class="field range-field">
+                    <span><span>Detail level</span><output id="detail-output">Balanced</output></span>
+                    <input type="range" name="detail" min="1" max="3" value="2" aria-label="Character detail level">
+                  </label>
+                </section>
+              </div>
+
+              <div class="builder-step" data-step="3">
+                <section class="form-section">
+                  <p class="section-title">Personality</p>
+                  <label class="field">
+                    <span>Defining traits</span>
+                    <input type="text" name="traits" placeholder="Curious, guarded, fiercely loyal" aria-label="Defining personality traits">
+                  </label>
+                  <div class="number-picker">
+                    <div><strong>Story intensity</strong><small>How dramatic is their world?</small></div>
+                    <button type="button" aria-label="Decrease story intensity" data-number-action="-1">−</button>
+                    <output id="intensity-output">3</output>
+                    <button type="button" aria-label="Increase story intensity" data-number-action="1">+</button>
+                  </div>
+                  <label class="switch-row">
+                    <span><strong>Keep it mysterious</strong><small>Leave room for interpretation</small></span>
+                    <input type="checkbox" name="mysterious" role="switch" aria-label="Keep character mysterious">
+                    <i aria-hidden="true"></i>
+                  </label>
+                </section>
+              </div>
+
+              <div class="form-actions">
+                <button class="button button--outlined" type="button" id="builder-back" disabled>Back</button>
+                <button class="button button--primary ripple" type="button" id="builder-next">Continue</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="screen" data-screen="prompt" aria-labelledby="prompt-title">
+            <div class="screen-heading">
+              <div>
+                <p class="eyebrow">Composition board</p>
+                <h1 class="large-title" id="prompt-title">Prompt workspace</h1>
+              </div>
+              <span class="badge badge--soft">Preview</span>
+            </div>
+            <div class="notice"><span aria-hidden="true">i</span><p>Prompt generation arrives in Phase 2. You can arrange and copy your own draft now.</p></div>
+            <label class="field">
+              <span>Visual direction</span>
+              <textarea id="prompt-draft" rows="8" placeholder="Describe the atmosphere, composition, lighting, lens, and visual style…" aria-label="Visual prompt draft"></textarea>
+            </label>
+            <div class="chip-row prompt-chips" aria-label="Prompt suggestions">
+              <button class="choice-chip" type="button" data-prompt-token="cinematic lighting">Cinematic</button>
+              <button class="choice-chip" type="button" data-prompt-token="intricate detail">Detailed</button>
+              <button class="choice-chip" type="button" data-prompt-token="dramatic low angle">Low angle</button>
+            </div>
+            <div class="button-row">
+              <button class="button button--secondary" type="button" id="copy-prompt">Copy draft</button>
+              <button class="button button--primary" type="button" id="save-prompt">Save</button>
+            </div>
+            <button class="card card--interactive full-card" type="button" id="open-sheet">
+              <span class="card-icon" aria-hidden="true">⌁</span><span><strong>Prompt anatomy</strong><small>Learn how a strong visual prompt is structured</small></span><span aria-hidden="true">›</span>
+            </button>
+          </section>
+
+          <section class="screen" data-screen="saved" aria-labelledby="saved-title">
+            <div class="screen-heading">
+              <div><p class="eyebrow">Local collection</p><h1 class="large-title" id="saved-title">Saved</h1></div>
+              <span class="badge" id="saved-count">0 items</span>
+            </div>
+            <label class="search-field">
+              <span aria-hidden="true">⌕</span>
+              <input type="search" id="saved-search" placeholder="Search your collection" aria-label="Search saved items">
+            </label>
+            <div class="segmented" role="tablist" aria-label="Saved item type">
+              <button class="is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
+              <button type="button" role="tab" aria-selected="false" data-filter="character">Characters</button>
+              <button type="button" role="tab" aria-selected="false" data-filter="prompt">Prompts</button>
+            </div>
+            <div class="saved-list" id="saved-list"></div>
+          </section>
+
+          <section class="screen" data-screen="settings" aria-labelledby="settings-title">
+            <div class="screen-heading"><div><p class="eyebrow">Personalize</p><h1 class="large-title" id="settings-title">Settings</h1></div></div>
+            <section class="settings-group">
+              <h2 class="section-title">Experience</h2>
+              <label class="switch-row">
+                <span><strong>Dark mode</strong><small>Use the signature Vyrelix theme</small></span>
+                <input type="checkbox" id="dark-mode-toggle" role="switch" aria-label="Dark mode" checked>
+                <i aria-hidden="true"></i>
+              </label>
+              <div class="divider"></div>
+              <label class="switch-row">
+                <span><strong>Animations</strong><small>Motion and transition effects</small></span>
+                <input type="checkbox" id="animation-toggle" role="switch" aria-label="Animations" checked>
+                <i aria-hidden="true"></i>
+              </label>
+            </section>
+            <section class="settings-group">
+              <h2 class="section-title">Information</h2>
+              <button class="settings-link" type="button" data-dialog="about"><span>About Vyrelix</span><span aria-hidden="true">›</span></button>
+              <div class="divider"></div>
+              <button class="settings-link" type="button" data-dialog="privacy"><span>Privacy</span><span aria-hidden="true">›</span></button>
+              <div class="divider"></div>
+              <div class="settings-link"><span>Version</span><span class="caption">1.0.0 · Phase 1A</span></div>
+            </section>
+            <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
+          </section>
+        </main>
+
+        <nav class="bottom-nav" aria-label="Primary navigation">
+          <button class="nav-item is-active" type="button" data-route="home" aria-label="Home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
+          <button class="nav-item" type="button" data-route="builder" aria-label="Build character"><span aria-hidden="true">✦</span><small>Build</small></button>
+          <button class="nav-item" type="button" data-route="saved" aria-label="Saved items"><span aria-hidden="true">▱</span><small>Saved</small></button>
+          <button class="nav-item" type="button" data-route="settings" aria-label="Settings"><span aria-hidden="true">⚙</span><small>Settings</small></button>
+        </nav>
+      </div>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="modal-backdrop is-hidden" id="modal-backdrop">
+      <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+        <div class="dialog__icon" aria-hidden="true">V</div>
+        <h2 class="medium-title" id="dialog-title">Vyrelix</h2>
+        <p class="body-text" id="dialog-copy"></p>
+        <div class="button-row">
+          <button class="button button--outlined" type="button" data-close-modal>Close</button>
+          <button class="button button--danger is-hidden" type="button" id="confirm-clear">Clear data</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="sheet-backdrop is-hidden" id="sheet-backdrop">
+      <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button class="sheet-handle" type="button" data-close-sheet aria-label="Close prompt anatomy"></button>
+        <h2 class="medium-title" id="sheet-title">Prompt anatomy</h2>
+        <ol class="anatomy-list">
+          <li><span>01</span><div><strong>Subject</strong><small>Who or what anchors the image?</small></div></li>
+          <li><span>02</span><div><strong>Environment</strong><small>Where does the moment happen?</small></div></li>
+          <li><span>03</span><div><strong>Direction</strong><small>Lighting, camera, color, and mood.</small></div></li>
+        </ol>
+        <button class="button button--primary button--wide" type="button" data-close-sheet>Got it</button>
+      </section>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

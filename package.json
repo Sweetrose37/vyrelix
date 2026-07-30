@@ -1,0 +1,9 @@
+{
+  "name": "vyrelix",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build.ps1"
+  }
+}

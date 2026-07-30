@@ -1,0 +1,5 @@
+# Local and temporary files
+node_modules/
+*.log
+*.tgz
+.DS_Store
