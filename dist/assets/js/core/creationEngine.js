@@ -28,6 +28,7 @@ export class CreationEngine {
     this.modules = new ModuleLoader();
     this.modules.register("visual-engine", () => import("../visual/visualEngine.js"));
     this.modules.register("prompt-engine", () => import("../prompt/promptEngine.js"));
+    this.modules.register("ai-engine", () => import("../ai/aiEngine.js"));
     this.projectModel = new ProjectEngine();
     this.history = new HistoryEngine(this.storage);
     this.recent = new RecentEngine(this.storage);

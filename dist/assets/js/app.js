@@ -28,6 +28,7 @@ const savedList = document.querySelector("#saved-list");
 let navigation;
 let visualStudioPromise = null;
 let promptStudioPromise = null;
+let aiStudioPromise = null;
 
 function launch() {
   const splash = document.querySelector("#splash");
@@ -140,7 +141,10 @@ async function ensurePromptStudio() {
       engine: creationEngine,
       navigate: navigation.navigate,
       showToast,
-      onPromptsChanged: refreshSaved
+      onPromptsChanged: () => {
+        refreshSaved();
+        document.dispatchEvent(new CustomEvent("vyrelix:prompts-changed"));
+      }
     })
   ).catch((error) => {
     promptStudioPromise = null;
@@ -148,6 +152,26 @@ async function ensurePromptStudio() {
     throw error;
   });
   return promptStudioPromise;
+}
+
+/**
+ * Lazily opens the offline-first AI Provider Engine.
+ */
+async function ensureAIStudio() {
+  if (aiStudioPromise) return aiStudioPromise;
+  aiStudioPromise = import("./ai/aiUI.js").then(({ initializeAIStudio }) =>
+    initializeAIStudio({
+      creationEngine,
+      navigate: navigation.navigate,
+      showToast,
+      openModal
+    })
+  ).catch((error) => {
+    aiStudioPromise = null;
+    showToast("AI Provider Engine could not be loaded", "error");
+    throw error;
+  });
+  return aiStudioPromise;
 }
 
 function handleNext() {
@@ -217,8 +241,8 @@ function bindEvents() {
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
     const isAbout = button.dataset.dialog === "about";
     openDialog(isAbout ? "About Vyrelix" : "Privacy", isAbout
-      ? "Vyrelix is a focused workspace for developing original characters, visual systems, and professional AI-ready prompts without connecting an AI provider."
-      : "Your projects and generated prompts stay in this browser's local storage. Vyrelix does not send them to a server.");
+      ? "Vyrelix is a focused workspace for developing original characters, visual systems, professional prompts, and clearly labeled demo artwork through an offline Mock Provider."
+      : "Your projects, prompts, provider settings, and demo images stay in this browser. Mock Provider uses no network connection.");
   }));
   document.querySelector("#notifications-button").addEventListener("click", () => showToast("You’re all caught up"));
   document.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
@@ -325,9 +349,16 @@ document.addEventListener("click", (event) => {
 navigation = createNavigation({ onRouteChange: (route) => {
   if (route === "saved") refreshSaved();
   if (route === "visual") ensureVisualStudio();
-  if (["prompt", "prompt-preview", "prompt-history", "ai-image", "test-mode"].includes(route)) {
+  if (["prompt", "prompt-preview", "prompt-history", "ai-image", "image-gallery", "provider-settings", "test-mode"].includes(route)) {
     ensurePromptStudio().then((controller) => {
       if (route === "prompt-history") controller.renderHistory();
+    });
+  }
+  if (["ai-image", "image-gallery", "provider-settings", "test-mode"].includes(route)) {
+    ensureAIStudio().then((controller) => {
+      if (route === "ai-image") controller.renderGenerator();
+      if (route === "image-gallery") controller.renderGallery();
+      if (route === "provider-settings") controller.renderProviders();
     });
   }
 } });

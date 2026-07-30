@@ -30,6 +30,9 @@
     <link rel="stylesheet" href="./css/visual/selectors.css">
     <link rel="stylesheet" href="./css/prompt/prompt.css">
     <link rel="stylesheet" href="./css/prompt/preview.css">
+    <link rel="stylesheet" href="./css/ai/generator.css">
+    <link rel="stylesheet" href="./css/ai/gallery.css">
+    <link rel="stylesheet" href="./css/ai/provider.css">
   </head>
   <body>
     <noscript>Vyrelix requires JavaScript to run.</noscript>
@@ -360,7 +363,7 @@
               <div><p class="eyebrow">Local generation engine</p><h1 class="large-title" id="prompt-studio-title">Prompt Studio</h1></div>
               <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
             </div>
-            <div class="notice"><span aria-hidden="true">✓</span><p>Build professional prompts locally. No AI provider is connected and nothing leaves this device.</p></div>
+            <div class="notice"><span aria-hidden="true">✓</span><p>Build professional prompts locally, then test them with the offline Mock Provider. Nothing leaves this device.</p></div>
             <form id="prompt-form" class="prompt-form">
               <label class="field"><span>Project <b aria-hidden="true">*</b></span><select name="projectId" required aria-label="Project to generate from"><option value="">Choose a saved project</option></select></label>
               <div class="prompt-form__pair">
@@ -404,7 +407,7 @@
             <section class="prompt-output-card"><h2 class="section-title">Project summary</h2><p class="prompt-output" data-preview-summary>No project selected.</p><h3 class="caption">Character summary</h3><p class="prompt-output prompt-output--muted" data-preview-character>No character summary available.</p><button class="button button--copy" type="button" data-copy-part="summary">Copy summary</button></section>
             <div class="prompt-metrics prompt-metrics--large" aria-label="Prompt statistics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
             <section class="export-panel" aria-labelledby="export-title"><div><p class="eyebrow">Portable files</p><h2 class="section-title" id="export-title">Export prompt</h2></div><div class="export-actions"><button type="button" data-export-format="txt">TXT</button><button type="button" data-export-format="md">Markdown</button><button type="button" data-export-format="json">JSON</button></div></section>
-            <button class="card card--interactive full-card" type="button" data-open-ai-panel><span class="card-icon" aria-hidden="true">◈</span><span><strong>AI Image Generation</strong><small>Prompt ready · API not connected</small></span><span aria-hidden="true">›</span></button>
+            <button class="card card--interactive full-card" type="button" data-open-ai-panel><span class="card-icon" aria-hidden="true">◈</span><span><strong>AI Image Generation</strong><small>Prompt ready · Offline Mock Provider available</small></span><span aria-hidden="true">›</span></button>
           </section>
 
           <section class="screen prompt-history-screen" data-screen="prompt-history" aria-labelledby="prompt-history-title">
@@ -413,9 +416,63 @@
             <div class="prompt-history-list" id="prompt-history-list" aria-live="polite"></div>
           </section>
 
-          <section class="screen ai-panel" data-screen="ai-image" aria-labelledby="ai-image-title">
+          <section class="screen ai-panel ai-panel--legacy" data-screen="ai-image-legacy" aria-labelledby="ai-image-title">
             <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt-preview" aria-label="Back to prompt preview">‹</button><div class="screen-heading__center"><p class="eyebrow">Future integration</p><h1 class="medium-title" id="ai-image-title">AI Image Generation</h1></div><span class="badge badge--soft">Offline</span></div>
             <div class="ai-placeholder" role="status"><span aria-hidden="true">◈</span><h2 class="large-title">Prompt ready</h2><p class="body-text">Your professional prompt is prepared. Connect a provider in a future phase to generate imagery.</p><dl><div><dt>Provider</dt><dd>Not configured</dd></div><div><dt>API status</dt><dd>Not connected</dd></div></dl><button class="button button--generate button--wide" type="button" disabled>Generate image</button><small>No prompt or project data is transmitted.</small></div>
+          </section>
+
+          <section class="screen ai-generator-screen" data-screen="ai-image" aria-labelledby="ai-generator-title">
+            <div class="screen-heading screen-heading--compact">
+              <button class="icon-button" type="button" data-route="prompt-preview" aria-label="Back to prompt preview">‹</button>
+              <div class="screen-heading__center"><p class="eyebrow">Universal AI Provider Engine</p><h1 class="medium-title" id="ai-generator-title">Generate Demo Image</h1></div>
+              <button class="provider-badge" type="button" data-route="provider-settings" id="ai-provider-badge" aria-label="Open provider settings">Mock Provider</button>
+            </div>
+            <div class="mock-notice"><strong>Demo Mode</strong><span>Offline artwork simulation · No API key required</span></div>
+            <section class="ai-request-card" aria-labelledby="ai-ready-title">
+              <div class="ai-request-card__heading"><div><p class="eyebrow">Prompt ready</p><h2 class="section-title" id="ai-ready-title">Generation request</h2></div><span id="ai-provider-status">Offline demo ready</span></div>
+              <p id="ai-prompt-preview">Generate and save a prompt in Prompt Studio first.</p>
+              <label class="field"><span>Collection</span><input id="ai-collection" type="text" maxlength="48" value="All Generations" aria-label="Demo image collection"></label>
+              <dl class="ai-request-meta"><div><dt>Estimated time</dt><dd id="ai-generation-estimate">2–5 seconds</dd></div><div><dt>Result type</dt><dd>Clearly labeled demo artwork</dd></div></dl>
+            </section>
+            <div class="ai-generate-actions">
+              <button class="button button--generate button--wide ripple" type="button" id="generate-demo-image" disabled><span class="button__spark" aria-hidden="true">✦</span>Generate Demo Image</button>
+              <button class="button button--outlined button--wide is-hidden" type="button" id="cancel-demo-image">Cancel generation</button>
+            </div>
+            <section class="ai-progress is-hidden" id="ai-generation-progress" role="progressbar" aria-label="Demo image generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div><strong id="ai-generation-status">Preparing Prompt…</strong><small>Mock Provider is simulating generation</small></div>
+              <span><i id="ai-progress-bar"></i></span>
+            </section>
+            <section class="ai-result is-hidden" id="ai-generation-result" aria-labelledby="ai-result-title">
+              <div class="demo-artwork demo-artwork--large" data-ai-artwork role="img" aria-label="Generated demo artwork">
+                <span>Demo Image</span><small>Generated using Mock Provider</small>
+              </div>
+              <div class="ai-result__copy"><h2 class="section-title" id="ai-result-title" data-ai-result-title>Demo generation</h2><p data-ai-result-meta>Mock Provider · Demo</p></div>
+              <div class="ai-result__actions"><button type="button" data-favorite-current aria-label="Favorite current demo image">♡ Favorite</button><button type="button" data-download-current aria-label="Download current demo image">↓ Download</button></div>
+            </section>
+            <button class="card card--interactive full-card" type="button" data-open-gallery><span class="card-icon" aria-hidden="true">▧</span><span><strong>Image Gallery</strong><small>Browse saved demo generations and history</small></span><span aria-hidden="true">›</span></button>
+          </section>
+
+          <section class="screen image-gallery-screen" data-screen="image-gallery" aria-labelledby="image-gallery-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="ai-image" aria-label="Back to image generator">‹</button><div class="screen-heading__center"><p class="eyebrow">Local generation history</p><h1 class="medium-title" id="image-gallery-title">Image Gallery</h1></div><span class="badge" id="image-gallery-count">0 images</span></div>
+            <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="image-gallery-search" placeholder="Search demo images" aria-label="Search image gallery"></label>
+            <div class="gallery-toolbar">
+              <select id="image-gallery-sort" aria-label="Sort image gallery"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select>
+              <select id="gallery-collection" aria-label="Filter image collection"><option value="all">All collections</option></select>
+              <button type="button" id="gallery-favorites" aria-label="Show favorite images only" aria-pressed="false">♡</button>
+            </div>
+            <div class="image-gallery-list" id="image-gallery-list" aria-live="polite"></div>
+          </section>
+
+          <section class="screen provider-settings-screen" data-screen="provider-settings" aria-labelledby="provider-settings-title">
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="ai-image" aria-label="Back to image generator">‹</button><div class="screen-heading__center"><p class="eyebrow">Provider architecture</p><h1 class="medium-title" id="provider-settings-title">AI Providers</h1></div><span class="badge badge--soft">Mock active</span></div>
+            <div class="notice"><span aria-hidden="true">✓</span><p>Mock Provider works offline. Unconfigured providers automatically fall back to Mock Provider.</p></div>
+            <label class="field"><span>Default provider</span><select id="default-provider" aria-label="Default AI provider"></select></label>
+            <div class="provider-list" id="provider-list"></div>
+            <section class="developer-provider-settings" aria-labelledby="provider-dev-title">
+              <p class="eyebrow">Developer settings</p><h2 class="section-title" id="provider-dev-title">Mock behavior</h2>
+              <label class="field"><span>Generation speed</span><select id="developer-latency" aria-label="Mock Provider generation speed"><option value="normal">Normal · 2–5 seconds</option><option value="instant">Instant generation</option><option value="slow">Slow generation · 7 seconds</option></select></label>
+              <label class="switch-row"><span><strong>Random failures</strong><small>Simulate recoverable provider errors</small></span><input type="checkbox" id="developer-failures" role="switch" aria-label="Enable random mock failures"><i aria-hidden="true"></i></label>
+            </section>
           </section>
 
           <section class="screen test-mode" data-screen="test-mode" aria-labelledby="test-mode-title">
@@ -428,6 +485,16 @@
               <button class="card card--interactive" type="button" data-test-action="stress"><span class="card-icon" aria-hidden="true">↻</span><span><strong>Stress Test Prompt Builder</strong><small>Validate 250 generated prompts</small></span><span aria-hidden="true">›</span></button>
               <button class="card card--interactive test-reset" type="button" data-test-action="reset"><span class="card-icon" aria-hidden="true">×</span><span><strong>Reset Demo Data</strong><small>Remove prompt test records and drafts</small></span><span aria-hidden="true">›</span></button>
             </div>
+            <section class="developer-ai-actions" aria-labelledby="developer-ai-title">
+              <p class="eyebrow">Provider engine</p><h2 class="section-title" id="developer-ai-title">Developer Settings</h2>
+              <div class="developer-ai-grid">
+                <button type="button" data-ai-dev-action="generate-test-images">Generate Test Images</button>
+                <button type="button" data-ai-dev-action="clear-ai-history">Clear History</button>
+                <button type="button" data-ai-dev-action="reset-ai-demo">Reset Demo Data</button>
+                <button type="button" data-ai-dev-action="load-ai-projects">Load Demo Projects</button>
+                <button type="button" data-ai-dev-action="generate-test-projects">Generate Test Projects</button>
+              </div>
+            </section>
             <p class="test-status" id="test-mode-status" aria-live="polite">Test tools ready.</p>
           </section>
 
@@ -477,7 +544,7 @@
               <div class="divider"></div>
               <button class="settings-link" type="button" data-route="components"><span>UI Library</span><span class="settings-link__meta">Components <span aria-hidden="true">›</span></span></button>
               <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption">4.0.0 · Prompt Generation Engine</span></div>
+              <div class="settings-link"><span>Version</span><span class="caption">5.0.0 · Universal AI Provider Engine</span></div>
             </section>
             <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
           </section>

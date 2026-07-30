@@ -2,7 +2,7 @@
 
 ## Purpose and phase boundary
 
-Version 4 turns saved Vyrelix projects into professional, natural-language AI-ready prompts entirely on the current device. It does not call an AI model, image provider, backend, or external API. The disabled AI Image Generation panel is an explicit integration boundary for a later phase.
+Version 4 turns saved Vyrelix projects into professional, natural-language AI-ready prompts entirely on the current device. It does not call an AI model, backend, or external API. Version 5 can pass a saved prompt to the separate offline Mock Provider; the Prompt Engine itself remains provider-independent.
 
 The system is additive: the Universal Creation Engine (UCE) remains the source of universal projects, and the Universal Visual Engine (UVE) remains the source of visual selections and compatibility rules.
 
@@ -77,4 +77,3 @@ Creatures, Worlds, Logos, Scenes, Vehicles, and Architecture can therefore use t
 All controls use semantic form elements, accessible labels, live status regions, visible focus behavior inherited from the component system, and 48-pixel touch targets. Forced-colors and reduced-motion preferences are supported.
 
 The prompt feature loads only when a prompt-related route opens. UVE datasets are resolved through the existing cached module loader. Templates are registered once, searches are cached and bounded, history DOM updates are batched into one string assignment, draft previews are debounced, and live preview never writes generated history.
-
