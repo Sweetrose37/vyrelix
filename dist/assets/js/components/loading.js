@@ -23,7 +23,7 @@ export function initializeLoading() {
 }
 
 const EMPTY_STATES = Object.freeze({
-  saved: ["✦", "Nothing saved yet", "Characters and prompt drafts you save will appear here."],
+  saved: ["✦", "No projects yet", "Projects and local drafts you create will appear here."],
   characters: ["✦", "No characters", "Your original character collection will appear here."],
   images: ["▧", "No images", "Future generated images will appear here."],
   favorites: ["♡", "No favorites", "Double tap or use the heart button to save favorites."],

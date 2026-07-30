@@ -1,0 +1,51 @@
+/* Project collection actions, empty states, and five-item mobile navigation. */
+.bottom-nav--five {
+  grid-template-columns: repeat(5, 1fr);
+  padding-inline: var(--space-1);
+}
+
+.bottom-nav--five .nav-item small {
+  font-size: 0.56rem;
+}
+
+.segmented--four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.project-empty {
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.project-empty strong,
+.project-empty small {
+  display: block;
+}
+
+.project-empty strong {
+  margin-bottom: var(--space-1);
+}
+
+.saved-item__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.saved-item__actions button {
+  display: grid;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gold);
+}
+
+@media (max-width: 345px) {
+  .bottom-nav--five .nav-item small {
+    font-size: 0.51rem;
+  }
+}

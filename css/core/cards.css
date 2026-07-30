@@ -1,0 +1,71 @@
+/* Universal project preview cards shared by dashboards and future studios. */
+.project-preview {
+  display: grid;
+  min-height: 128px;
+  padding: var(--space-3);
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--space-3);
+  contain: content;
+}
+
+.project-preview__thumbnail {
+  display: grid;
+  min-height: 102px;
+  place-items: center;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  background:
+    radial-gradient(circle at 70% 20%, rgba(242, 220, 134, 0.22), transparent 28%),
+    linear-gradient(145deg, #343040, #17151e);
+  color: rgba(255, 255, 255, 0.52);
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+}
+
+.project-preview__heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.project-preview__heading h3 {
+  min-width: 0;
+  margin: 2px 0 var(--space-2);
+  overflow: hidden;
+  font-size: 0.94rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-preview__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1) var(--space-2);
+}
+
+.project-preview__meta span:last-child {
+  grid-column: 1 / -1;
+}
+
+.project-preview__meta small,
+.project-preview__meta strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-preview__meta small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.project-preview__meta strong {
+  color: var(--gray);
+  font-size: 0.68rem;
+  font-weight: var(--weight-medium);
+}

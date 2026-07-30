@@ -1,0 +1,81 @@
+/* Premium Studio Selection cards powered by the studio registry. */
+.studio-intro {
+  margin: -10px 0 var(--space-6);
+}
+
+.studio-selector {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.studio-option {
+  position: relative;
+  display: grid;
+  min-height: 116px;
+  padding: var(--space-4);
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--gradient-glass), var(--surface);
+  text-align: left;
+  transition: var(--transition-interactive);
+}
+
+.studio-option::after {
+  position: absolute;
+  right: -28px;
+  bottom: -48px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.07);
+  content: "";
+}
+
+.studio-option--active {
+  border-color: var(--gold-border);
+  box-shadow: var(--shadow-gold);
+}
+
+.studio-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.studio-option__icon {
+  display: grid;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  place-items: center;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  background: rgba(212, 175, 55, 0.09);
+  color: var(--gold);
+  font-size: 1.1rem;
+}
+
+.studio-option__copy {
+  min-width: 0;
+}
+
+.studio-option__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.studio-option h2 {
+  margin: 1px 0;
+  font-size: 0.95rem;
+}
+
+.studio-option p {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}

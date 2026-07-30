@@ -1,5 +1,5 @@
 /**
- * Vyrelix Phase 1A entry point: initializes shell, routing, forms, and local data.
+ * Vyrelix application entry point: composes the existing shell with the Universal Creation Engine.
  */
 import { createNavigation } from "./navigation.js";
 import { storage } from "./storage.js";
@@ -15,10 +15,12 @@ import { initializeCards } from "./components/cards.js";
 import { initializeForms, createSearchController } from "./components/forms.js";
 import { initializeModals, openModal } from "./components/modals.js";
 import { initializeDrawers } from "./components/drawer.js";
-import { initializeBottomSheets } from "./components/bottomSheet.js";
+import { initializeBottomSheets, openBottomSheet, closeBottomSheet } from "./components/bottomSheet.js";
 import { initializeTabs } from "./components/tabs.js";
 import { initializeLoading, setButtonLoading } from "./components/loading.js";
 import { initializeGestures } from "./components/gestures.js";
+import { creationEngine } from "./core/creationEngine.js";
+import { initializeDashboard } from "./core/dashboard.js";
 
 const state = { step: 1, intensity: 3, filter: "all", query: "" };
 const form = document.querySelector("#character-form");
@@ -64,8 +66,26 @@ function serializeCharacter() {
 }
 
 function saveCharacter() {
+  const character = serializeCharacter();
+  let project;
+  try {
+    project = creationEngine.projects.create({
+      name: character.title,
+      type: "Character",
+      category: character.data.archetype || "Original",
+      description: character.data.concept || "",
+      tags: [],
+      theme: character.data.presence || "Original",
+      artStyle: "Character concept",
+      colorPalette: character.data.color ? [character.data.color] : [],
+      data: { ...character.data, legacyCharacterId: character.id }
+    });
+  } catch (error) {
+    showToast(error.message, "error");
+    return;
+  }
   const characters = storage.getCharacters();
-  characters.unshift(serializeCharacter());
+  characters.unshift({ ...character, projectId: project.id });
   storage.saveCharacters(characters);
   storage.saveRecentActivity(characters.slice(0, 8));
   form.reset();
@@ -74,6 +94,7 @@ function saveCharacter() {
   document.querySelector("#intensity-output").textContent = "3";
   updateBuilder();
   refreshSaved();
+  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
   showToast("Character saved on this device");
   navigation.navigate("saved");
 }
@@ -91,14 +112,21 @@ function handleNext() {
 }
 
 function getSavedItems() {
-  return [...storage.getCharacters(), ...storage.getPrompts()]
-    .filter((item) => state.filter === "all" || item.kind === state.filter)
+  const projects = creationEngine.projects.list({ includeArchived: true }).map((project) => ({
+    ...project,
+    kind: "project",
+    title: project.name,
+    subtitle: `${project.type} · ${project.status} · ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(project.modifiedAt))}`,
+    createdAt: new Date(project.createdAt).getTime()
+  }));
+  return [...projects, ...storage.getPrompts()]
+    .filter((item) => state.filter === "all" || (state.filter === "archived" ? item.status === "archived" : item.kind === state.filter && item.status !== "archived"))
     .filter((item) => item.title.toLowerCase().includes(state.query))
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
 function refreshSaved() {
-  const all = [...storage.getCharacters(), ...storage.getPrompts()];
+  const all = [...creationEngine.projects.list({ includeArchived: true }), ...storage.getPrompts()];
   document.querySelector("#saved-count").textContent = `${all.length} item${all.length === 1 ? "" : "s"}`;
   renderSaved(getSavedItems(), savedList);
 }
@@ -152,6 +180,11 @@ function bindEvents() {
     refreshSaved();
   }));
   savedList.addEventListener("click", (event) => {
+    const projectAction = event.target.closest("[data-project-action]");
+    if (projectAction) {
+      handleProjectAction(projectAction.dataset.projectAction, projectAction.dataset.projectId);
+      return;
+    }
     const button = event.target.closest("[data-delete-id]");
     if (!button) return;
     const method = button.dataset.deleteKind === "character" ? "Characters" : "Prompts";
@@ -166,12 +199,86 @@ function bindEvents() {
   });
 }
 
+function migrateLegacyCharacters() {
+  const projects = creationEngine.projects.list();
+  storage.getCharacters().forEach((character) => {
+    if (projects.some((project) => project.id === character.projectId || project.data?.legacyCharacterId === character.id)) return;
+    try {
+      creationEngine.projects.create({
+        name: character.title,
+        type: "Character",
+        category: character.data?.archetype || "Original",
+        description: character.data?.concept || "",
+        theme: character.data?.presence || "Original",
+        artStyle: "Character concept",
+        colorPalette: character.data?.color ? [character.data.color] : [],
+        data: { ...character.data, legacyCharacterId: character.id }
+      });
+    } catch {
+      /* Duplicate legacy names remain safely stored in the Phase 1 collection. */
+    }
+  });
+}
+
+function handleProjectAction(action, id) {
+  const project = creationEngine.projects.get(id);
+  if (!project) return;
+  try {
+    if (action === "favorite") creationEngine.projects.favorite(id);
+    if (action === "menu") {
+      const labels = project.status === "archived" ? ["Restore", "Delete"] : ["Rename", "Duplicate", "Archive", "Delete"];
+      const content = labels.map((label) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `button button--wide ${label === "Delete" ? "button--danger" : "button--outlined"}`;
+        button.dataset.projectMenuAction = label.toLocaleLowerCase();
+        button.dataset.projectId = id;
+        button.textContent = label;
+        return button;
+      });
+      openBottomSheet({ heading: project.name, content });
+      return;
+    }
+    refreshSaved();
+    document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-project-menu-action]");
+  if (!button) return;
+  const action = button.dataset.projectMenuAction;
+  const id = button.dataset.projectId;
+  const project = creationEngine.projects.get(id);
+  try {
+    if (action === "rename") {
+      const name = window.prompt("Rename project", project.name);
+      if (name?.trim()) creationEngine.projects.rename(id, name);
+    }
+    if (action === "duplicate") creationEngine.projects.duplicate(id);
+    if (action === "archive") creationEngine.projects.archive(id);
+    if (action === "restore") creationEngine.projects.restore(id);
+    if (action === "delete" && window.confirm(`Delete ${project.name}? This cannot be undone.`)) creationEngine.projects.delete(id);
+    closeBottomSheet();
+    refreshSaved();
+    document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
+    const messages = { rename: "Project renamed", duplicate: "Project duplicated", archive: "Project archived", restore: "Project restored", delete: "Project deleted" };
+    showToast(messages[action] || "Project updated", action === "delete" ? "deleted" : "success");
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+});
+
 navigation = createNavigation({ onRouteChange: (route) => { if (route === "saved") refreshSaved(); } });
+migrateLegacyCharacters();
+initializeDashboard({ engine: creationEngine, navigate: navigation.navigate, showToast });
 const settings = initializeSettings(() => openDialog("Clear local storage?", "This removes all saved characters, prompts, history, and preferences from this device.", { destructive: true }));
 document.querySelector("#confirm-clear").addEventListener("click", () => {
   const action = document.querySelector("#dialog").dataset.action;
   if (action === "clear-storage") {
-    storage.clear(); refreshSaved(); settings.reset(); closeDialog(); showToast("Local storage cleared", "deleted");
+    storage.clear(); refreshSaved(); settings.reset(); closeDialog(); document.dispatchEvent(new CustomEvent("vyrelix:projects-changed")); showToast("Local storage cleared", "deleted");
   } else {
     closeDialog();
     showToast(action === "demo-delete" ? "Delete pattern confirmed" : "Action confirmed", action === "demo-delete" ? "deleted" : "success");
@@ -191,7 +298,7 @@ createSearchController({
   input: document.querySelector("#saved-search"),
   suggestions: document.querySelector("#search-suggestions"),
   clearButton: document.querySelector("[data-search-clear]"),
-  getItems: () => [...storage.getCharacters(), ...storage.getPrompts()],
+  getItems: () => getSavedItems(),
   onQuery: debounce((query) => { state.query = query; refreshSaved(); }, 100)
 });
 initializeGestures({ showToast, onPullRefresh: refreshSaved });

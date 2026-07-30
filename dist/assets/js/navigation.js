@@ -1,7 +1,7 @@
 /**
  * Minimal single-page navigation with history support and accessible state.
  */
-const routes = new Set(["home", "builder", "prompt", "saved", "settings", "components"]);
+const routes = new Set(["home", "studios", "builder", "prompt", "saved", "settings", "components"]);
 
 export function createNavigation({ onRouteChange } = {}) {
   const screens = [...document.querySelectorAll("[data-screen]")];

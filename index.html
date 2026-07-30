@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0B0B0F">
-    <meta name="description" content="Vyrelix — a premium original character creation workspace.">
+    <meta name="description" content="Vyrelix — a premium mobile AI creative studio powered by a universal creation engine.">
     <title>Vyrelix</title>
     <link rel="stylesheet" href="./css/variables.css">
     <link rel="stylesheet" href="./css/typography.css">
@@ -21,6 +21,10 @@
     <link rel="stylesheet" href="./css/utilities.css">
     <link rel="stylesheet" href="./css/mobile.css">
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/core/cards.css">
+    <link rel="stylesheet" href="./css/core/dashboard.css">
+    <link rel="stylesheet" href="./css/core/studios.css">
+    <link rel="stylesheet" href="./css/core/projects.css">
   </head>
   <body>
     <noscript>Vyrelix requires JavaScript to run.</noscript>
@@ -59,54 +63,110 @@
         <main class="screen-stack" id="screen-stack">
           <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
             <div class="hero">
-              <div class="eyebrow"><span></span> Character studio</div>
-              <h1 class="large-title" id="home-title">Bring your next<br><em>original</em> to life.</h1>
-              <p class="body-text text-muted">Shape memorable characters and prepare cinematic prompts in one focused workspace.</p>
-              <button class="button button--primary button--wide ripple" type="button" data-route="builder">
-                Start creating <span aria-hidden="true">→</span>
+              <div class="eyebrow"><span></span> Universal creative engine</div>
+              <h1 class="large-title" id="home-title">Every idea.<br>One <em>studio.</em></h1>
+              <p class="body-text text-muted">Create, organize, and evolve original characters today—with worlds, scenes, objects, and more ready to grow from the same engine.</p>
+              <button class="button button--primary button--wide ripple" type="button" data-route="studios">
+                Explore studios <span aria-hidden="true">→</span>
               </button>
             </div>
 
+            <section class="section-block dashboard-summary" aria-labelledby="dashboard-title">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Project dashboard</p>
+                  <h2 class="medium-title" id="dashboard-title">Your creative universe</h2>
+                </div>
+                <span class="badge">UCE</span>
+              </div>
+              <div class="dashboard-stats" id="dashboard-stats" aria-live="polite"></div>
+            </section>
+
             <section class="section-block" aria-labelledby="quick-title">
               <div class="section-heading">
-                <h2 class="medium-title" id="quick-title">Quick start</h2>
-                <span class="badge">Phase 1A</span>
+                <h2 class="medium-title" id="quick-title">Quick create</h2>
+                <span class="badge badge--soft">Character live</span>
               </div>
               <div class="card-grid">
                 <button class="card card--interactive quick-card" type="button" data-route="builder" aria-label="Create a new character">
                   <span class="card-icon" aria-hidden="true">✦</span>
                   <span>
                     <strong>New character</strong>
-                    <small>Build from a blank canvas</small>
+                    <small>Start a universal project</small>
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
-                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open prompt workspace">
-                  <span class="card-icon" aria-hidden="true">⌁</span>
+                <button class="card card--interactive quick-card" type="button" data-random-character aria-label="Create a random character project">
+                  <span class="card-icon" aria-hidden="true">⟳</span>
                   <span>
-                    <strong>Prompt workspace</strong>
-                    <small>Arrange your visual direction</small>
+                    <strong>Random character</strong>
+                    <small>Use a reusable seed</small>
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
               </div>
             </section>
 
-            <section class="section-block" aria-labelledby="activity-title">
+            <section class="section-block template-strip" aria-labelledby="templates-title">
               <div class="section-heading">
-                <h2 class="medium-title" id="activity-title">Your studio</h2>
+                <h2 class="medium-title" id="templates-title">Templates</h2>
+                <span class="caption">Framework ready</span>
+              </div>
+              <div class="template-scroll" aria-label="Available project templates">
+                <button type="button" data-template="Blank">Blank</button>
+                <button type="button" data-template="Fantasy">Fantasy</button>
+                <button type="button" data-template="Sci-Fi">Sci-Fi</button>
+                <button type="button" data-template="Modern">Modern</button>
+                <button type="button" data-template="Anime">Anime</button>
+                <button type="button" data-template="Realistic">Realistic</button>
+                <button type="button" data-template="Custom">Custom</button>
+              </div>
+            </section>
+
+            <section class="section-block" aria-labelledby="projects-title">
+              <div class="section-heading">
+                <h2 class="medium-title" id="projects-title">Recent projects</h2>
                 <button class="text-button" type="button" data-route="saved">View all</button>
               </div>
-              <article class="card card--glass studio-card">
-                <div class="monogram-art" aria-label="Abstract character placeholder image">A</div>
-                <div class="studio-card__copy">
-                  <span class="badge badge--soft">Draft</span>
-                  <h3>Aria Nocturne</h3>
-                  <p class="caption">Celestial archivist · edited today</p>
+              <div class="project-tools">
+                <label class="search-field project-search">
+                  <span aria-hidden="true">⌕</span>
+                  <span class="sr-only">Search projects by name, tag, category, studio, date, favorite, or status</span>
+                  <input type="search" id="project-search" placeholder="Search every project" aria-label="Search all projects">
+                </label>
+                <div class="project-tool-row">
+                  <label>
+                    <span class="sr-only">Filter project status</span>
+                    <select id="project-status-filter" aria-label="Filter projects by status">
+                      <option value="all">All statuses</option>
+                      <option value="draft">Drafts</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span class="sr-only">Sort projects</span>
+                    <select id="project-sort" aria-label="Sort projects">
+                      <option value="modified-desc">Recently modified</option>
+                      <option value="name-asc">Name A–Z</option>
+                      <option value="created-desc">Recently created</option>
+                    </select>
+                  </label>
                 </div>
-                <button class="icon-button icon-button--small" type="button" data-route="builder" aria-label="Continue editing Aria Nocturne">›</button>
-              </article>
+              </div>
+              <div class="project-feed" id="dashboard-projects" aria-live="polite"></div>
             </section>
+          </section>
+
+          <section class="screen" data-screen="studios" aria-labelledby="studios-title">
+            <div class="screen-heading">
+              <div>
+                <p class="eyebrow">Choose your canvas</p>
+                <h1 class="large-title" id="studios-title">Creative studios</h1>
+              </div>
+              <span class="badge">12 modules</span>
+            </div>
+            <p class="body-text studio-intro">One engine powers every creative discipline. Character Studio is open now; the foundation for every future studio is already in place.</p>
+            <div class="studio-selector" id="studio-selector" aria-live="polite"></div>
           </section>
 
           <section class="screen" data-screen="builder" aria-labelledby="builder-title">
@@ -228,21 +288,22 @@
 
           <section class="screen" data-screen="saved" aria-labelledby="saved-title">
             <div class="screen-heading">
-              <div><p class="eyebrow">Local collection</p><h1 class="large-title" id="saved-title">Saved</h1></div>
+              <div><p class="eyebrow">Universal collection</p><h1 class="large-title" id="saved-title">Projects</h1></div>
               <span class="badge" id="saved-count">0 items</span>
             </div>
             <div class="search-combobox" data-search-root>
             <label class="search-field">
               <span aria-hidden="true">⌕</span>
-              <input type="search" id="saved-search" placeholder="Search your collection" aria-label="Search saved items" aria-controls="search-suggestions" aria-expanded="false" autocomplete="off">
+              <input type="search" id="saved-search" placeholder="Search your projects" aria-label="Search saved projects" aria-controls="search-suggestions" aria-expanded="false" autocomplete="off">
               <button class="search-clear is-hidden" type="button" aria-label="Clear search" data-search-clear>×</button>
             </label>
             <div class="search-suggestions is-hidden" id="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
             </div>
-            <div class="segmented" role="tablist" aria-label="Saved item type">
+            <div class="segmented segmented--four" role="tablist" aria-label="Saved item type">
               <button class="is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
-              <button type="button" role="tab" aria-selected="false" data-filter="character">Characters</button>
+              <button type="button" role="tab" aria-selected="false" data-filter="project">Projects</button>
               <button type="button" role="tab" aria-selected="false" data-filter="prompt">Prompts</button>
+              <button type="button" role="tab" aria-selected="false" data-filter="archived">Archive</button>
             </div>
             <div class="saved-list" id="saved-list"></div>
           </section>
@@ -271,7 +332,7 @@
               <div class="divider"></div>
               <button class="settings-link" type="button" data-route="components"><span>UI Library</span><span class="settings-link__meta">Components <span aria-hidden="true">›</span></span></button>
               <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption">1.1.0 · UI System</span></div>
+              <div class="settings-link"><span>Version</span><span class="caption">2.0.0 · Universal Creation Engine</span></div>
             </section>
             <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
           </section>
@@ -417,10 +478,11 @@
           </section>
         </main>
 
-        <nav class="bottom-nav" aria-label="Primary navigation">
+        <nav class="bottom-nav bottom-nav--five" aria-label="Primary navigation">
           <button class="nav-item is-active" type="button" data-route="home" aria-label="Home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
+          <button class="nav-item" type="button" data-route="studios" aria-label="Creative studios"><span aria-hidden="true">◈</span><small>Studios</small></button>
           <button class="nav-item" type="button" data-route="builder" aria-label="Build character"><span aria-hidden="true">✦</span><small>Build</small></button>
-          <button class="nav-item" type="button" data-route="saved" aria-label="Saved items"><span aria-hidden="true">▱</span><small>Saved</small></button>
+          <button class="nav-item" type="button" data-route="saved" aria-label="Projects"><span aria-hidden="true">▱</span><small>Projects</small></button>
           <button class="nav-item" type="button" data-route="settings" aria-label="Settings"><span aria-hidden="true">⚙</span><small>Settings</small></button>
         </nav>
       </div>

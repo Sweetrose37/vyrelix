@@ -1,6 +1,6 @@
 # Vyrelix
 
-Vyrelix is a mobile-only original-character creation workspace and visual-prompt organizer. The current release establishes the complete application shell and reusable UI system, including navigation, settings, device-local persistence, accessible overlays, gestures, search, feedback, and loading states. It intentionally contains no AI generation, character engine, prompt engine, backend, or external API.
+Vyrelix is a premium mobile-only AI Creative Studio foundation. Version 2 introduces the Universal Creation Engine (UCE): a reusable project model, modular studio registry, lifecycle managers, shared datasets, dashboard, Studio Selection screen, and expandable device-local persistence. It intentionally contains no AI generation, prompt generation, backend, or external API.
 
 ## Technology
 
@@ -8,19 +8,23 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 
 ## Structure
 
-- `index.html` contains the accessible application shell and seven screen states.
+- `index.html` contains the accessible application shell, project dashboard, Studio Selection screen, Character Builder, collection, settings, and UI library.
 - `css/` separates tokens, typography, layout, component foundations, focused component modules, motion, utilities, mobile refinements, and product-level styles.
-- `js/` contains application orchestration, navigation, UI feedback, storage, clipboard, settings, animation controllers, and focused component controllers.
+- `js/core/` contains the Universal Creation Engine and its focused managers.
+- `js/project/` contains reusable project building, preview, templates, validation, statistics, import, and export modules.
+- `js/studios/` contains registry descriptors for Character Studio and every scaffolded future studio.
+- `js/data/core/` is the single shared dataset source available to all studios.
+- Existing `js/` modules continue to provide navigation, UI feedback, legacy storage compatibility, settings, animations, and focused component controllers.
 - `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
-- `docs/COMPONENTS.md` documents every reusable component, its markup contract, customization points, accessibility behavior, and dependencies.
+- `docs/COMPONENTS.md` documents the UI system; `docs/UNIVERSAL_CREATION_ENGINE.md` documents the UCE, managers, project lifecycle, storage, and expansion strategy.
 - `assets/` reserves organized locations for future logos, icons, imagery, backgrounds, and fonts.
 - `worker/` contains the production static-site request handler and security headers.
 - `scripts/` contains the dependency-free production build.
-- `ai/`, `character/`, `prompt/`, and `data/` are reserved for later-phase feature modules and are not active in Phase 1A.
+- `ai/`, `character/`, `prompt/`, and the original `data/` directory remain reserved for later feature phases.
 
 ## Architecture
 
-Vyrelix uses a small single-page architecture. `app.js` composes focused modules; `navigation.js` owns screen and browser-history state; `storage.js` is the only local-storage boundary; and the files in `js/components/` own one interaction family each. CSS design tokens keep the gold-on-charcoal visual system consistent, while component styles layer on top of the original foundation without changing existing class contracts.
+Vyrelix uses a small single-page architecture. `app.js` composes the original shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the files in `js/components/` own one interaction family each. CSS design tokens keep the gold-on-charcoal visual system consistent, while new core styles layer on top without changing existing class contracts.
 
 All saved content remains on the current device. Storage keys are versioned so future migrations can be introduced without collisions.
 
@@ -48,10 +52,10 @@ Dialogs, sheets, and drawers restore focus after closing and trap keyboard focus
 
 ## Future expansion
 
-The application is ready for the Character Engine in Phase 2A. Later phases can add domain modules under `character/`, `prompt/`, and `ai/` without changing the shell. Suggested sequence: character schema and validation, prompt composition, optional persistence adapters, AI provider integration, authentication, synchronization, and image-generation workflows.
+Character Studio is the first active studio. Creature, World, Scene, Environment, Object, Vehicle, Architecture, Logo, Mascot, Poster, Book Cover, and Icon project types are registered for future work. New studios plug into the registry, reuse the project model and shared data, and store domain values in `project.data` without architectural changes.
 
 ## Phase boundary
 
-Buttons in the prompt workspace save or copy user-authored drafts only. They do not generate, transform, or send content anywhere.
+Buttons in the prompt workspace save or copy user-authored drafts only. The Universal Randomizer creates seeded local metadata and does not call AI, generate prompts, transform content, or send data anywhere.
 
 The UI Library includes generate-button and generation-loader visuals because they are required reusable states. They are inert demonstrations and do not generate or transmit content.
