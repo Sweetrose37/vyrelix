@@ -26,6 +26,7 @@ export class CreationEngine {
     this.studios = new StudioManager();
     STUDIO_DEFINITIONS.forEach((studio) => this.studios.register(studio));
     this.modules = new ModuleLoader();
+    this.modules.register("visual-engine", () => import("../visual/visualEngine.js"));
     this.projectModel = new ProjectEngine();
     this.history = new HistoryEngine(this.storage);
     this.recent = new RecentEngine(this.storage);

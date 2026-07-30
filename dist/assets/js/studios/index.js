@@ -17,5 +17,9 @@ import { bookCoverStudio } from "./bookCoverStudio.js";
 export const STUDIO_DEFINITIONS = Object.freeze([
   characterStudio, creatureStudio, worldStudio, sceneStudio, objectStudio, logoStudio,
   mascotStudio, environmentStudio, vehicleStudio, architectureStudio, posterStudio, bookCoverStudio,
-  Object.freeze({ id: "icon", name: "Icon Studio", projectType: "Icon", icon: "◉", description: "Create scalable visual symbols and interface icons.", active: false, generator: false })
+  Object.freeze({
+    id: "icon", name: "Icon Studio", projectType: "Icon", icon: "◉",
+    description: "Create scalable visual symbols and interface icons.", active: false, generator: false,
+    visualCapabilities: Object.freeze(["color", "pattern", "composition", "artStyle"])
+  })
 ]);

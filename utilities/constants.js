@@ -1,7 +1,7 @@
 /**
  * Immutable application constants and versioned storage namespaces.
  */
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "3.0.0";
 export const STORAGE_KEYS = Object.freeze({
   settings: "vyrelix.v1.settings",
   favorites: "vyrelix.v1.favorites",

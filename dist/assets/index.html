@@ -25,6 +25,9 @@
     <link rel="stylesheet" href="./css/core/dashboard.css">
     <link rel="stylesheet" href="./css/core/studios.css">
     <link rel="stylesheet" href="./css/core/projects.css">
+    <link rel="stylesheet" href="./css/visual/visual.css">
+    <link rel="stylesheet" href="./css/visual/preview.css">
+    <link rel="stylesheet" href="./css/visual/selectors.css">
   </head>
   <body>
     <noscript>Vyrelix requires JavaScript to run.</noscript>
@@ -228,6 +231,11 @@
                     <span><span>Detail level</span><output id="detail-output">Balanced</output></span>
                     <input type="range" name="detail" min="1" max="3" value="2" aria-label="Character detail level">
                   </label>
+                  <button class="card card--interactive visual-launch-card" type="button" data-route="visual" aria-label="Open the Universal Visual Engine for this character">
+                    <span class="card-icon" aria-hidden="true">◈</span>
+                    <span><strong>Universal Visual Engine</strong><small>Customize face, eyes, hair, color, material, lighting, camera, and style</small></span>
+                    <span aria-hidden="true">›</span>
+                  </button>
                 </section>
               </div>
 
@@ -257,6 +265,60 @@
                 <button class="button button--primary ripple" type="button" id="builder-next">Continue</button>
               </div>
             </form>
+          </section>
+
+          <section class="screen visual-studio" data-screen="visual" aria-labelledby="visual-title">
+            <div class="screen-heading screen-heading--compact">
+              <button class="icon-button" type="button" data-route="builder" aria-label="Back to Character Builder">‹</button>
+              <div class="screen-heading__center">
+                <p class="eyebrow">Character Studio</p>
+                <h1 class="medium-title" id="visual-title">Visual Engine</h1>
+              </div>
+              <button class="icon-button" type="button" data-random-visual aria-label="Randomize all compatible visual selections">⟳</button>
+            </div>
+
+            <div id="visual-preview-root">
+              <div class="generate-loader" role="status" aria-label="Loading Universal Visual Engine">
+                <span aria-hidden="true">◈</span><div><strong>Opening Visual Engine</strong><small>Loading reusable visual datasets…</small></div>
+              </div>
+            </div>
+
+            <div class="visual-template-row">
+              <label>
+                <span>Visual template</span>
+                <select id="visual-template" aria-label="Choose a visual template"></select>
+              </label>
+              <button class="button button--secondary" type="button" data-random-current>Random</button>
+            </div>
+
+            <div class="visual-group-tabs" id="visual-groups" role="group" aria-label="Visual category groups"></div>
+            <div class="visual-category-tabs" id="visual-categories" role="group" aria-label="Visual categories"></div>
+
+            <div class="visual-tools">
+              <label class="search-field">
+                <span aria-hidden="true">⌕</span>
+                <input type="search" id="visual-search" placeholder="Search visual assets" aria-label="Search the active visual dataset">
+              </label>
+              <div class="visual-filter-row">
+                <label>
+                  <span class="sr-only">Filter visual assets by category</span>
+                  <select id="visual-category-filter" aria-label="Filter visual assets by category"></select>
+                </label>
+                <div class="visual-view-toggle" role="group" aria-label="Visual asset view">
+                  <button class="is-active" type="button" data-visual-view="all" aria-pressed="true" aria-label="Show all visual assets">All</button>
+                  <button type="button" data-visual-view="favorites" aria-pressed="false" aria-label="Show favorite visual assets">♡</button>
+                  <button type="button" data-visual-view="recent" aria-pressed="false" aria-label="Show recent visual assets">↶</button>
+                </div>
+              </div>
+              <p class="caption visual-result-count" id="visual-result-count" aria-live="polite"></p>
+            </div>
+
+            <div class="visual-assets" id="visual-assets" aria-live="polite"></div>
+
+            <div class="visual-actions">
+              <button class="button button--outlined" type="button" data-save-visual>Save preset</button>
+              <button class="button button--primary" type="button" data-apply-visual>Apply visual</button>
+            </div>
           </section>
 
           <section class="screen" data-screen="prompt" aria-labelledby="prompt-title">
@@ -332,7 +394,7 @@
               <div class="divider"></div>
               <button class="settings-link" type="button" data-route="components"><span>UI Library</span><span class="settings-link__meta">Components <span aria-hidden="true">›</span></span></button>
               <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption">2.0.0 · Universal Creation Engine</span></div>
+              <div class="settings-link"><span>Version</span><span class="caption">3.0.0 · Universal Visual Engine</span></div>
             </section>
             <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
           </section>

@@ -1,6 +1,6 @@
 # Vyrelix
 
-Vyrelix is a premium mobile-only AI Creative Studio foundation. Version 2 introduces the Universal Creation Engine (UCE): a reusable project model, modular studio registry, lifecycle managers, shared datasets, dashboard, Studio Selection screen, and expandable device-local persistence. It intentionally contains no AI generation, prompt generation, backend, or external API.
+Vyrelix is a premium mobile-only AI Creative Studio foundation. Version 3 adds the Universal Visual Engine (UVE) to the Universal Creation Engine (UCE): reusable visual datasets, compatibility-aware selection and randomization, live Character Studio customization, visual presets, and future-studio adapters. It intentionally contains no AI generation, prompt generation, backend, or external API.
 
 ## Technology
 
@@ -12,11 +12,13 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 - `css/` separates tokens, typography, layout, component foundations, focused component modules, motion, utilities, mobile refinements, and product-level styles.
 - `js/core/` contains the Universal Creation Engine and its focused managers.
 - `js/project/` contains reusable project building, preview, templates, validation, statistics, import, and export modules.
+- `js/visual/` contains the lazily loaded Universal Visual Engine and its focused color, material, lighting, camera, style, composition, mood, validation, compatibility, storage, search, filter, template, randomizer, and preview modules.
 - `js/studios/` contains registry descriptors for Character Studio and every scaffolded future studio.
 - `js/data/core/` is the single shared dataset source available to all studios.
+- `js/data/visual/` contains normalized visual datasets, including a deterministic catalog of more than 1,000 named colors.
 - Existing `js/` modules continue to provide navigation, UI feedback, legacy storage compatibility, settings, animations, and focused component controllers.
 - `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
-- `docs/COMPONENTS.md` documents the UI system; `docs/UNIVERSAL_CREATION_ENGINE.md` documents the UCE, managers, project lifecycle, storage, and expansion strategy.
+- `docs/COMPONENTS.md` documents the UI system; `docs/UNIVERSAL_CREATION_ENGINE.md` documents the UCE; and `docs/UNIVERSAL_VISUAL_ENGINE.md` documents visual engines, datasets, compatibility, and extension.
 - `assets/` reserves organized locations for future logos, icons, imagery, backgrounds, and fonts.
 - `worker/` contains the production static-site request handler and security headers.
 - `scripts/` contains the dependency-free production build.
@@ -24,7 +26,7 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 
 ## Architecture
 
-Vyrelix uses a small single-page architecture. `app.js` composes the original shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the files in `js/components/` own one interaction family each. CSS design tokens keep the gold-on-charcoal visual system consistent, while new core styles layer on top without changing existing class contracts.
+Vyrelix uses a small single-page architecture. `app.js` composes the original shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the UVE loads only when Character Studio opens its visual workspace. CSS design tokens keep the gold-on-charcoal visual system consistent, while core and visual styles layer on top without changing existing class contracts.
 
 All saved content remains on the current device. Storage keys are versioned so future migrations can be introduced without collisions.
 

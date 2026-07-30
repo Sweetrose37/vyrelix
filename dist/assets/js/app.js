@@ -22,10 +22,11 @@ import { initializeGestures } from "./components/gestures.js";
 import { creationEngine } from "./core/creationEngine.js";
 import { initializeDashboard } from "./core/dashboard.js";
 
-const state = { step: 1, intensity: 3, filter: "all", query: "" };
+const state = { step: 1, intensity: 3, filter: "all", query: "", visual: null, visualMeta: null };
 const form = document.querySelector("#character-form");
 const savedList = document.querySelector("#saved-list");
 let navigation;
+let visualStudioPromise = null;
 
 function launch() {
   const splash = document.querySelector("#splash");
@@ -61,7 +62,7 @@ function serializeCharacter() {
     id: createId("character"), kind: "character",
     title: data.name?.trim() || "Untitled character",
     subtitle: `${data.archetype || "Original concept"} · just now`,
-    data: { ...data, intensity: state.intensity }, createdAt: Date.now()
+    data: { ...data, intensity: state.intensity, visual: state.visual }, createdAt: Date.now()
   };
 }
 
@@ -75,9 +76,9 @@ function saveCharacter() {
       category: character.data.archetype || "Original",
       description: character.data.concept || "",
       tags: [],
-      theme: character.data.presence || "Original",
-      artStyle: "Character concept",
-      colorPalette: character.data.color ? [character.data.color] : [],
+      theme: state.visualMeta?.mood || character.data.presence || "Original",
+      artStyle: state.visualMeta?.artStyle || "Character concept",
+      colorPalette: state.visual ? Object.values(state.visual.colors) : character.data.color ? [character.data.color] : [],
       data: { ...character.data, legacyCharacterId: character.id }
     });
   } catch (error) {
@@ -91,12 +92,41 @@ function saveCharacter() {
   form.reset();
   state.step = 1;
   state.intensity = 3;
+  state.visual = null;
+  state.visualMeta = null;
   document.querySelector("#intensity-output").textContent = "3";
   updateBuilder();
   refreshSaved();
   document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
   showToast("Character saved on this device");
   navigation.navigate("saved");
+}
+
+async function ensureVisualStudio() {
+  if (visualStudioPromise) return visualStudioPromise;
+  visualStudioPromise = import("./visual/visualUI.js").then(({ initializeVisualStudio }) =>
+    initializeVisualStudio({
+      root: document.querySelector('[data-screen="visual"]'),
+      initial: state.visual,
+      showToast,
+      onApply: (visual, engine) => {
+        state.visual = visual;
+        state.visualMeta = {
+          primary: engine.getAsset("color", visual.colors.primaryId)?.name,
+          artStyle: engine.getAsset("artStyle", visual.artStyleId)?.name,
+          mood: engine.getAsset("mood", visual.moodId)?.name
+        };
+        const colorOption = [...form.elements.color.options].find((option) => option.textContent.toLocaleLowerCase() === state.visualMeta.primary?.toLocaleLowerCase());
+        if (colorOption) form.elements.color.value = colorOption.value;
+        navigation.navigate("builder");
+      }
+    })
+  ).catch((error) => {
+    visualStudioPromise = null;
+    showToast("Visual Engine could not be loaded", "error");
+    throw error;
+  });
+  return visualStudioPromise;
 }
 
 function handleNext() {
@@ -271,7 +301,10 @@ document.addEventListener("click", (event) => {
   }
 });
 
-navigation = createNavigation({ onRouteChange: (route) => { if (route === "saved") refreshSaved(); } });
+navigation = createNavigation({ onRouteChange: (route) => {
+  if (route === "saved") refreshSaved();
+  if (route === "visual") ensureVisualStudio();
+} });
 migrateLegacyCharacters();
 initializeDashboard({ engine: creationEngine, navigate: navigation.navigate, showToast });
 const settings = initializeSettings(() => openDialog("Clear local storage?", "This removes all saved characters, prompts, history, and preferences from this device.", { destructive: true }));

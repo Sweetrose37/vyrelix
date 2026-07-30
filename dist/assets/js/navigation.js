@@ -1,7 +1,7 @@
 /**
  * Minimal single-page navigation with history support and accessible state.
  */
-const routes = new Set(["home", "studios", "builder", "prompt", "saved", "settings", "components"]);
+const routes = new Set(["home", "studios", "builder", "visual", "prompt", "saved", "settings", "components"]);
 
 export function createNavigation({ onRouteChange } = {}) {
   const screens = [...document.querySelectorAll("[data-screen]")];
@@ -11,7 +11,7 @@ export function createNavigation({ onRouteChange } = {}) {
     const target = routes.has(route) ? route : "home";
     screens.forEach((screen) => screen.classList.toggle("is-active", screen.dataset.screen === target));
     navItems.forEach((item) => {
-      const active = item.dataset.route === target || (target === "prompt" && item.dataset.route === "builder");
+      const active = item.dataset.route === target || (["prompt", "visual"].includes(target) && item.dataset.route === "builder");
       item.classList.toggle("is-active", active);
       item.toggleAttribute("aria-current", active);
     });
