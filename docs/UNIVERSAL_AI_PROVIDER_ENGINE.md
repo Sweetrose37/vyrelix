@@ -81,7 +81,7 @@ To activate OpenAI or another provider later:
 
 1. Create a class extending `BaseProvider`.
 2. Implement the six provider methods.
-3. Keep credentials outside source and `.openai/hosting.json`.
+3. Keep credentials outside source and deployment artifacts.
 4. Register the adapter with `ProviderRegistry`.
 5. Mark it configured only after secure credential validation.
 6. Return the existing provider-response contract.
@@ -95,4 +95,3 @@ Provider controls, progress, cancellation, filters, gallery actions, and develop
 The provider feature loads only on AI, gallery, provider-settings, or test routes. Demo graphics are cached CSS descriptors; gallery records contain no image blobs; gallery rendering is incremental; and active generation is single-flight.
 
 This phase accepts no credentials, sends no network requests, and never stores an API key.
-

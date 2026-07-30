@@ -26,8 +26,8 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 - `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
 - `docs/COMPONENTS.md` documents the UI system; the engine documents cover UCE, UVE, prompts, and the Universal AI Provider Engine.
 - `assets/` reserves organized locations for logos, icons, imagery, backgrounds, fonts, and documentation for cached demo artwork.
-- `worker/` contains the production static-site request handler and security headers.
-- `scripts/` contains the dependency-free production build.
+- `.github/workflows/pages.yml` publishes the validated static artifact to GitHub Pages from `main`.
+- `scripts/` contains the dependency-free GitHub Pages production build.
 - `ai/`, `character/`, `prompt/`, and the original `data/` directory remain reserved for later feature phases.
 
 ## Architecture
@@ -51,6 +51,8 @@ Create a production artifact with:
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1
 ```
+
+Pushes to `main` automatically publish the contents of `dist/` to GitHub Pages. The generated artifact includes `.nojekyll` so every framework-free asset is served unchanged.
 
 ## Accessibility and performance
 
