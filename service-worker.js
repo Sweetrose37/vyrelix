@@ -1,4 +1,4 @@
-const CACHE_NAME = "vyrelix-v7-dual";
+const CACHE_NAME = "vyrelix-v7-mobile-fit";
 const PRECACHE_URLS = [
   "./",
   "./index.html",

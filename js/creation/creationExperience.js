@@ -286,7 +286,6 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       button("Choose another path", "text-button", { creationBack: "" })
     );
     experienceRoot.replaceChildren(section);
-    area.focus();
   }
 
   function detectedItems() {
