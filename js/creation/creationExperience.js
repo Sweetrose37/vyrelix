@@ -102,11 +102,13 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     historyOpen: false,
     compareVersionId: "",
     promptOverride: "",
+    customPanelUids: [],
     draggingUid: "",
     editingBefore: null
   };
 
   function updateStage(copy) {
+    experienceRoot.dataset.creationView = state.view;
     stageLabel.textContent = copy;
     status.textContent = copy;
   }
@@ -185,6 +187,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       historyOpen: false,
       compareVersionId: "",
       promptOverride: "",
+      customPanelUids: [],
       draggingUid: "",
       editingBefore: null
     });
@@ -408,19 +411,29 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     card.append(heading);
     if (!item.collapsed) {
       const body = element("div", "creative-panel-card__body");
-      const area = element("textarea");
-      area.rows = 3;
-      area.value = item.value || "";
-      area.placeholder = descriptor?.hint || `Define ${item.label.toLocaleLowerCase()}`;
-      area.dataset.panelValue = item.uid;
-      area.disabled = item.locked;
-      area.setAttribute("aria-label", item.label);
-      body.append(area);
       const suggestions = descriptor?.suggestions || [];
-      if (suggestions.length) {
-        const row = element("div", "panel-suggestion-row");
-        suggestions.slice(0, 4).forEach((suggestion) => row.append(button(suggestion, "mini-suggestion", { panelSuggestion: item.uid, suggestionValue: suggestion })));
-        body.append(row);
+      const selectLabel = element("label", "panel-choice-control");
+      selectLabel.append(element("span", "", `Choose ${item.label.toLocaleLowerCase()}`));
+      const select = element("select");
+      select.dataset.panelSelect = item.uid;
+      select.disabled = item.locked;
+      select.setAttribute("aria-label", `Choose ${item.label}`);
+      select.append(new Option(`Select ${item.label.toLocaleLowerCase()}…`, ""));
+      if (item.value && !suggestions.includes(item.value)) select.append(new Option(`${item.value} · Current`, item.value));
+      suggestions.forEach((suggestion) => select.append(new Option(suggestion, suggestion)));
+      select.append(new Option("Custom direction…", "__custom__"));
+      select.value = state.customPanelUids.includes(item.uid) ? "__custom__" : item.value || "";
+      selectLabel.append(select);
+      body.append(selectLabel);
+      if (state.customPanelUids.includes(item.uid)) {
+        const area = element("textarea");
+        area.rows = 3;
+        area.value = item.value || "";
+        area.placeholder = descriptor?.hint || `Define ${item.label.toLocaleLowerCase()}`;
+        area.dataset.panelValue = item.uid;
+        area.disabled = item.locked;
+        area.setAttribute("aria-label", `Custom ${item.label}`);
+        body.append(area);
       }
       if (item.kind === "artistic-style") body.append(button("Browse 300+ styles", "text-button", { openLibrary: "styles" }));
       const order = element("div", "panel-order-actions");
@@ -637,25 +650,21 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   function renderPresetBar(container) {
     const bar = element("div", "preset-bar");
-    const output = element("input");
-    output.type = "search";
-    output.value = state.specification.categoryLabel;
-    output.setAttribute("list", "creative-output-list");
+    const output = element("select");
     output.setAttribute("aria-label", "Creative output type");
-    output.placeholder = "Choose any creative output";
     output.dataset.outputType = "";
+    if (!EVERYTHING_LIBRARY.includes(state.specification.categoryLabel)) output.append(new Option(`${state.specification.categoryLabel} · Current`, state.specification.categoryLabel));
+    EVERYTHING_LIBRARY.forEach((item) => output.append(new Option(item, item)));
+    output.value = state.specification.categoryLabel;
     const outputLabel = element("label", "output-picker");
     outputLabel.append(element("span", "", "Everything Library"), output);
-    const list = element("datalist");
-    list.id = "creative-output-list";
-    EVERYTHING_LIBRARY.forEach((item) => list.append(new Option(item)));
     const select = element("select");
     select.dataset.applyPreset = "";
     select.setAttribute("aria-label", "Apply creative preset");
     select.append(new Option("Apply a preset…", ""));
     engine.templates.list().slice(0, 8).forEach((template) => select.append(new Option(template.name, `template:${template.name}`)));
     (engine.settings.get().customCreativePresets || []).forEach((preset) => select.append(new Option(preset.name, `custom:${preset.id}`)));
-    bar.append(outputLabel, list, select, button("Save custom preset", "text-button", { savePreset: "" }));
+    bar.append(outputLabel, select, button("Save custom preset", "text-button", { savePreset: "" }));
     container.append(bar);
   }
 
@@ -844,6 +853,22 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       pushHistory("Creative text updated");
       state.editingBefore = null;
       renderBuild();
+    }
+    if (event.target.matches("[data-panel-select]")) {
+      const panel = state.specification.sections.find((item) => item.uid === event.target.dataset.panelSelect);
+      if (!panel) return;
+      if (event.target.value === "__custom__") {
+        if (!state.customPanelUids.includes(panel.uid)) state.customPanelUids.push(panel.uid);
+        renderBuild();
+        requestAnimationFrame(() => root.querySelector(`[data-panel-value="${panel.uid}"]`)?.focus());
+      } else {
+        state.customPanelUids = state.customPanelUids.filter((uid) => uid !== panel.uid);
+        panel.value = event.target.value;
+        panel.source = "selected";
+        state.promptOverride = "";
+        pushHistory(`${panel.label} selected`);
+        renderBuild();
+      }
     }
     if (event.target.matches("[data-reference-input]")) [...(event.target.files || [])].forEach(addReference);
     if (event.target.matches("[data-prompt-lock]")) {

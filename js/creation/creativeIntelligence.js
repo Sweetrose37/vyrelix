@@ -49,6 +49,11 @@ const PANEL_HINTS = Object.freeze({
 });
 
 const PANEL_SUGGESTIONS = Object.freeze({
+  subject: ["Primary hero subject", "Product-focused subject", "People-centered subject", "Environment-led subject"],
+  story: ["A clear transformation", "A memorable reveal", "An intimate human moment", "A bold aspirational narrative"],
+  theme: ["Modern elegance", "Nature and renewal", "Future-forward innovation", "Celebration and connection"],
+  environment: ["Clean studio setting", "Natural outdoor setting", "Premium interior", "Cinematic imagined world"],
+  scene: ["Hero reveal", "Quiet detail moment", "Dynamic action scene", "Editorial still life"],
   purpose: ["Create a memorable first impression", "Communicate clearly at a glance", "Feel polished and production-ready"],
   mood: ["Luxurious and confident", "Warm and inviting", "Cinematic and dramatic", "Playful and energetic", "Quiet and refined"],
   "artistic-style": ["Luxury editorial", "Cinematic realism", "Modern minimalism", "Art Deco", "Bold vector illustration"],
@@ -66,6 +71,17 @@ const PANEL_SUGGESTIONS = Object.freeze({
   texture: ["Fine uncoated paper grain", "Subtle brushed finish", "Soft tactile fabric", "Polished reflective surface"]
 });
 
+const GROUP_SUGGESTIONS = Object.freeze({
+  Foundation: ["Clear and focused", "Rich and detailed", "Minimal and refined", "Bold and expressive"],
+  Visual: ["Balanced professional direction", "Cinematic premium direction", "Clean minimal direction", "Experimental creative direction"],
+  Brand: ["Premium editorial system", "Modern accessible system", "Bold campaign system", "Elegant heritage system"],
+  Materials: ["Matte tactile finish", "Polished reflective finish", "Natural organic finish", "Premium metallic finish"],
+  Character: ["Natural and expressive", "Heroic and confident", "Stylized and playful", "Elegant and composed"],
+  World: ["Grounded realism", "Cinematic atmosphere", "Imaginative fantasy", "Future-forward environment"],
+  Effects: ["Subtle atmospheric effect", "Dynamic dramatic effect", "Soft magical effect", "Clean effect-free finish"],
+  Advanced: ["Balanced defaults", "High detail", "Fast draft", "Maximum creative control"]
+});
+
 function titleCase(value) {
   return String(value).replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -76,7 +92,7 @@ export const CREATIVE_PANELS = Object.freeze(
     group,
     label: LABEL_OVERRIDES[id] || titleCase(id),
     hint: PANEL_HINTS[id] || `Define the ${titleCase(id).toLocaleLowerCase()} for this creation.`,
-    suggestions: Object.freeze(PANEL_SUGGESTIONS[id] || [])
+    suggestions: Object.freeze(PANEL_SUGGESTIONS[id] || GROUP_SUGGESTIONS[group] || [])
   })))
 );
 

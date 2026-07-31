@@ -655,6 +655,33 @@
   line-height: 1.5;
 }
 
+.panel-choice-control {
+  display: grid;
+  margin-top: 12px;
+  gap: 6px;
+}
+
+.panel-choice-control > span {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .04em;
+}
+
+.panel-choice-control select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 38px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  outline: 0;
+  background: var(--surface-sunken);
+  color: var(--white);
+  font-size: 1rem;
+}
+
+.panel-choice-control select:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px var(--creative-accent-soft); }
+
 .creative-panel-card__body textarea:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px var(--creative-accent-soft); }
 .creative-panel-card__body textarea:disabled { opacity: .7; }
 
@@ -830,6 +857,11 @@
 
 /* Final narrow-screen overrides stay last so larger workspace rules cannot win the cascade. */
 @media (max-width: 479px) {
+  .creation-os:has(#creative-experience-root[data-creation-view="describe"]) .creation-heading { display: none; }
+  .creation-os:has(#creative-experience-root[data-creation-view="describe"]) { padding-top: 2px; }
+  .describe-workspace__intro .body-text { display: none; }
+  .creative-reference-drop { display: none; }
+  .idea-example:nth-of-type(n+3) { display: none; }
   .idea-examples > span { width: auto; flex: 0 0 auto; }
   .specification-hero {
     padding: 17px;
