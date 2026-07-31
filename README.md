@@ -1,70 +1,44 @@
 # Vyrelix
 
-Vyrelix is a premium mobile-only creative platform powered by one Universal Creative Engine. Users begin with a creative goal, choose the amount of guidance they want, and receive an adaptive experience for people, invitations, brands, products, publications, environments, vehicles, campaigns, or anything else. Existing character, visual, prompt, project, gallery, provider, and offline demo capabilities remain available through the same universal project lifecycle.
+Vyrelix is a responsive, device-private Universal Creative Platform. Every idea begins in one engine and can move freely between two creation methods:
+
+- **Describe Mode** understands a natural-language idea and converts it into an editable creative specification.
+- **Build Mode** exposes that same specification as modular panels users can add, remove, reorder, collapse, lock, favorite, and complete with contextual recommendations.
+
+Both workflows converge into the same project, visual-direction, prompt-inspection, history, template, import, and export systems.
+
+## Product capabilities
+
+- 94 output concepts in the Everything Library, with open-ended output naming
+- 66 reusable creative panel types
+- 305 searchable artistic style directions with favorites and recents
+- Intent detection for output type, style, colors, mood, materials, typography, composition, lighting, and rendering
+- Reference images, drag and drop, pasted images, and supported-browser voice input
+- Contextual creative suggestions that preview before application
+- Undo, redo, snapshots, version comparison, and restoration
+- Generated prompts that remain behind the scenes unless Prompt Inspector is opened
+- Project saving, editing, duplication, archive, import, and export
+- Responsive phone, tablet, desktop, portrait, and landscape layouts
+- Installable offline-capable PWA
+
+All creative data is stored in the current browser. The static client does not accept API credentials or transmit projects.
 
 ## Technology
 
-The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has no runtime dependencies and works from any static web server.
+Vyrelix uses semantic HTML, modular CSS, and native JavaScript modules with no runtime package dependencies. `index.html` contains the accessible application shell; `js/app.js` composes navigation and feature controllers; `js/core/` owns the Universal Creation Engine; and `js/creation/` contains creative intelligence, the Everything Library, Describe Mode, and Build Mode.
 
-## Structure
+Internal project-type descriptors under `js/studios/` are retained for backward compatibility only. Users never select or switch studios.
 
-- `index.html` contains the accessible application shell, project dashboard, Universal Creation Experience, legacy character tools, collection, settings, and UI library.
-- `css/` separates tokens, typography, layout, component foundations, focused component modules, motion, utilities, mobile refinements, and product-level styles.
-- `js/core/` contains the Universal Creation Engine and its focused managers.
-- `js/creation/` contains the two-question adaptive entry experience, creative-goal schemas, category inference, creation modes, and UCE project handoff.
-- `js/project/` contains reusable project building, preview, templates, validation, statistics, import, and export modules.
-- `js/visual/` contains the lazily loaded Universal Visual Engine and its focused color, material, lighting, camera, style, composition, mood, validation, compatibility, storage, search, filter, template, randomizer, and preview modules.
-- `js/prompt/` contains the lazily loaded prompt composition, template, optimization, validation, negative prompt, history, search, storage, preview, and export facade modules.
-- `js/generator/` coordinates the nine-step generation pipeline, smart defaults, summaries, live preview, compatible randomization, and accessible Generate button.
-- `js/export/` provides copy, TXT, Markdown, and versioned JSON output.
-- `js/ai/` contains the provider manager, queue, request/response pipelines, image metadata, storage, history, gallery, downloader, error handling, and lazy UI controller.
-- `js/providers/` contains the universal adapter contract, registry, settings, validation, fully working Mock Provider, and inactive future-provider adapter.
-- `js/mock/` contains cached placeholder artwork, fake latency, demo generation, and sample data.
-- `js/studios/` retains internal project-type descriptors for backward compatibility; users never select or switch studios.
-- `js/data/core/` is the single shared dataset source available to every creative goal.
-- `js/data/visual/` contains normalized visual datasets, including a deterministic catalog of more than 1,000 named colors.
-- Existing `js/` modules continue to provide navigation, UI feedback, legacy storage compatibility, settings, animations, and focused component controllers.
-- `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
-- `docs/COMPONENTS.md` documents the UI system; the engine documents cover UCE, UVE, prompts, and the Universal AI Provider Engine.
-- `assets/` reserves organized locations for logos, icons, imagery, backgrounds, fonts, and documentation for cached demo artwork.
-- `.github/workflows/pages.yml` publishes the validated static artifact to GitHub Pages from `main`.
-- `scripts/` contains the dependency-free GitHub Pages production build.
-- `ai/`, `character/`, `prompt/`, and the original `data/` directory remain reserved for later feature phases.
+## Production
 
-## Architecture
-
-Vyrelix uses a small single-page architecture. `app.js` composes the shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; `creationExperience.js` translates a goal and creation mode into adaptive fields; UCE persistence flows through `StorageEngine`; and the large UVE and prompt workspaces load only when their routes open. CSS design tokens keep the gold-on-charcoal visual system consistent while focused feature styles preserve existing class contracts.
-
-All saved content remains on the current device. Mock Provider makes no network requests, and storage keys are versioned so future migrations can be introduced without collisions.
-
-## Development
-
-Serve the repository root with any static server. For example:
-
-```sh
-npx serve .
-```
-
-Then open the printed local address on a portrait mobile viewport between 320px and 430px wide. Directly opening `index.html` also works in modern browsers, although clipboard permissions may require a secure local server.
-
-Create a production artifact with:
+Create the GitHub Pages artifact with:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1
 ```
 
-Pushes to `main` automatically publish the contents of `dist/` to GitHub Pages. The generated artifact includes `.nojekyll` so every framework-free asset is served unchanged.
+Pushes to `main` deploy `dist/` through `.github/workflows/pages.yml`.
 
-## Accessibility and performance
+## Architecture boundary
 
-Controls have accessible names, keyboard focus states, semantic roles, and touch targets sized for mobile use. Reduced-motion preferences are honored. The app uses no remote fonts, images, or render-blocking libraries. Demo artwork uses cached CSS descriptors and gallery cards render incrementally.
-
-Dialogs, sheets, and drawers restore focus after closing and trap keyboard focus while open. Tabs and expandable selections support arrow-key navigation. Saved lists render in idle batches, search suggestions use a single live controller, and all interaction families use delegated listeners where practical.
-
-## Future expansion
-
-Character, Creature, Environment, Object, Vehicle, Architecture, Logo, Poster, Book Cover, and related project types remain registered inside UCE. New user goals extend `creationSchemas.js`, reuse the universal project model and shared data, and store goal-specific values in `project.data` without introducing separate user-facing workflows.
-
-## Phase boundary
-
-The Prompt Engine produces text deterministically from user-controlled project metadata. Mock Provider simulates image generation using cached CSS demo graphics that are explicitly labeled as demos. Real providers remain inactive, no credentials are accepted, and no project or prompt data is transmitted.
+Vyrelix’s current creative intelligence and prompt generation run deterministically on the device. The architecture keeps project and prompt records provider-independent so a secure server-side intelligence service can be integrated later without changing the creation experience or exposing credentials in the browser.

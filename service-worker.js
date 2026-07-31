@@ -1,4 +1,4 @@
-const CACHE_NAME = "vyrelix-v6";
+const CACHE_NAME = "vyrelix-v7-dual";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -7,7 +7,11 @@ const PRECACHE_URLS = [
   "./css/variables.css",
   "./css/layout.css",
   "./css/style.css",
-  "./js/app.js"
+  "./css/core/creation.css",
+  "./js/app.js",
+  "./js/creation/creationExperience.js",
+  "./js/creation/creativeIntelligence.js",
+  "./js/creation/creationSchemas.js"
 ];
 
 self.addEventListener("install", (event) => {

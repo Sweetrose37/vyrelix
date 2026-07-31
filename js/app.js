@@ -220,18 +220,9 @@ function bindProjectActions() {
         announceProjectsChanged();
       }
       if (event.target.closest("[data-project-edit]")) {
-        openBottomSheet({
-          heading: "Edit project",
-          content: [
-            Object.assign(document.createElement("label"), { className: "field", innerHTML: '<span>Project name</span><input name="projectName" maxlength="80">' }),
-            Object.assign(document.createElement("label"), { className: "field", innerHTML: '<span>Creative goal</span><textarea name="projectDescription" rows="4" maxlength="500"></textarea>' }),
-            Object.assign(document.createElement("button"), { type: "button", className: "button button--primary button--wide", textContent: "Save changes" })
-          ]
-        });
-        const sheet = document.querySelector("[data-sheet]");
-        sheet.querySelector('[name="projectName"]').value = project.name;
-        sheet.querySelector('[name="projectDescription"]').value = project.description;
-        sheet.querySelector(".button--primary").dataset.saveProjectEdit = project.id;
+        const controller = await ensureCreationExperience();
+        controller.openProject(project);
+        navigation.navigate("create");
       }
       if (event.target.closest('[data-project-continue="prompt"]')) {
         setActiveProject(project.id);
@@ -266,22 +257,6 @@ function bindProjectActions() {
     }
   });
 
-  document.addEventListener("click", (event) => {
-    const save = event.target.closest("[data-save-project-edit]");
-    if (!save) return;
-    const sheet = document.querySelector("[data-sheet]");
-    try {
-      creationEngine.projects.update(save.dataset.saveProjectEdit, {
-        name: sheet.querySelector('[name="projectName"]').value.trim(),
-        description: sheet.querySelector('[name="projectDescription"]').value.trim()
-      });
-      closeBottomSheet();
-      announceProjectsChanged();
-      showToast("Project updated");
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
 }
 
 function bindSavedActions() {

@@ -39,7 +39,12 @@ export class PromptEngine {
     normalized.characterSummary = getCharacterSummary(project, this.visualEngine);
     const generationProject = buildGenerationProject(project, normalized);
     const sections = buildPositiveSections(project, normalized, this.visualEngine);
-    return assertPromptRecord(buildPromptRecord(project, generationProject, sections, normalized));
+    const record = buildPromptRecord(project, generationProject, sections, normalized);
+    const override = String(project.data?.promptOverride || "").trim();
+    if (override) {
+      record.prompt = override;
+      record.text = override;
+    }
+    return assertPromptRecord(record);
   }
 }
-

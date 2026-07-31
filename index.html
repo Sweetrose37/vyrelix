@@ -90,9 +90,9 @@
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
-                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open Prompt Builder">
-                  <span class="card-icon" aria-hidden="true">⌁</span>
-                  <span><strong>Prompt Builder</strong><small>Continue from a saved project</small></span>
+                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-mode="build" aria-label="Open Build Mode">
+                  <span class="card-icon" aria-hidden="true">◇</span>
+                  <span><strong>Build something</strong><small>Assemble your idea with creative panels</small></span>
                   <span aria-hidden="true">›</span>
                 </button>
                 <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset aria-label="Start creating with inspiration">
@@ -156,52 +156,16 @@
             </section>
           </section>
 
-          <section class="screen creation-screen" data-screen="create" aria-labelledby="creation-title">
+          <section class="screen creation-screen creation-os" data-screen="create" aria-labelledby="creation-title">
             <div class="screen-heading creation-heading">
               <div>
-                <p class="eyebrow" id="creation-step-label">Question 1 of 2</p>
+                <p class="eyebrow" id="creation-stage-label">Universal Creative Engine</p>
                 <h1 class="large-title" id="creation-title">Create anything</h1>
               </div>
-              <span class="badge">UCE</span>
+              <button class="icon-button" type="button" data-creative-reset aria-label="Start a new creation">＋</button>
             </div>
-            <div class="creation-progress" aria-hidden="true">
-              <span class="is-active" data-creation-progress></span>
-              <span data-creation-progress></span>
-              <span data-creation-progress></span>
-            </div>
-            <p class="sr-only" id="creation-live-status" aria-live="polite">Choose or describe what you want to create.</p>
-
-            <section class="creation-question" id="creation-question-one" aria-labelledby="creation-question-one-title">
-              <h2 class="medium-title" id="creation-question-one-title">What would you like to create?</h2>
-              <p class="body-text text-muted">Describe it naturally or choose a suggested category.</p>
-              <label class="field creation-goal-field">
-                <span>Your creative goal</span>
-                <textarea id="creation-goal" rows="4" maxlength="500" placeholder="e.g. An elegant wedding invitation with botanical details…" aria-label="Describe what you would like to create"></textarea>
-              </label>
-              <p class="creation-inference" id="creation-inference">Describe anything. Vyrelix will recognize the creative direction.</p>
-              <label class="search-field creation-category-search"><span aria-hidden="true">⌕</span><input type="search" id="creation-category-search" placeholder="Search 60+ creative formats" aria-label="Search creative formats"></label>
-              <div class="creation-category-grid" id="creation-categories" aria-label="Suggested creation categories"></div>
-              <button class="text-button creation-browse-all" type="button" data-creation-browse-all>Browse all creative formats</button>
-              <button class="button button--primary button--wide ripple" type="button" data-creation-continue>Continue</button>
-            </section>
-
-            <section class="creation-question is-hidden" id="creation-question-two" aria-labelledby="creation-question-two-title">
-              <h2 class="medium-title" id="creation-question-two-title">How would you like to create it?</h2>
-              <p class="body-text text-muted">Choose the amount of guidance that feels right. You can start over at any time.</p>
-              <div class="creation-mode-grid" id="creation-modes" aria-label="Creation modes"></div>
-              <button class="button button--outlined button--wide" type="button" data-creation-back>Back</button>
-            </section>
-
-            <section class="is-hidden" id="creation-workspace" aria-labelledby="adaptive-creation-title">
-              <div class="creation-summary">
-                <div>
-                  <strong id="adaptive-creation-title"><span id="creation-summary-category">Creation</span> · <span id="creation-summary-mode">Mode</span></strong>
-                  <small id="creation-summary-goal">Your creative goal</small>
-                </div>
-                <span class="badge">Adaptive</span>
-              </div>
-              <div id="adaptive-creation-root"></div>
-            </section>
+            <p class="sr-only" id="creation-live-status" aria-live="polite">Choose how you want to create.</p>
+            <div id="creative-experience-root"></div>
           </section>
 
           <section class="screen project-detail-screen" data-screen="project" aria-labelledby="project-detail-title">
@@ -225,12 +189,12 @@
             <section class="project-answer-panel" aria-labelledby="project-answers-title">
               <div class="section-heading">
                 <h2 class="medium-title" id="project-answers-title">Creative direction</h2>
-                <button class="text-button" type="button" data-project-edit>Edit</button>
+                <button class="text-button" type="button" data-project-edit>✎ Edit in Build Mode</button>
               </div>
               <div id="project-detail-answers"></div>
             </section>
             <div class="project-detail-actions">
-              <button class="card card--interactive" type="button" data-project-continue="prompt"><span class="card-icon" aria-hidden="true">⌁</span><span><strong>Build creative brief</strong><small>Turn this direction into a polished, portable brief</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-project-continue="prompt"><span class="card-icon" aria-hidden="true">⌁</span><span><strong>Open Prompt Inspector</strong><small>Advanced prompt review, copy, and export controls</small></span><span aria-hidden="true">›</span></button>
               <button class="card card--interactive" type="button" data-project-continue="visual"><span class="card-icon" aria-hidden="true">◈</span><span><strong>Shape visual direction</strong><small>Refine color, material, composition, mood, and style</small></span><span aria-hidden="true">›</span></button>
             </div>
             <div class="project-detail-toolbar">
@@ -296,10 +260,10 @@
 
           <section class="screen prompt-studio" data-screen="prompt" aria-labelledby="prompt-studio-title">
             <div class="screen-heading">
-              <div><p class="eyebrow">Local generation engine</p><h1 class="large-title" id="prompt-studio-title">Prompt Builder</h1></div>
+              <div><p class="eyebrow">Advanced transparency</p><h1 class="large-title" id="prompt-studio-title">Prompt Inspector</h1></div>
               <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
             </div>
-            <div class="notice"><span aria-hidden="true">✓</span><p>Build a production-ready creative brief locally. Your project stays on this device.</p></div>
+            <div class="notice"><span aria-hidden="true">✓</span><p>Vyrelix builds prompts behind the scenes. Advanced users can inspect, refine, copy, and export them here.</p></div>
             <form id="prompt-form" class="prompt-form">
               <label class="field"><span>Project <b aria-hidden="true">*</b></span><select name="projectId" required aria-label="Project to generate from"><option value="">Choose a saved project</option></select></label>
               <div class="prompt-form__pair">
@@ -327,13 +291,13 @@
               <div class="prompt-metrics" aria-label="Live prompt metrics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
             </section>
             <div class="prompt-shortcuts">
-              <button class="card card--interactive" type="button" data-route="prompt-history"><span class="card-icon" aria-hidden="true">↶</span><span><strong>Prompt history</strong><small>Search, favorite, duplicate, rename, or delete</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-route="prompt-history"><span class="card-icon" aria-hidden="true">↶</span><span><strong>Prompt versions</strong><small>Review previous generated directions</small></span><span aria-hidden="true">›</span></button>
             </div>
-            <div class="generate-dock"><button class="button button--generate button--wide ripple" type="button" id="generate-prompt" disabled><span class="button__spark" aria-hidden="true">✦</span><span data-generate-label>Generate prompt</span></button></div>
+            <div class="generate-dock"><button class="button button--generate button--wide ripple" type="button" id="generate-prompt" disabled><span class="button__spark" aria-hidden="true">✦</span><span data-generate-label>Refresh prompt</span></button></div>
           </section>
 
           <section class="screen prompt-preview-screen" data-screen="prompt-preview" aria-labelledby="prompt-preview-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Builder">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Inspector">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
             <section class="prompt-output-card">
               <div class="prompt-preview__heading"><span class="badge" data-preview-type>Ready</span><span data-prompt-length>Concise</span></div><h2 class="section-title">Formatted prompt</h2><p class="prompt-output" data-preview-prompt>Generate a prompt to see it here.</p>
               <div class="prompt-action-grid"><button class="button button--copy" type="button" data-copy-part="prompt">Copy prompt</button><button class="button button--copy" type="button" data-copy-part="json">Copy JSON</button></div>
@@ -346,7 +310,7 @@
           </section>
 
           <section class="screen prompt-history-screen" data-screen="prompt-history" aria-labelledby="prompt-history-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Builder">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt history</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Inspector">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt versions</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
             <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="prompt-history-search" placeholder="Search prompts" aria-label="Search prompt history"></label>
             <div class="prompt-history-list" id="prompt-history-list" aria-live="polite"></div>
           </section>
