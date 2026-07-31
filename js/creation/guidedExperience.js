@@ -244,6 +244,66 @@ const AGE_WARDROBE_OVERRIDES = Object.freeze({
   })
 });
 
+const BOOK_COVER_STEPS = Object.freeze([
+  Object.freeze({ id: "title", group: "Book", label: "Book Title", prompt: "Enter the exact title that should appear on the cover.", options: Object.freeze([]), input: "text", required: true }),
+  Object.freeze({ id: "author", group: "Book", label: "Author Name", prompt: "Enter the author or pen name.", options: Object.freeze([]), input: "text" }),
+  Object.freeze({ id: "subtitle", group: "Book", label: "Subtitle", prompt: "Add an optional subtitle or series line.", options: Object.freeze([]), input: "text" }),
+  Object.freeze({ id: "genre", group: "Book", label: "Genre", prompt: "Choose the genre readers should recognize immediately.", options: choices("Fantasy", "Romance", "Thriller", "Mystery", "Memoir", "Literary Fiction", "Science Fiction", "Horror", "Young Adult", "Nonfiction"), allowCustom: true }),
+  Object.freeze({ id: "audience", group: "Book", label: "Audience", prompt: "Choose the intended reader.", options: choices("Children", "Young Adult", "New Adult", "Adult", "Professional", "General Audience"), allowCustom: true }),
+  Object.freeze({ id: "storyHook", group: "Story", label: "Story Hook", prompt: "Describe the central promise, conflict, or transformation.", options: Object.freeze([]), input: "textarea" }),
+  Object.freeze({ id: "imagery", group: "Story", label: "Key Imagery", prompt: "Choose a visual focus or describe your own.", options: choices("Main Character", "Symbolic Object", "Story Setting", "Silhouette", "Typography Only", "Character Ensemble", "Abstract Metaphor"), allowCustom: true }),
+  Object.freeze({ id: "setting", group: "Story", label: "Setting", prompt: "Choose the world shown on the cover.", options: choices("Contemporary City", "Small Town", "Historical World", "Fantasy Realm", "Outer Space", "Nature", "Interior Scene", "Abstract Space"), allowCustom: true }),
+  Object.freeze({ id: "coverStyle", group: "Design", label: "Cover Style", prompt: "Choose the visual language.", options: choices("Luxury Editorial", "Painterly", "Cinematic", "Illustrated", "Photographic", "Minimal", "Vintage", "Bold Graphic", "Typographic"), visual: "style", allowCustom: true }),
+  Object.freeze({ id: "coverTone", group: "Design", label: "Mood", prompt: "Choose how the cover should feel.", options: choices("Atmospheric", "Bold", "Intimate", "Mysterious", "Romantic", "Playful", "Dark", "Hopeful"), allowCustom: true }),
+  Object.freeze({ id: "typography", group: "Design", label: "Typography", prompt: "Choose a type direction for the title and author.", options: choices("Elegant Serif", "Modern Sans Serif", "Hand Lettered", "Art Deco", "Classic Literary", "Bold Display", "Vintage Type", "Minimal"), allowCustom: true }),
+  Object.freeze({ id: "colorPalette", group: "Design", label: "Color Palette", prompt: "Choose the cover color direction.", options: PALETTES, visual: "palette", allowCustom: true }),
+  Object.freeze({ id: "composition", group: "Design", label: "Composition", prompt: "Choose the cover layout.", options: choices("Centered Hero", "Top Title and Scenic Art", "Large Type with Small Symbol", "Full-Bleed Character", "Split Composition", "Minimal Negative Space"), allowCustom: true }),
+  Object.freeze({ id: "coverFormat", group: "Production", label: "Cover Format", prompt: "Choose what needs to be designed.", options: choices("Front Cover", "Full Wrap Cover", "Ebook Cover", "Paperback", "Hardcover Dust Jacket"), allowCustom: true }),
+  Object.freeze({ id: "trimSize", group: "Production", label: "Trim Size", prompt: "Choose the finished book proportions.", options: choices("5 x 8 in", "5.5 x 8.5 in", "6 x 9 in", "Square", "A5", "Custom Size"), allowCustom: true }),
+  Object.freeze({ id: "finish", group: "Production", label: "Print Finish", prompt: "Choose optional production finishes.", options: choices("Matte", "Gloss", "Soft Touch", "Gold Foil", "Silver Foil", "Embossed", "Spot UV", "Digital Only"), multiple: true, allowCustom: true })
+]);
+
+const CHILDREN_BOOK_STEPS = Object.freeze([
+  Object.freeze({ id: "title", group: "Story", label: "Book Title", prompt: "Enter a working title for the book.", options: Object.freeze([]), input: "text", required: true }),
+  Object.freeze({ id: "premise", group: "Story", label: "Story Idea", prompt: "What happens, and why will a young reader care?", options: Object.freeze([]), input: "textarea", required: true }),
+  Object.freeze({ id: "readingAge", group: "Story", label: "Reading Age", prompt: "Choose the age range this book is written for.", options: choices("Baby 0-2", "Toddler 2-4", "Preschool 3-5", "Early Reader 5-7", "Growing Reader 7-9", "Middle Grade 8-12"), allowCustom: true }),
+  Object.freeze({ id: "bookFormat", group: "Story", label: "Book Type", prompt: "Choose the storytelling format.", options: choices("Board Book", "Picture Book", "Bedtime Story", "Early Reader", "Educational Story", "Chapter Book", "Activity Story"), allowCustom: true }),
+  Object.freeze({ id: "pageCount", group: "Story", label: "Page Count", prompt: "Choose the approximate finished length.", options: choices("12 Pages", "16 Pages", "24 Pages", "32 Pages", "40 Pages", "48 Pages"), allowCustom: true }),
+  Object.freeze({ id: "lesson", group: "Story", label: "Theme or Lesson", prompt: "Choose the heart of the story.", options: choices("Friendship", "Kindness", "Confidence", "Family", "Curiosity", "Feelings", "Sharing", "Courage", "Learning", "No Explicit Lesson"), allowCustom: true }),
+  Object.freeze({ id: "mainCharacter", group: "Characters", label: "Main Character", prompt: "Describe the lead character, appearance, and personality.", options: Object.freeze([]), input: "textarea" }),
+  Object.freeze({ id: "supportingCharacters", group: "Characters", label: "Supporting Characters", prompt: "Add family, friends, animals, or magical companions.", options: Object.freeze([]), input: "textarea" }),
+  Object.freeze({ id: "setting", group: "Characters", label: "Story World", prompt: "Choose where the story takes place.", options: choices("Cozy Home", "Neighborhood", "School", "Forest", "Farm", "Ocean", "Outer Space", "Fantasy Kingdom", "Magical Everyday World"), allowCustom: true }),
+  Object.freeze({ id: "continuity", group: "Characters", label: "Character Continuity", prompt: "Choose how strictly character details repeat across pages.", options: choices("Exact Model Sheet", "Consistent Outfit and Props", "Consistent Features with Outfit Changes", "Flexible Storybook Interpretation"), allowCustom: true }),
+  Object.freeze({ id: "illustrationStyle", group: "Illustration", label: "Illustration Style", prompt: "Choose the art style for every page.", options: choices("Soft Watercolor", "Colorful Gouache", "Paper Cut Collage", "Soft 3D", "Kawaii", "Colored Pencil", "Ink and Wash", "Bold Flat Shapes", "Classic Storybook"), visual: "style", allowCustom: true }),
+  Object.freeze({ id: "colorPalette", group: "Illustration", label: "Color Palette", prompt: "Choose a coordinated palette for the whole book.", options: PALETTES, visual: "palette", allowCustom: true }),
+  Object.freeze({ id: "mood", group: "Illustration", label: "Mood", prompt: "Choose the emotional feeling.", options: choices("Warm and Safe", "Playful", "Dreamy", "Adventurous", "Funny", "Gentle", "Bright and Energetic"), allowCustom: true }),
+  Object.freeze({ id: "pageLayout", group: "Layout", label: "Page Layout", prompt: "Choose how text and illustrations share each page.", options: choices("Full-Bleed Spreads", "Spot Illustrations", "Text Beside Art", "Framed Vignettes", "Comic Panels", "Mixed Layout"), allowCustom: true }),
+  Object.freeze({ id: "textDensity", group: "Layout", label: "Text Amount", prompt: "Choose how much text appears per page.", options: choices("A Few Words", "One Short Sentence", "Two to Four Sentences", "Short Paragraphs", "Chapter Text"), allowCustom: true }),
+  Object.freeze({ id: "typography", group: "Layout", label: "Typography", prompt: "Choose a readable type style.", options: choices("Rounded and Friendly", "Handwritten", "Classic Storybook Serif", "Clean Sans Serif", "Playful Display with Simple Body Text"), allowCustom: true }),
+  Object.freeze({ id: "coverDirection", group: "Layout", label: "Cover Direction", prompt: "Describe the front-cover moment and title placement.", options: Object.freeze([]), input: "textarea" }),
+  Object.freeze({ id: "delivery", group: "Production", label: "What to Build", prompt: "Choose the book material Vyrelix should prepare.", options: choices("Complete Book Plan", "Page-by-Page Storyboard", "Story and Illustration Direction", "Cover and Interior System", "Character and World Bible"), allowCustom: true })
+]);
+
+const STICKER_STEPS = Object.freeze([
+  Object.freeze({ id: "packName", group: "Pack", label: "Pack Name", prompt: "Name this sticker pack.", options: Object.freeze([]), input: "text", required: true }),
+  Object.freeze({ id: "stickerSubject", group: "Pack", label: "Character or Subject", prompt: "Describe who or what appears in every sticker.", options: Object.freeze([]), input: "textarea", required: true }),
+  Object.freeze({ id: "packSize", group: "Pack", label: "Number of Stickers", prompt: "Choose how many coordinated stickers to create.", options: choices("4 Stickers", "6 Stickers", "8 Stickers", "12 Stickers", "16 Stickers", "24 Stickers"), allowCustom: true }),
+  Object.freeze({ id: "packTheme", group: "Pack", label: "Pack Theme", prompt: "Choose what connects the set.", options: choices("Everyday Reactions", "Celebration", "Love and Friendship", "Work and Productivity", "School", "Gaming", "Food", "Self Care", "Seasonal", "Brand Mascot"), allowCustom: true }),
+  Object.freeze({ id: "variationType", group: "Pack", label: "Variation Type", prompt: "Choose how the stickers vary.", options: choices("Expressions", "Poses and Actions", "Short Phrases", "Outfit Changes", "Props", "Mixed Variety"), multiple: true, allowCustom: true }),
+  Object.freeze({ id: "expressions", group: "Expressions", label: "Expressions", prompt: "Choose all expressions needed in the pack.", options: choices("Happy", "Laughing", "Excited", "Confident", "Love", "Surprised", "Thinking", "Sleepy", "Sad", "Angry", "Celebrating", "Shy"), multiple: true, allowCustom: true }),
+  Object.freeze({ id: "actions", group: "Expressions", label: "Actions and Poses", prompt: "Choose all actions needed in the pack.", options: choices("Waving", "Thumbs Up", "Dancing", "Cheering", "Working", "Relaxing", "Eating", "Running", "Taking a Photo", "Holding a Sign", "Facepalm", "Hugging"), multiple: true, allowCustom: true }),
+  Object.freeze({ id: "phrases", group: "Expressions", label: "Words or Phrases", prompt: "Add any exact words that should appear.", options: Object.freeze([]), input: "textarea" }),
+  Object.freeze({ id: "stickerStyle", group: "Design", label: "Sticker Style", prompt: "Choose the visual style for the complete pack.", options: choices("Cute 2D", "Soft 3D", "Kawaii", "Hand Drawn", "Bold Graphic", "Retro Cartoon", "Watercolor", "Pixel Art", "Realistic"), visual: "style", allowCustom: true }),
+  Object.freeze({ id: "palette", group: "Design", label: "Color Palette", prompt: "Choose the coordinated color direction.", options: PALETTES, visual: "palette", allowCustom: true }),
+  Object.freeze({ id: "outlineColor", group: "Design", label: "Outline Color", prompt: "Choose the sticker border color.", options: choices("White", "Black", "Color Matched", "Cream", "No Outline"), allowCustom: true }),
+  Object.freeze({ id: "outlineThickness", group: "Design", label: "Outline Thickness", prompt: "Choose how bold the border should be.", options: choices("Thin", "Medium", "Thick", "Extra Thick"), allowCustom: true }),
+  Object.freeze({ id: "background", group: "Design", label: "Background", prompt: "Choose the area outside each sticker.", options: choices("Transparent", "White", "Color Matched", "Textured"), allowCustom: true }),
+  Object.freeze({ id: "cutStyle", group: "Production", label: "Cut Style", prompt: "Choose how physical or digital stickers are prepared.", options: choices("Die-Cut", "Kiss-Cut Sheet", "Printable Sheet", "Digital Only"), allowCustom: true }),
+  Object.freeze({ id: "finish", group: "Production", label: "Finish", prompt: "Choose the surface finish.", options: choices("Matte", "Glossy", "Holographic", "Glitter", "Clear Vinyl", "Paper"), allowCustom: true }),
+  Object.freeze({ id: "arrangement", group: "Production", label: "Delivery Arrangement", prompt: "Choose how the finished pack is organized.", options: choices("Individual Transparent Files", "Sticker Sheet", "Individual Files and Sheet", "Messaging App Pack"), allowCustom: true }),
+  Object.freeze({ id: "constraints", group: "Production", label: "Production Notes", prompt: "Add sizing, safe-area, text, or content requirements.", options: Object.freeze([]), input: "textarea" })
+]);
+
 const FIELD_OPTIONS = Object.freeze({
   role: choices("Hero", "Professional", "Creator", "Explorer", "Caregiver"),
   personality: choices("Warm", "Curious", "Confident", "Playful", "Calm", "Bold"),
@@ -373,6 +433,9 @@ export function allGuidedCategories() {
 
 export function guidedSteps(categoryOrId, answers = {}) {
   const category = typeof categoryOrId === "string" ? getCreationCategory(categoryOrId) : categoryOrId;
+  if (category.id === "book-cover") return BOOK_COVER_STEPS;
+  if (category.id === "children-book") return CHILDREN_BOOK_STEPS;
+  if (category.id === "sticker") return STICKER_STEPS;
   const personLike = new Set(["person", "woman", "man", "teen", "family", "baby", "toddler", "child", "fantasy-character", "sci-fi-character"]);
   if (!personLike.has(category.id)) return Object.freeze(genericSteps(category));
   const selectedAge = String(answers.age || "").toLocaleLowerCase().replace(/[^a-z]/g, "");
@@ -383,6 +446,19 @@ export function guidedSteps(categoryOrId, answers = {}) {
 
 export function suggestedAnswer(step, category) {
   if (step.options?.length) return step.options[0].value;
+  const tailored = {
+    title: category.id === "children-book" ? "The Little Star Who Found Home" : "Untitled Book",
+    author: "Author Name",
+    premise: "A curious young hero faces a small challenge, discovers an unexpected strength, and returns home changed.",
+    mainCharacter: "A warm, curious young hero with a distinctive outfit and an expressive personality.",
+    supportingCharacters: "A loyal friend and a caring grown-up who help the hero along the way.",
+    coverDirection: "Show the main character in the story world with clear title space and one inviting visual mystery.",
+    packName: "Everyday Expressions",
+    stickerSubject: "One expressive original character shown consistently across the complete pack.",
+    phrases: "Hello!; Thank you!; You got this!; Yay!",
+    constraints: "Keep every sticker readable at small sizes with clean separation and consistent character details."
+  };
+  if (tailored[step.id]) return tailored[step.id];
   return category.ideas?.[0] || `A polished ${category.label.toLocaleLowerCase()} direction`;
 }
 
@@ -451,7 +527,46 @@ const PANEL_MAP = Object.freeze({
   headline: "headline",
   callToAction: "call-to-action",
   environment: "environment",
-  setting: "environment"
+  setting: "environment",
+  title: "subject",
+  author: "typography",
+  subtitle: "headline",
+  genre: "purpose",
+  storyHook: "story",
+  imagery: "subject",
+  coverStyle: "artistic-style",
+  coverTone: "mood",
+  typography: "typography",
+  coverFormat: "aspect-ratio",
+  trimSize: "aspect-ratio",
+  finish: "materials",
+  premise: "story",
+  readingAge: "purpose",
+  bookFormat: "purpose",
+  pageCount: "composition",
+  lesson: "story",
+  mainCharacter: "subject",
+  supportingCharacters: "subject",
+  continuity: "quality",
+  illustrationStyle: "artistic-style",
+  pageLayout: "composition",
+  textDensity: "composition",
+  coverDirection: "story",
+  delivery: "purpose",
+  packName: "subject",
+  stickerSubject: "subject",
+  packSize: "composition",
+  packTheme: "purpose",
+  variationType: "composition",
+  expressions: "expression",
+  actions: "pose",
+  phrases: "headline",
+  stickerStyle: "artistic-style",
+  outlineColor: "palette",
+  outlineThickness: "quality",
+  cutStyle: "materials",
+  arrangement: "aspect-ratio",
+  constraints: "negative-prompt"
 });
 
 function displayAnswer(value) {
@@ -483,6 +598,7 @@ export function guidedSpecification(categoryId, answers = {}, seedGoal = "") {
   specification.categoryId = category.id;
   specification.categoryLabel = category.label;
   specification.projectType = category.projectType;
+  specification.displayName = displayAnswer(answers.title || answers.packName || answers.stickerSubject || answers.assetSubject);
   const grouped = new Map();
   summary.forEach(([key, label, value]) => {
     const kind = panelKindFor(key);

@@ -65,6 +65,25 @@ const UNIVERSAL_OUTPUTS = Object.freeze([
   Object.freeze({ id: "Presentation mockup", icon: "▣", description: "Show the idea in context" }),
   Object.freeze({ id: "Production-ready brief", icon: "✦", description: "Complete direction for production" })
 ]);
+const BOOK_COVER_OUTPUTS = Object.freeze([
+  Object.freeze({ id: "Front cover", icon: "▣", description: "A polished front-cover design" }),
+  Object.freeze({ id: "Full wrap cover", icon: "▤", description: "Front, spine, and back-cover direction" }),
+  Object.freeze({ id: "Ebook cover", icon: "◇", description: "A thumbnail-ready digital cover" }),
+  Object.freeze({ id: "Cover concept set", icon: "▦", description: "Several coordinated cover directions" })
+]);
+const CHILDREN_BOOK_OUTPUTS = Object.freeze([
+  Object.freeze({ id: "Complete book plan", icon: "▤", description: "Story, characters, pages, cover, and art direction" }),
+  Object.freeze({ id: "Page-by-page storyboard", icon: "▦", description: "A complete visual sequence for every page" }),
+  Object.freeze({ id: "Story and illustration direction", icon: "✦", description: "Narrative plus a consistent illustration system" }),
+  Object.freeze({ id: "Cover and interior system", icon: "▣", description: "A coordinated cover and page-design direction" })
+]);
+const STICKER_OUTPUTS = Object.freeze([
+  Object.freeze({ id: "Sticker pack sheet", icon: "▦", description: "The complete set arranged on one sheet" }),
+  Object.freeze({ id: "Individual transparent stickers", icon: "◇", description: "Each sticker prepared as its own asset" }),
+  Object.freeze({ id: "Die-cut sticker set", icon: "✿", description: "Print-minded shapes, borders, and cut direction" }),
+  Object.freeze({ id: "Expression pack", icon: "☺", description: "A consistent character with varied reactions" })
+]);
+const BOOK_COLLECTION_IDS = new Set(["book-cover", "children-book", "comic", "storyboard", "magazine-cover", "illustration"]);
 
 function element(tag, className = "", text = "") {
   const node = document.createElement(tag);
@@ -136,6 +155,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     guidedSeedGoal: "",
     guidedOutput: "",
     guidedGroup: "",
+    guidedCollection: "",
     guidedShowAll: false,
     guidedQuery: "",
     guidedCustomStep: "",
@@ -160,13 +180,24 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   function guidedOutputs(category) {
+    if (category.id === "book-cover") return BOOK_COVER_OUTPUTS;
+    if (category.id === "children-book") return CHILDREN_BOOK_OUTPUTS;
+    if (category.id === "sticker") return STICKER_OUTPUTS;
     return CHARACTER_CATEGORY_IDS.has(category.id) ? CHARACTER_OUTPUTS : UNIVERSAL_OUTPUTS;
   }
 
   function defaultGuidedOutput(category) {
-    if (category.id === "sticker") return "Creative concept set";
-    if (category.id === "children-book" || category.id === "book-cover") return "Presentation mockup";
     return guidedOutputs(category)[0].id;
+  }
+
+  function resolvedGuidedOutput(category, value = state.guidedOutput) {
+    if (guidedOutputs(category).some((output) => output.id === value)) return value;
+    const legacy = {
+      "book-cover:Presentation mockup": "Front cover",
+      "children-book:Presentation mockup": "Cover and interior system",
+      "sticker:Creative concept set": "Sticker pack sheet"
+    };
+    return legacy[`${category.id}:${value}`] || defaultGuidedOutput(category);
   }
 
   function answerText(id, fallback = "") {
@@ -266,6 +297,51 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     return stage;
   }
 
+  function renderBookPreview(category) {
+    const shell = element("div", `book-live-preview${category.id === "children-book" ? " is-storybook" : ""}`);
+    const cover = element("div", "book-live-preview__cover");
+    cover.style.setProperty("--book-accent", previewColor(answerText("colorPalette"), {
+      gold: "#c89a45", ocean: "#247ba0", earth: "#56705c", sunset: "#db6f61", candy: "#c879b8", neutral: "#a78f78"
+    }, "#8d67d8"));
+    cover.append(
+      element("small", "", answerText("genre", answerText("bookFormat", category.id === "children-book" ? "Picture Book" : "Book Cover"))),
+      element("span", "book-live-preview__art", category.id === "children-book" ? "✦ ☁" : "◇"),
+      element("strong", "", answerText("title", "Your Book Title")),
+      element("em", "", answerText("author", category.id === "children-book" ? answerText("mainCharacter", "An original story") : "Author Name"))
+    );
+    const pages = element("div", "book-live-preview__pages");
+    pages.append(element("span"), element("span"), element("span"));
+    shell.append(cover, pages);
+    shell.setAttribute("role", "img");
+    shell.setAttribute("aria-label", `${category.label} preview for ${answerText("title", "an untitled book")}.`);
+    return shell;
+  }
+
+  function renderStickerPreview() {
+    const sheet = element("div", "sticker-live-preview");
+    sheet.style.setProperty("--sticker-accent", previewColor(answerText("palette"), {
+      gold: "#d0a34a", ocean: "#4ba5c8", earth: "#6c9478", sunset: "#ea7669", candy: "#d778b1", neutral: "#ad927d"
+    }, "#8c72e8"));
+    const faces = ["☺", "★", "♥", "!", "✦", "✓"];
+    faces.forEach((mark, index) => {
+      const sticker = element("span", `sticker-live-preview__item sticker-live-preview__item--${index + 1}`, mark);
+      sticker.title = answerText("stickerSubject", "Sticker");
+      sheet.append(sticker);
+    });
+    sheet.append(element("small", "", answerText("packSize", "Sticker Pack")));
+    sheet.setAttribute("role", "img");
+    sheet.setAttribute("aria-label", `${answerText("packName", "Sticker pack")} preview with ${answerText("packSize", "multiple stickers")}.`);
+    return sheet;
+  }
+
+  function renderCategoryPreview(category, presentation) {
+    if (category.id === "book-cover" || category.id === "children-book") return renderBookPreview(category);
+    if (category.id === "sticker") return renderStickerPreview();
+    const creativeMark = element("div", "creative-live-mark", presentation.icon);
+    creativeMark.append(element("span", "", "✦"));
+    return creativeMark;
+  }
+
   function renderGuidedOutputPicker(category, compact = false) {
     const section = element("section", `guided-output-picker${compact ? " is-compact" : ""}`);
     const heading = element("div", "guided-output-picker__heading");
@@ -278,7 +354,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     section.append(heading);
     const row = element("div", "guided-output-row");
     guidedOutputs(category).forEach((output) => {
-      const selected = (state.guidedOutput || defaultGuidedOutput(category)) === output.id;
+      const selected = resolvedGuidedOutput(category) === output.id;
       const control = button("", `guided-output-card${selected ? " is-selected" : ""}`, { guidedOutput: output.id });
       control.setAttribute("aria-pressed", String(selected));
       control.append(element("span", "", output.icon), element("strong", "", output.id), element("small", "", output.description));
@@ -337,7 +413,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     state.guidedStep = Math.max(0, Number(draft.step) || 0);
     state.guidedAnswers = clone(draft.answers || {});
     state.guidedSeedGoal = draft.seedGoal || "";
-    state.guidedOutput = draft.output || "";
+    state.guidedOutput = resolvedGuidedOutput(getCreationCategory(state.guidedCategoryId), draft.output);
     state.projectId = draft.projectId && engine.projects.get(draft.projectId) ? draft.projectId : "";
     renderGuidedStep();
   }
@@ -345,7 +421,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   function syncGuidedSpecification() {
     if (!state.guidedCategoryId) return;
     state.specification = guidedSpecification(state.guidedCategoryId, state.guidedAnswers, state.guidedSeedGoal);
-    state.specification.outputType = state.guidedOutput || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId));
+    state.specification.outputType = resolvedGuidedOutput(getCreationCategory(state.guidedCategoryId));
     state.specification.goal = `${state.specification.goal} Present the finished creation as: ${state.specification.outputType}.`;
     state.specification.prompt = buildPromptFromSpecification(state.specification);
     state.goal = state.specification.goal;
@@ -445,6 +521,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       guidedSeedGoal: "",
       guidedOutput: "",
       guidedGroup: "",
+      guidedCollection: "",
       guidedShowAll: false,
       guidedQuery: "",
       guidedCustomStep: "",
@@ -642,7 +719,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   function renderGuidedCategories() {
     state.view = "guided-categories";
-    updateStage("Creative Builder · Choose a creation");
+    const booksOnly = state.guidedCollection === "books";
+    updateStage(booksOnly ? "Creative Builder · Books & Stories" : "Creative Builder · Choose a creation");
     const section = element("section", "guided-category-picker");
     const header = element("header", "guided-category-picker__header");
     header.append(
@@ -650,9 +728,9 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       (() => {
         const copy = element("div");
         copy.append(
-          element("p", "eyebrow", "🪄 Universal Creative Builder"),
-          element("h2", "display-title", "What would you like to create today?"),
-          element("p", "body-text text-muted", "Choose a starting point, then open any detail section in whatever order feels natural.")
+          element("p", "eyebrow", booksOnly ? "▤ Books & Stories" : "🪄 Universal Creative Builder"),
+          element("h2", "display-title", booksOnly ? "What kind of book would you like to create?" : "What would you like to create today?"),
+          element("p", "body-text text-muted", booksOnly ? "Choose a book starting point. Every option opens dedicated story, design, and production controls." : "Choose a starting point, then open any detail section in whatever order feels natural.")
         );
         return copy;
       })()
@@ -661,11 +739,14 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     const search = element("input", "guided-category-search");
     search.type = "search";
     search.value = state.guidedQuery;
-    search.placeholder = "Search every creative possibility";
+    search.placeholder = booksOnly ? "Search book and story options" : "Search every creative possibility";
     search.setAttribute("aria-label", "Search creation categories");
     search.dataset.guidedCategorySearch = "";
     section.append(search);
-    const categories = (state.guidedShowAll ? allGuidedCategories() : featuredGuidedCategories())
+    const categorySource = booksOnly
+      ? allGuidedCategories().filter((item) => BOOK_COLLECTION_IDS.has(item.id))
+      : (state.guidedShowAll ? allGuidedCategories() : featuredGuidedCategories());
+    const categories = categorySource
       .filter((item) => !state.guidedQuery || `${item.label} ${item.description}`.toLocaleLowerCase().includes(state.guidedQuery.toLocaleLowerCase()));
     const grid = element("div", "guided-category-grid");
     categories.forEach((item) => {
@@ -688,7 +769,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       grid.append(empty);
     }
     section.append(grid);
-    if (!state.guidedQuery) {
+    if (!booksOnly && !state.guidedQuery) {
       section.append(button(state.guidedShowAll ? "Show featured creations" : `✨ More · Explore ${allGuidedCategories().length} categories`, "button button--outlined button--wide", { guidedToggleAll: "" }));
     }
     section.append(button("Choose another experience", "text-button", { creationBack: "" }));
@@ -701,6 +782,27 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   function guidedAnswer(step) {
     return state.guidedAnswers[step.id] ?? (step.multiple ? [] : "");
+  }
+
+  function guidedMissingRequired() {
+    return guidedSteps(state.guidedCategoryId, state.guidedAnswers).find((step) => {
+      if (!step.required) return false;
+      const value = guidedAnswer(step);
+      return Array.isArray(value) ? !value.length : !String(value || "").trim();
+    }) || null;
+  }
+
+  function focusMissingRequired() {
+    const missing = guidedMissingRequired();
+    if (!missing) return false;
+    const steps = guidedSteps(state.guidedCategoryId, state.guidedAnswers);
+    state.guidedStep = steps.findIndex((step) => step.id === missing.id);
+    state.guidedCustomStep = missing.id;
+    persistGuidedDraft();
+    renderGuidedStep();
+    showToast(`Add ${missing.label} before creating`, "error");
+    requestAnimationFrame(() => root.querySelector(`[data-guided-custom-input="${missing.id}"]`)?.focus());
+    return true;
   }
 
   function renderGuidedOption(step, item) {
@@ -754,6 +856,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   function renderGuidedReview() {
+    if (focusMissingRequired()) return;
     state.view = "guided-review";
     updateStage("Creative Builder · Review");
     syncGuidedSpecification();
@@ -783,14 +886,16 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     progress.append(element("span"), element("small", "", "Creative direction ready"));
     section.append(progress);
     section.append(renderGuidedOutputPicker(category, true));
-    if (CHARACTER_CATEGORY_IDS.has(category.id)) {
+    if (CHARACTER_CATEGORY_IDS.has(category.id) || ["book-cover", "children-book", "sticker"].includes(category.id)) {
       const preview = element("section", "guided-review-preview");
-      preview.append(renderCharacterFigure(presentation));
+      preview.append(CHARACTER_CATEGORY_IDS.has(category.id) ? renderCharacterFigure(presentation) : renderCategoryPreview(category, presentation));
       const copy = element("div");
       copy.append(
-        element("p", "eyebrow", "Live character direction"),
-        element("h3", "medium-title", state.guidedOutput || defaultGuidedOutput(category)),
-        element("p", "body-text text-muted", `${answerText("artisticStyle", "Adaptive style")} · ${answerText("clothingStyle", "Original wardrobe")} · ${answerText("expression", "Natural expression")}`)
+        element("p", "eyebrow", CHARACTER_CATEGORY_IDS.has(category.id) ? "Live character direction" : "Live creative direction"),
+        element("h3", "medium-title", resolvedGuidedOutput(category)),
+        element("p", "body-text text-muted", CHARACTER_CATEGORY_IDS.has(category.id)
+          ? `${answerText("artisticStyle", "Adaptive style")} · ${answerText("clothingStyle", "Original wardrobe")} · ${answerText("expression", "Natural expression")}`
+          : `${answerText("illustrationStyle", answerText("coverStyle", answerText("stickerStyle", "Adaptive style")))} · ${answerText("colorPalette", answerText("palette", "Coordinated color"))}`)
       );
       preview.append(copy);
       section.append(preview);
@@ -873,9 +978,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     if (CHARACTER_CATEGORY_IDS.has(category.id)) {
       preview.append(renderCharacterFigure(presentation));
     } else {
-      const creativeMark = element("div", "creative-live-mark", presentation.icon);
-      creativeMark.append(element("span", "", "✦"));
-      preview.append(creativeMark);
+      preview.append(renderCategoryPreview(category, presentation));
     }
     const previewCopy = element("div", "character-builder-preview__copy");
     previewCopy.append(element("p", "eyebrow", "Live direction"), element("strong", "", state.projectId ? "Continue your creation" : "Your creation takes shape here"));
@@ -935,7 +1038,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       summary.setAttribute("aria-expanded", String(state.guidedStep === index));
       const copy = element("span");
       copy.append(
-        element("strong", "", step.label),
+        element("strong", "", `${step.label}${step.required ? " *" : ""}`),
         element("small", display ? "guided-dropdown__value" : "", display || "Choose an option")
       );
       summary.append(copy, element("span", "guided-dropdown__chevron", state.guidedStep === index ? "⌃" : "⌄"));
@@ -1502,7 +1605,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     const spec = state.specification;
     const existingProject = state.projectId ? engine.projects.get(state.projectId) : null;
     const answers = Object.fromEntries(spec.sections.map((section, index) => [`${section.kind}-${index + 1}`, section.value]).filter(([, value]) => String(value || "").trim()));
-    const nameSeed = spec.sections.find((section) => section.kind === "subject")?.value || spec.goal || spec.categoryLabel;
+    const nameSeed = spec.displayName || spec.sections.find((section) => section.kind === "subject")?.value || spec.goal || spec.categoryLabel;
     const patch = {
       name: existingProject?.name || uniqueProjectName(engine, nameSeed),
       type: spec.projectType,
@@ -1526,7 +1629,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
         guidedStep: state.guidedStep,
         guidedAnswers: clone(state.guidedAnswers),
         guidedSeedGoal: state.guidedSeedGoal,
-        guidedOutput: state.guidedCategoryId ? (state.guidedOutput || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId))) : "",
+        guidedOutput: state.guidedCategoryId ? resolvedGuidedOutput(getCreationCategory(state.guidedCategoryId)) : "",
         experienceVersion: 4
       }
     };
@@ -1555,7 +1658,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     state.guidedStep = Math.max(0, Number(project.data?.guidedStep) || 0);
     state.guidedAnswers = clone(project.data?.guidedAnswers || {});
     state.guidedSeedGoal = project.data?.guidedSeedGoal || project.data?.goal || "";
-    state.guidedOutput = project.data?.guidedOutput || (state.guidedCategoryId ? defaultGuidedOutput(getCreationCategory(state.guidedCategoryId)) : "");
+    state.guidedOutput = state.guidedCategoryId ? resolvedGuidedOutput(getCreationCategory(state.guidedCategoryId), project.data?.guidedOutput) : "";
     state.guidedGroup = "";
     state.history = [];
     state.historyIndex = -1;
@@ -1580,7 +1683,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       if (look) {
         state.guidedCategoryId = look.categoryId || "person";
         state.guidedAnswers = clone(look.answers || {});
-        state.guidedOutput = look.output || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId));
+        state.guidedOutput = resolvedGuidedOutput(getCreationCategory(state.guidedCategoryId), look.output);
         state.guidedStep = 0;
         state.guidedCustomStep = "";
         state.guidedGroup = "";
@@ -1591,6 +1694,9 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       }
     } else if (options.category) {
       selectGuidedCategory(options.category);
+    } else if (options.collection) {
+      state.guidedCollection = options.collection;
+      renderGuidedCategories();
     } else if (options.template) {
       state.specification = blankSpecification("");
       if (options.template === "Custom") {
@@ -1778,7 +1884,10 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     const target = event.target.closest("button, [data-creation-path]");
     if (!target) return;
     if (target.dataset.creationPath === "describe") renderDescribe();
-    if (target.dataset.creationPath === "guided") renderGuidedCategories();
+    if (target.dataset.creationPath === "guided") {
+      state.guidedCollection = "";
+      renderGuidedCategories();
+    }
     if (target.dataset.creationPath === "inspire") renderInspire();
     if (target.dataset.creationPath === "build") {
       state.specification = blankSpecification("");
@@ -1910,6 +2019,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       renderGuidedStep();
     }
     if (target.hasAttribute("data-guided-generate")) {
+      if (focusMissingRequired()) return;
       syncGuidedSpecification();
       state.history = [];
       state.historyIndex = -1;

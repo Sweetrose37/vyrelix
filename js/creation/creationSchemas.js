@@ -75,6 +75,24 @@ const STORY_FIELDS = Object.freeze([
   field("tone", "Tone and style", "Playful, dramatic, educational, cinematic")
 ]);
 
+const CHILDREN_BOOK_FIELDS = Object.freeze([
+  field("title", "Book title", "Name the book", { required: true }),
+  field("premise", "Story idea", "What happens, and why will young readers care?", { type: "textarea", required: true }),
+  field("readingAge", "Reading age", "Baby, toddler, preschool, early reader, or middle grade"),
+  field("bookFormat", "Book type", "Picture book, bedtime story, early reader, or chapter book"),
+  field("pageCount", "Page count", "12, 16, 24, 32, 40, or 48 pages"),
+  field("mainCharacter", "Main character", "Describe the lead character and personality"),
+  field("supportingCharacters", "Supporting characters", "Family, friends, animals, or magical companions"),
+  field("setting", "Story world", "Where and when does the story happen?"),
+  field("lesson", "Theme or lesson", "Friendship, confidence, kindness, curiosity, or another theme"),
+  field("illustrationStyle", "Illustration style", "Watercolor, collage, soft 3D, ink, or another style"),
+  field("colorPalette", "Color palette", "Choose the colors that shape the book"),
+  field("pageLayout", "Page layout", "Full bleed, spot illustrations, panels, or a mixed layout"),
+  field("typography", "Typography", "Playful, handwritten, classic, or highly readable"),
+  field("continuity", "Character continuity", "Keep appearance, clothing, scale, and props consistent"),
+  field("coverDirection", "Cover direction", "Describe the front-cover moment", { type: "textarea" })
+]);
+
 const DIGITAL_FIELDS = Object.freeze([
   field("productName", "Product or experience", "App, website, tool, or service", { required: true }),
   field("userGoal", "User goal", "What should someone accomplish?", { type: "textarea" }),
@@ -91,6 +109,25 @@ const ASSET_FIELDS = Object.freeze([
   field("palette", "Color direction", "Brand colors or palette"),
   field("format", "Format", "Square, seamless, transparent, tileable"),
   field("constraints", "Constraints", "Size, clarity, background, or production limits", { type: "textarea" })
+]);
+
+const STICKER_FIELDS = Object.freeze([
+  field("packName", "Pack name", "Name this sticker pack", { required: true }),
+  field("stickerSubject", "Character or subject", "Who or what appears in the pack?", { required: true }),
+  field("packSize", "Number of stickers", "4, 6, 8, 12, 16, or 24"),
+  field("packTheme", "Pack theme", "Everyday reactions, celebration, work, hobbies, or another theme"),
+  field("variationType", "Variation type", "Expressions, poses, actions, phrases, outfits, or a mix"),
+  field("expressions", "Expressions", "Happy, laughing, excited, sleepy, surprised, and more"),
+  field("actions", "Actions and poses", "Waving, dancing, cheering, thinking, working, and more"),
+  field("stickerStyle", "Sticker style", "Cute 2D, soft 3D, kawaii, hand-drawn, bold graphic, or realistic"),
+  field("palette", "Color palette", "Choose a coordinated color system"),
+  field("outlineColor", "Outline color", "White, black, color-matched, or none"),
+  field("outlineThickness", "Outline thickness", "Thin, medium, thick, or extra thick"),
+  field("background", "Background", "Transparent, white, colored, or textured"),
+  field("cutStyle", "Cut style", "Die-cut, kiss-cut sheet, digital only, or printable sheet"),
+  field("finish", "Finish", "Matte, glossy, holographic, glitter, or vinyl"),
+  field("arrangement", "Delivery arrangement", "Individual files, sticker sheet, or both"),
+  field("constraints", "Production notes", "Text, sizing, safe area, or details to avoid", { type: "textarea" })
 ]);
 
 const category = ({ id, label, icon, projectType, keywords, fields, ideas }) => Object.freeze({
@@ -194,7 +231,7 @@ export const CREATION_CATEGORIES = Object.freeze([
   expanded("magazine-cover", "Magazine Cover", "Book Cover", CAMPAIGN_FIELDS),
   expanded("album-cover", "Album Cover", "Book Cover", CAMPAIGN_FIELDS, ["music cover"]),
   expanded("storyboard", "Storyboard", "Scene", STORY_FIELDS, ["shot list"]),
-  expanded("children-book", "Children’s Book", "Book Cover", STORY_FIELDS, ["kids book", "picture book"]),
+  expanded("children-book", "Children’s Book", "Book Cover", CHILDREN_BOOK_FIELDS, ["kids book", "picture book", "storybook", "early reader"]),
   expanded("illustration", "Illustration", "Scene", STORY_FIELDS),
   expanded("comic", "Comic", "Scene", STORY_FIELDS, ["graphic novel"]),
   expanded("educational-material", "Educational Material", "Poster", STORY_FIELDS, ["worksheet", "learning resource"]),
@@ -207,7 +244,7 @@ export const CREATION_CATEGORIES = Object.freeze([
   expanded("pattern", "Pattern", "Object", ASSET_FIELDS, ["seamless pattern"]),
   expanded("icon", "Icon", "Icon", ASSET_FIELDS),
   expanded("emoji", "Emoji", "Icon", ASSET_FIELDS),
-  expanded("sticker", "Sticker", "Icon", ASSET_FIELDS),
+  expanded("sticker", "Sticker Pack", "Icon", STICKER_FIELDS, ["stickers", "sticker sheet", "die cut sticker"]),
   expanded("game-asset", "Game Asset", "Object", ASSET_FIELDS, ["game sprite"]),
   expanded("concept-art", "Concept Art", "Scene", STORY_FIELDS),
   expanded("pixel-art", "Pixel Art", "Scene", ASSET_FIELDS),

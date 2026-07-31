@@ -385,7 +385,8 @@ function bindGeneralEvents() {
       reset: trigger.hasAttribute("data-create-reset"),
       mode: trigger.dataset.createMode || null,
       template: trigger.dataset.template || null,
-      category: trigger.dataset.createCategory || null
+      category: trigger.dataset.createCategory || null,
+      collection: trigger.dataset.createCollection || null
     };
   }));
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
