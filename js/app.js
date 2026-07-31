@@ -31,7 +31,7 @@ let pendingCreationOptions = null;
 const modeNames = Object.freeze({
   "dual-experience": "Universal Creative Engine",
   quick: "Quick Create",
-  guided: "Guided Creator",
+  guided: "Creative Builder",
   advanced: "Advanced Creator",
   director: "Creative Director",
   inspire: "Inspire Me",
@@ -364,6 +364,11 @@ function addDataPortability() {
 }
 
 function bindGeneralEvents() {
+  document.querySelectorAll("[data-enter-vyrelix]").forEach((trigger) => trigger.addEventListener("click", () => {
+    const launch = document.querySelector("#launch-screen");
+    launch?.classList.add("is-leaving");
+    window.setTimeout(() => launch?.remove(), 420);
+  }));
   document.addEventListener("click", (event) => {
     const card = event.target.closest("[data-project-open]");
     if (card && !savedList.contains(card)) openProject(card.dataset.projectOpen);
@@ -406,10 +411,45 @@ function bindGeneralEvents() {
   });
 }
 
+function renderSavedLooks() {
+  const grid = document.querySelector("#saved-look-grid");
+  if (!grid) return;
+  const looks = creationEngine.settings.get().savedCharacterLooks || [];
+  if (!looks.length) {
+    grid.innerHTML = '<div class="empty-state empty-state--compact"><h3>Your saved looks will appear here</h3><p>Save an outfit from the Character Builder to reuse it later.</p></div>';
+    return;
+  }
+  grid.replaceChildren();
+  looks.forEach((look) => {
+    const card = document.createElement("article");
+    card.className = "saved-look-card";
+    const mark = document.createElement("span");
+    mark.className = "saved-look-card__mark";
+    mark.textContent = "✦";
+    const copy = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = look.name || "Saved character look";
+    const detail = document.createElement("small");
+    detail.textContent = `${look.answers?.top || look.answers?.outfit || "Complete look"} · ${look.answers?.shoes || "Open footwear"}`;
+    copy.append(title, detail);
+    const use = document.createElement("button");
+    use.type = "button";
+    use.className = "button button--outlined";
+    use.textContent = "Use look";
+    use.dataset.route = "create";
+    use.addEventListener("click", () => {
+      pendingCreationOptions = { reset: true, lookId: look.id };
+    });
+    card.append(mark, copy, use);
+    grid.append(card);
+  });
+}
+
 navigation = createNavigation({
   onRouteChange: (route) => {
     if (route === "saved") refreshSaved();
     if (route === "project") renderProject();
+    if (route === "library") renderSavedLooks();
     if (route === "create") {
       const options = pendingCreationOptions || {};
       pendingCreationOptions = null;
@@ -459,6 +499,7 @@ document.querySelector("#confirm-clear").addEventListener("click", () => {
 });
 refreshSaved();
 renderProject();
+renderSavedLooks();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
 }

@@ -32,6 +32,24 @@ const PALETTES = Object.freeze([
   option("Candy", "Berry pink, lilac, sky blue, lemon", "linear-gradient(135deg,#ed6a9e 0 25%,#b99bea 25% 50%,#82c8e5 50% 75%,#f7df72 75%)")
 ]);
 
+const GARMENT_COLORS = Object.freeze([
+  option("Black", "Black", "#18171d"),
+  option("Ivory", "Ivory", "#f6efe0"),
+  option("Chocolate", "Chocolate Brown", "#624033"),
+  option("Camel", "Camel", "#bd8c5b"),
+  option("Blush", "Blush Pink", "#dfa6b5"),
+  option("Berry", "Berry", "#913b62"),
+  option("Ruby", "Ruby Red", "#a9283f"),
+  option("Orange", "Burnt Orange", "#c46737"),
+  option("Golden", "Golden Yellow", "#d5a93e"),
+  option("Emerald", "Emerald Green", "#287057"),
+  option("Sky", "Sky Blue", "#78b9d2"),
+  option("Navy", "Navy Blue", "#243a62"),
+  option("Lavender", "Lavender", "#a795ca"),
+  option("Silver", "Silver", "#a8abb3"),
+  option("Gold", "Metallic Gold", "#bb8a35")
+]);
+
 const PERSON_STEPS = Object.freeze([
   Object.freeze({ id: "gender", group: "Identity", label: "Character Type", prompt: "Choose how this character is represented.", options: choices("Woman", "Man", "Non-binary", "Androgynous", "Girl", "Boy"), allowCustom: true }),
   Object.freeze({ id: "age", group: "Identity", label: "Age Group", prompt: "Choose the character's life stage.", options: choices("Baby", "Toddler", "Child", "Teen", "Young Adult", "Adult", "Middle Aged", "Senior"), allowCustom: true }),
@@ -50,6 +68,14 @@ const PERSON_STEPS = Object.freeze([
   Object.freeze({ id: "facialHair", group: "Face", label: "Facial Hair", prompt: "Choose facial hair if desired.", options: choices("None", "Clean Shaven", "Stubble", "Mustache", "Goatee", "Short Beard", "Full Beard", "Braided Beard"), allowCustom: true }),
   Object.freeze({ id: "makeup", group: "Face", label: "Makeup", prompt: "Choose a makeup direction.", options: choices("None", "Natural", "Soft Glam", "Full Glam", "Editorial", "Fantasy", "Face Paint", "Stage Makeup"), allowCustom: true }),
   Object.freeze({ id: "clothingStyle", group: "Wardrobe", label: "Clothing Style", prompt: "Choose the overall wardrobe style.", options: choices("Luxury", "Casual", "Streetwear", "Business", "Preppy", "Bohemian", "Fantasy", "Historical", "Sportswear", "Swimwear", "Traditional", "Futuristic", "Formal"), allowCustom: true }),
+  Object.freeze({ id: "clothingColor", group: "Wardrobe", label: "Clothing Color", prompt: "Choose the main color for the look.", options: GARMENT_COLORS, visual: "swatch", allowCustom: true }),
+  Object.freeze({ id: "fabric", group: "Wardrobe", label: "Fabric & Material", prompt: "Choose the texture and material of the clothing.", options: choices("Cotton", "Linen", "Denim", "Leather", "Silk", "Satin", "Velvet", "Knit", "Chiffon", "Lace", "Wool", "Metallic", "Sequins", "Technical Fabric"), allowCustom: true }),
+  Object.freeze({ id: "pattern", group: "Wardrobe", label: "Pattern", prompt: "Choose a pattern or surface treatment.", options: choices("Solid", "Stripes", "Plaid", "Polka Dots", "Floral", "Animal Print", "Geometric", "Abstract", "Camouflage", "Embroidered", "Graphic Print"), allowCustom: true }),
+  Object.freeze({ id: "fit", group: "Wardrobe", label: "Fit & Silhouette", prompt: "Choose how the clothing fits and moves.", options: choices("Tailored", "Relaxed", "Oversized", "Fitted", "Flowing", "Structured", "Layered", "Cropped", "Draped"), allowCustom: true }),
+  Object.freeze({ id: "occasion", group: "Wardrobe", label: "Occasion", prompt: "Choose where this look belongs.", options: choices("Everyday", "Work", "School", "Celebration", "Wedding", "Red Carpet", "Vacation", "Festival", "Sports", "Performance", "Fantasy Adventure"), allowCustom: true }),
+  Object.freeze({ id: "season", group: "Wardrobe", label: "Season", prompt: "Choose the season for the look.", options: choices("Spring", "Summer", "Autumn", "Winter", "All Season"), allowCustom: true }),
+  Object.freeze({ id: "era", group: "Wardrobe", label: "Era", prompt: "Choose a time-period influence.", options: choices("Contemporary", "1920s", "1950s", "1970s", "1980s", "1990s", "Y2K", "Historical", "Retro Future", "Far Future"), allowCustom: true }),
+  Object.freeze({ id: "culturalInfluence", group: "Wardrobe", label: "Cultural Influence", prompt: "Add a respectful cultural or regional fashion influence.", options: choices("None", "African Contemporary", "Caribbean", "East Asian Contemporary", "South Asian", "Middle Eastern", "Indigenous-Inspired Textiles", "European Heritage", "Latin American", "Global Fusion"), allowCustom: true }),
   Object.freeze({ id: "top", group: "Wardrobe", label: "Tops", prompt: "Choose a top or upper-body garment.", options: choices("T-Shirt", "Blouse", "Button-Down", "Sweater", "Hoodie", "Crop Top", "Tank Top", "Corset", "Tunic", "Jersey", "Baby Onesie", "Graphic Tee"), allowCustom: true }),
   Object.freeze({ id: "bottom", group: "Wardrobe", label: "Bottoms", prompt: "Choose bottoms.", options: choices("Jeans", "Tailored Trousers", "Joggers", "Leggings", "Shorts", "Mini Skirt", "Midi Skirt", "Maxi Skirt", "Cargo Pants", "Diaper Cover", "School Uniform Bottom"), allowCustom: true }),
   Object.freeze({ id: "outfit", group: "Wardrobe", label: "Dresses & Full Outfits", prompt: "Choose a complete outfit if preferred.", options: choices("Evening Gown", "Cocktail Dress", "Sundress", "Suit", "Tuxedo", "Jumpsuit", "Romper", "Tracksuit", "Fantasy Armor", "Royal Robes", "Baby Set", "Toddler Set"), allowCustom: true }),
@@ -69,6 +95,14 @@ const PERSON_STEPS = Object.freeze([
 const AGE_WARDROBE_OVERRIDES = Object.freeze({
   baby: Object.freeze({
     clothingStyle: choices("Cozy", "Classic", "Playful", "Luxury Keepsake", "Seasonal", "Traditional"),
+    fabric: choices("Organic Cotton", "Soft Knit", "Fleece", "Linen Blend", "Velvet", "Muslin"),
+    pattern: choices("Solid", "Tiny Floral", "Stars", "Animals", "Stripes", "Polka Dots", "Storybook Print"),
+    fit: choices("Soft Relaxed", "Snug", "Layered", "Roomy"),
+    occasion: choices("Everyday", "Bedtime", "Family Portrait", "Celebration", "Christening", "Holiday"),
+    season: choices("Spring", "Summer", "Autumn", "Winter", "All Season"),
+    era: choices("Contemporary", "Classic Keepsake", "Vintage-Inspired"),
+    culturalInfluence: choices("None", "Family Heritage", "Traditional Celebration", "Global Contemporary"),
+    makeup: choices("None"),
     top: choices("Baby Onesie", "Bodysuit", "Soft T-Shirt", "Knit Sweater", "Sleep Top"),
     bottom: choices("Soft Leggings", "Bloomers", "Diaper Cover", "Pull-On Pants", "Footed Pants"),
     outfit: choices("Baby Set", "Romper", "Sleep and Play", "Christening Outfit", "Snowsuit", "Special Occasion Set"),
@@ -81,6 +115,13 @@ const AGE_WARDROBE_OVERRIDES = Object.freeze({
   }),
   toddler: Object.freeze({
     clothingStyle: choices("Playful", "Everyday", "Preppy", "Mini Streetwear", "Dressy", "Seasonal", "Traditional"),
+    fabric: choices("Cotton", "Denim", "Soft Knit", "Fleece", "Linen", "Corduroy"),
+    pattern: choices("Solid", "Stripes", "Plaid", "Polka Dots", "Floral", "Animals", "Graphic Print"),
+    fit: choices("Relaxed", "Roomy", "Layered", "Fitted", "Play-Ready"),
+    occasion: choices("Everyday", "Playtime", "Family Portrait", "School", "Celebration", "Holiday"),
+    era: choices("Contemporary", "Retro", "Classic"),
+    culturalInfluence: choices("None", "Family Heritage", "Traditional Celebration", "Global Contemporary"),
+    makeup: choices("None", "Playful Face Paint"),
     top: choices("Graphic Tee", "Polo", "Sweater", "Hoodie", "Tunic", "Button-Down", "Tank Top"),
     bottom: choices("Pull-On Jeans", "Joggers", "Leggings", "Shorts", "Skirt", "Overalls"),
     outfit: choices("Toddler Set", "Romper", "Overalls", "Party Dress", "Mini Suit", "Pajama Set", "Rain Set"),
@@ -93,6 +134,13 @@ const AGE_WARDROBE_OVERRIDES = Object.freeze({
   }),
   child: Object.freeze({
     clothingStyle: choices("Everyday", "Playful", "Preppy", "Streetwear", "Sportswear", "Formal", "Fantasy", "Traditional"),
+    fabric: choices("Cotton", "Denim", "Knit", "Fleece", "Linen", "Velvet", "Sports Fabric"),
+    pattern: choices("Solid", "Stripes", "Plaid", "Polka Dots", "Floral", "Geometric", "Graphic Print"),
+    fit: choices("Relaxed", "Fitted", "Oversized", "Layered", "Play-Ready"),
+    occasion: choices("Everyday", "School", "Celebration", "Sports", "Performance", "Family Portrait", "Fantasy Adventure"),
+    era: choices("Contemporary", "Retro", "Historical", "Future"),
+    culturalInfluence: choices("None", "Family Heritage", "Traditional Celebration", "Global Contemporary"),
+    makeup: choices("None", "Stage Makeup", "Playful Face Paint"),
     top: choices("Graphic Tee", "Polo", "Blouse", "Button-Down", "Sweater", "Hoodie", "Jersey"),
     bottom: choices("Jeans", "Joggers", "Leggings", "Shorts", "Skirt", "Cargo Pants", "School Uniform Bottom"),
     outfit: choices("School Uniform", "Party Dress", "Suit", "Tracksuit", "Overalls", "Fantasy Costume", "Dance Outfit"),
@@ -105,6 +153,11 @@ const AGE_WARDROBE_OVERRIDES = Object.freeze({
   }),
   teen: Object.freeze({
     clothingStyle: choices("Casual", "Streetwear", "Preppy", "Sportswear", "Y2K", "Alternative", "Formal", "Creative"),
+    fabric: choices("Cotton", "Denim", "Leather", "Knit", "Satin", "Velvet", "Technical Fabric"),
+    pattern: choices("Solid", "Stripes", "Plaid", "Floral", "Geometric", "Graphic Print", "Abstract"),
+    fit: choices("Tailored", "Relaxed", "Oversized", "Fitted", "Layered", "Cropped"),
+    occasion: choices("Everyday", "School", "Celebration", "Formal", "Sports", "Performance", "Festival"),
+    culturalInfluence: choices("None", "Family Heritage", "Traditional Celebration", "Global Contemporary", "Regional Street Style"),
     top: choices("Graphic Tee", "Button-Down", "Sweater", "Hoodie", "Crop Top", "Tank Top", "Jersey"),
     bottom: choices("Jeans", "Joggers", "Leggings", "Shorts", "Skirt", "Cargo Pants", "School Uniform Bottom"),
     outfit: choices("School Look", "Party Dress", "Suit", "Jumpsuit", "Tracksuit", "Dance Outfit", "Festival Look"),
@@ -242,11 +295,12 @@ export function allGuidedCategories() {
   ];
 }
 
-export function guidedSteps(categoryOrId) {
+export function guidedSteps(categoryOrId, answers = {}) {
   const category = typeof categoryOrId === "string" ? getCreationCategory(categoryOrId) : categoryOrId;
   const personLike = new Set(["person", "woman", "man", "teen", "family", "baby", "toddler", "child", "fantasy-character", "sci-fi-character"]);
   if (!personLike.has(category.id)) return Object.freeze(genericSteps(category));
-  const overrides = AGE_WARDROBE_OVERRIDES[category.id];
+  const selectedAge = String(answers.age || "").toLocaleLowerCase().replace(/[^a-z]/g, "");
+  const overrides = AGE_WARDROBE_OVERRIDES[category.id] || AGE_WARDROBE_OVERRIDES[selectedAge];
   if (!overrides) return PERSON_STEPS;
   return Object.freeze(PERSON_STEPS.map((step) => Object.freeze(overrides[step.id] ? { ...step, options: overrides[step.id] } : step)));
 }
@@ -277,6 +331,14 @@ const PANEL_MAP = Object.freeze({
   facialHair: "face",
   makeup: "face",
   clothingStyle: "clothing",
+  clothingColor: "clothing",
+  fabric: "materials",
+  pattern: "clothing",
+  fit: "clothing",
+  occasion: "purpose",
+  season: "environment",
+  era: "artistic-style",
+  culturalInfluence: "clothing",
   top: "clothing",
   bottom: "clothing",
   outfit: "clothing",
@@ -326,7 +388,7 @@ function panelKindFor(key) {
 
 export function guidedSpecification(categoryId, answers = {}, seedGoal = "") {
   const category = getCreationCategory(categoryId);
-  const steps = guidedSteps(category);
+  const steps = guidedSteps(category, answers);
   const labels = new Map(steps.map((step) => [step.id, step.label]));
   const summary = Object.entries(answers)
     .map(([key, value]) => [key, labels.get(key) || titleCase(key), displayAnswer(value)])

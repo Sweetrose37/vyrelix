@@ -222,7 +222,7 @@ export const CREATION_CATEGORIES = Object.freeze([
 
 export const CREATION_MODES = Object.freeze([
   Object.freeze({ id: "quick", icon: "⚡", name: "Quick Create", description: "One description. Vyrelix fills in the rest." }),
-  Object.freeze({ id: "guided", icon: "🎨", name: "Guided Creator", description: "Answer only the questions relevant to your goal." }),
+  Object.freeze({ id: "guided", icon: "🎨", name: "Creative Builder", description: "Open visual sections and shape every detail in any order." }),
   Object.freeze({ id: "advanced", icon: "🛠", name: "Advanced Creator", description: "Open every available creative control." }),
   Object.freeze({ id: "director", icon: "🤖", name: "AI Creative Director", description: "Build the direction through a focused conversation." }),
   Object.freeze({ id: "inspire", icon: "🎲", name: "Inspire Me", description: "Generate, mix, and favorite creative ideas." }),

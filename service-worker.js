@@ -1,4 +1,4 @@
-const CACHE_NAME = "vyrelix-v9-universal-builder";
+const CACHE_NAME = "vyrelix-v10-luminous-creator";
 const PRECACHE_URLS = [
   "./",
   "./index.html",

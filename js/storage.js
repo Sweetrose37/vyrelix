@@ -37,7 +37,7 @@ export const storage = {
   saveRecentActivity: (value) => write(STORAGE_KEYS.activity, value),
   getHistory: () => read(STORAGE_KEYS.history, []),
   saveHistory: (value) => write(STORAGE_KEYS.history, value),
-  getTheme: () => read(STORAGE_KEYS.theme, "dark"),
+  getTheme: () => read(STORAGE_KEYS.theme, "soft"),
   saveTheme: (value) => write(STORAGE_KEYS.theme, value),
   clear: () => Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key))
 };

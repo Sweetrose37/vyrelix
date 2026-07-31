@@ -7,6 +7,11 @@ export function initializeSettings(onClearRequest) {
   const darkToggle = document.querySelector("#dark-mode-toggle");
   const animationToggle = document.querySelector("#animation-toggle");
   let settings = storage.getSettings();
+  if (Number(settings.paletteVersion || 0) < 2) {
+    settings = { ...settings, darkMode: false, paletteVersion: 2 };
+    storage.saveTheme("soft");
+    storage.saveSettings(settings);
+  }
 
   function apply() {
     document.documentElement.dataset.theme = settings.darkMode ? "dark" : "soft";

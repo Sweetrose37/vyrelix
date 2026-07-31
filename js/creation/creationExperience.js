@@ -50,6 +50,22 @@ const ASSISTANT_ACTIONS = Object.freeze([
   ["surprise", "Surprise Me"]
 ]);
 
+const CHARACTER_CATEGORY_IDS = new Set(["person", "woman", "man", "teen", "child", "toddler", "baby", "family", "fantasy-character", "sci-fi-character"]);
+const CHARACTER_OUTPUTS = Object.freeze([
+  Object.freeze({ id: "Full-body character", icon: "◇", description: "Head-to-toe finished character" }),
+  Object.freeze({ id: "Character portrait", icon: "◉", description: "Face and upper-body portrait" }),
+  Object.freeze({ id: "Character sheet", icon: "▦", description: "Multiple poses and expressions" }),
+  Object.freeze({ id: "Sticker pack", icon: "✿", description: "A coordinated expression set" }),
+  Object.freeze({ id: "Storybook character", icon: "▤", description: "Ready for a book or story world" }),
+  Object.freeze({ id: "Fashion look", icon: "✦", description: "Editorial outfit presentation" })
+]);
+const UNIVERSAL_OUTPUTS = Object.freeze([
+  Object.freeze({ id: "Single finished design", icon: "◇", description: "One polished final direction" }),
+  Object.freeze({ id: "Creative concept set", icon: "▦", description: "A coordinated family of ideas" }),
+  Object.freeze({ id: "Presentation mockup", icon: "▣", description: "Show the idea in context" }),
+  Object.freeze({ id: "Production-ready brief", icon: "✦", description: "Complete direction for production" })
+]);
+
 function element(tag, className = "", text = "") {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -118,6 +134,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     guidedStep: 0,
     guidedAnswers: {},
     guidedSeedGoal: "",
+    guidedOutput: "",
+    guidedGroup: "",
     guidedShowAll: false,
     guidedQuery: "",
     guidedCustomStep: "",
@@ -141,6 +159,123 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     engine.settings.set({ recentIdeas: ideas });
   }
 
+  function guidedOutputs(category) {
+    return CHARACTER_CATEGORY_IDS.has(category.id) ? CHARACTER_OUTPUTS : UNIVERSAL_OUTPUTS;
+  }
+
+  function defaultGuidedOutput(category) {
+    if (category.id === "sticker") return "Creative concept set";
+    if (category.id === "children-book" || category.id === "book-cover") return "Presentation mockup";
+    return guidedOutputs(category)[0].id;
+  }
+
+  function answerText(id, fallback = "") {
+    const value = state.guidedAnswers[id];
+    return Array.isArray(value) ? value.join(", ") : String(value || fallback);
+  }
+
+  function valueSlug(value, fallback = "default") {
+    return String(value || fallback).toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || fallback;
+  }
+
+  function previewColor(value, palette, fallback) {
+    const normalized = String(value || "").toLocaleLowerCase();
+    const match = Object.entries(palette).find(([key]) => normalized.includes(key));
+    return match?.[1] || fallback;
+  }
+
+  function renderCharacterFigure(presentation) {
+    const stage = element("div", "character-live-stage");
+    const figure = element("div", `character-live-figure age-${valueSlug(answerText("age"), "adult")} body-${valueSlug(answerText("bodyType"), "average")}`);
+    const skin = previewColor(answerText("skinTone"), {
+      porcelain: "#f6d6c7", fair: "#eac0a8", light: "#dca986", medium: "#bd7f5b", tan: "#9b6042", deep: "#6f422f", rich: "#3f281f"
+    }, "#bd7f5b");
+    const hair = previewColor(answerText("hairColor"), {
+      "jet black": "#19151a", "soft black": "#292229", "dark brown": "#4a3029", chestnut: "#75462f", honey: "#c69a5a",
+      platinum: "#e8dcc4", auburn: "#8f432d", copper: "#ad5d33", gray: "#918e93", white: "#eee9e2", pastel: "#c9a7d1", fantasy: "#7f62a7"
+    }, "#3d2928");
+    const clothing = previewColor(answerText("clothingColor"), {
+      black: "#27232d", ivory: "#efe3cf", chocolate: "#624033", camel: "#bd8c5b", blush: "#dfa6b5", berry: "#913b62",
+      ruby: "#a9283f", orange: "#c46737", golden: "#d5a93e", emerald: "#287057", sky: "#78b9d2", navy: "#243a62",
+      lavender: "#a795ca", silver: "#a8abb3", gold: "#bb8a35"
+    }, "#9b6a78");
+    figure.style.setProperty("--figure-skin", skin);
+    figure.style.setProperty("--figure-hair", hair);
+    figure.style.setProperty("--figure-clothing", clothing);
+    figure.dataset.hair = valueSlug(answerText("hairStyle"));
+    figure.dataset.pose = valueSlug(answerText("pose"));
+    figure.dataset.expression = valueSlug(answerText("expression"));
+    figure.dataset.fit = valueSlug(answerText("fit"));
+    figure.dataset.pattern = valueSlug(answerText("pattern"));
+    const hairBack = element("span", "character-live__hair-back");
+    const head = element("div", "character-live__head");
+    head.append(
+      element("span", "character-live__hair"),
+      (() => {
+        const eyes = element("span", "character-live__eyes");
+        eyes.append(element("i"), element("i"));
+        return eyes;
+      })(),
+      element("span", "character-live__mouth")
+    );
+    const neck = element("span", "character-live__neck");
+    const body = element("div", "character-live__body");
+    body.append(
+      element("span", "character-live__arm character-live__arm--left"),
+      element("span", "character-live__torso"),
+      element("span", "character-live__arm character-live__arm--right")
+    );
+    const lower = element("div", "character-live__lower");
+    lower.append(element("span", "character-live__leg"), element("span", "character-live__leg"));
+    const shoes = element("div", "character-live__shoes");
+    shoes.append(element("span"), element("span"));
+    figure.append(hairBack, head, neck, body, lower, shoes);
+    stage.append(figure);
+    stage.setAttribute("role", "img");
+    stage.setAttribute("aria-label", `${presentation.label} preview. ${answerText("hairStyle", "Custom hair")}, ${answerText("clothingStyle", "original clothing")}, ${answerText("pose", "standing pose")}.`);
+    return stage;
+  }
+
+  function renderGuidedOutputPicker(category, compact = false) {
+    const section = element("section", `guided-output-picker${compact ? " is-compact" : ""}`);
+    const heading = element("div", "guided-output-picker__heading");
+    heading.append(
+      element("div", "", ""),
+      element("strong", "", "What should Vyrelix create?"),
+      element("small", "", "This decides how your finished idea will be presented.")
+    );
+    heading.firstChild.textContent = "✦";
+    section.append(heading);
+    const row = element("div", "guided-output-row");
+    guidedOutputs(category).forEach((output) => {
+      const selected = (state.guidedOutput || defaultGuidedOutput(category)) === output.id;
+      const control = button("", `guided-output-card${selected ? " is-selected" : ""}`, { guidedOutput: output.id });
+      control.setAttribute("aria-pressed", String(selected));
+      control.append(element("span", "", output.icon), element("strong", "", output.id), element("small", "", output.description));
+      row.append(control);
+    });
+    section.append(row);
+    return section;
+  }
+
+  function guidedInsights(steps) {
+    const insights = [];
+    const selected = (id) => {
+      const value = state.guidedAnswers[id];
+      return Array.isArray(value) ? value.length : String(value || "").trim();
+    };
+    if (!selected("artisticStyle")) insights.push(["Style opportunity", "Choose an artistic style or let Vyrelix select one that matches the character."]);
+    if (!selected("colorPalette") && !selected("clothingColor")) insights.push(["Color opportunity", "A palette will help the clothing, background, and final output feel connected."]);
+    if (selected("outfit") && (selected("top") || selected("bottom"))) insights.push(["Layering check", "You selected a complete outfit and separate garments. Vyrelix will treat the garments as styling variations."]);
+    if (selected("clothingStyle") && !selected("shoes")) insights.push(["Finish the look", "Choose shoes to complete the wardrobe from head to toe."]);
+    if (["baby", "toddler", "child"].includes(answerText("age").toLocaleLowerCase()) && selected("makeup") && answerText("makeup") !== "None") {
+      insights.push(["Age-aware direction", "Makeup will be interpreted as playful face paint or stage styling appropriate to the selected age."]);
+    }
+    const completed = steps.filter((step) => selected(step.id)).length;
+    if (completed < Math.ceil(steps.length * .35)) insights.push(["AI can complete the rest", "Your selected details will stay locked while Vyrelix intelligently fills the open areas."]);
+    return insights.slice(0, 4);
+  }
+
   function guidedDraft() {
     const draft = engine.settings.get().creationDraftV1;
     return draft && typeof draft === "object" && draft.categoryId ? draft : null;
@@ -155,6 +290,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
           step: state.guidedStep,
           answers: clone(state.guidedAnswers),
           seedGoal: state.guidedSeedGoal,
+          output: state.guidedOutput,
           projectId: state.projectId,
           updatedAt: new Date().toISOString()
         }
@@ -171,6 +307,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     state.guidedStep = Math.max(0, Number(draft.step) || 0);
     state.guidedAnswers = clone(draft.answers || {});
     state.guidedSeedGoal = draft.seedGoal || "";
+    state.guidedOutput = draft.output || "";
     state.projectId = draft.projectId && engine.projects.get(draft.projectId) ? draft.projectId : "";
     renderGuidedStep();
   }
@@ -178,6 +315,9 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   function syncGuidedSpecification() {
     if (!state.guidedCategoryId) return;
     state.specification = guidedSpecification(state.guidedCategoryId, state.guidedAnswers, state.guidedSeedGoal);
+    state.specification.outputType = state.guidedOutput || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId));
+    state.specification.goal = `${state.specification.goal} Present the finished creation as: ${state.specification.outputType}.`;
+    state.specification.prompt = buildPromptFromSpecification(state.specification);
     state.goal = state.specification.goal;
     state.promptOverride = "";
   }
@@ -195,6 +335,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       state.guidedAnswers = clone(defaults[categoryId] || {});
       state.guidedStep = 0;
       state.guidedCustomStep = "";
+      state.guidedGroup = "";
+      state.guidedOutput = defaultGuidedOutput(getCreationCategory(categoryId));
     }
     state.guidedCategoryId = categoryId;
     persistGuidedDraft();
@@ -271,6 +413,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       guidedStep: 0,
       guidedAnswers: {},
       guidedSeedGoal: "",
+      guidedOutput: "",
+      guidedGroup: "",
       guidedShowAll: false,
       guidedQuery: "",
       guidedCustomStep: "",
@@ -296,8 +440,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   function projectProgress(project) {
     if (project.data?.creationMode === "guided" && project.data?.guidedCategoryId) {
-      const steps = guidedSteps(project.data.guidedCategoryId);
       const answers = project.data?.guidedAnswers || {};
+      const steps = guidedSteps(project.data.guidedCategoryId, answers);
       const completed = steps.filter((step) => {
         const value = answers[step.id];
         return Array.isArray(value) ? value.length : String(value || "").trim();
@@ -522,7 +666,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   function currentGuidedStep() {
-    return guidedSteps(state.guidedCategoryId)[state.guidedStep] || null;
+    return guidedSteps(state.guidedCategoryId, state.guidedAnswers)[state.guidedStep] || null;
   }
 
   function guidedAnswer(step) {
@@ -537,12 +681,19 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       guidedStepId: step.id
     });
     control.setAttribute("aria-pressed", String(selected));
+    control.dataset.optionKind = step.id;
     if (item.swatch) {
       const swatch = element("span", "guided-option__swatch");
       swatch.style.background = item.swatch;
       control.append(swatch);
     } else if (step.visual === "style") {
       control.append(element("span", "guided-option__style-mark", item.label.slice(0, 1)));
+    } else if (["hairStyle", "top", "bottom", "outfit", "outerwear", "shoes", "accessories", "props", "pose", "expression", "pattern", "fabric"].includes(step.id)) {
+      const marks = {
+        hairStyle: "〰", top: "T", bottom: "Ⅱ", outfit: "✦", outerwear: "◇", shoes: "⌣",
+        accessories: "○", props: "◆", pose: "↗", expression: "☺", pattern: "▧", fabric: "≈"
+      };
+      control.append(element("span", "guided-option__visual-mark", marks[step.id] || "✦"));
     }
     control.append(element("strong", "", item.label));
     return control;
@@ -578,7 +729,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     syncGuidedSpecification();
     const category = getCreationCategory(state.guidedCategoryId);
     const presentation = categoryPresentation(category);
-    const steps = guidedSteps(category);
+    const steps = guidedSteps(category, state.guidedAnswers);
     const section = element("section", "guided-review");
     const header = element("header", "guided-review__header");
     header.append(
@@ -601,6 +752,38 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     progress.style.setProperty("--guided-progress", "100%");
     progress.append(element("span"), element("small", "", "Creative direction ready"));
     section.append(progress);
+    section.append(renderGuidedOutputPicker(category, true));
+    if (CHARACTER_CATEGORY_IDS.has(category.id)) {
+      const preview = element("section", "guided-review-preview");
+      preview.append(renderCharacterFigure(presentation));
+      const copy = element("div");
+      copy.append(
+        element("p", "eyebrow", "Live character direction"),
+        element("h3", "medium-title", state.guidedOutput || defaultGuidedOutput(category)),
+        element("p", "body-text text-muted", `${answerText("artisticStyle", "Adaptive style")} · ${answerText("clothingStyle", "Original wardrobe")} · ${answerText("expression", "Natural expression")}`)
+      );
+      preview.append(copy);
+      section.append(preview);
+    }
+    const insights = guidedInsights(steps);
+    if (insights.length) {
+      const insightSection = element("section", "guided-insights");
+      const insightHeading = element("div", "section-heading");
+      insightHeading.append(element("h3", "medium-title", "Creative Director notes"), element("span", "badge badge--soft", `${insights.length} suggestions`));
+      insightSection.append(insightHeading);
+      const insightGrid = element("div", "guided-insight-grid");
+      insights.forEach(([title, copy]) => {
+        const card = element("article", "guided-insight-card");
+        card.append(element("span", "", "✦"), (() => {
+          const content = element("div");
+          content.append(element("strong", "", title), element("small", "", copy));
+          return content;
+        })());
+        insightGrid.append(card);
+      });
+      insightSection.append(insightGrid);
+      section.append(insightSection);
+    }
     const summary = element("div", "guided-review-grid");
     steps.forEach((step, index) => {
       const value = guidedAnswer(step);
@@ -627,7 +810,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     if (!state.guidedCategoryId) return renderGuidedCategories();
     const category = getCreationCategory(state.guidedCategoryId);
     const presentation = categoryPresentation(category);
-    const steps = guidedSteps(category);
+    const steps = guidedSteps(category, state.guidedAnswers);
     state.guidedStep = Math.min(Math.max(-1, state.guidedStep), Math.max(0, steps.length - 1));
     state.view = "guided";
     updateStage(`Creative Builder · ${presentation.label}`);
@@ -656,37 +839,63 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     progress.append(element("span"), element("small", "", `${completed} of ${steps.length} details selected · Auto-saved`));
     section.append(progress);
 
-    const preview = element("section", "character-builder-preview");
-    const age = String(state.guidedAnswers.age || "").toLocaleLowerCase();
-    const gender = String(state.guidedAnswers.gender || "").toLocaleLowerCase();
-    const avatar = age === "baby" ? "🍼" : age === "toddler" ? "👶" : age === "child" ? "🧒" : age === "teen" ? "🧑" : gender === "woman" ? "👩" : gender === "man" ? "👨" : presentation.icon;
-    preview.append(
-      element("span", "character-builder-preview__avatar", avatar),
-      (() => {
-        const copy = element("div");
-        copy.append(element("strong", "", state.projectId ? "Continue your character" : "Your creation takes shape here"));
-        const chips = element("div", "character-builder-preview__chips");
-        steps.filter((step) => {
-          const value = guidedAnswer(step);
-          return Array.isArray(value) ? value.length : value;
-        }).slice(0, 5).forEach((step) => {
-          const value = guidedAnswer(step);
-          chips.append(element("span", "", Array.isArray(value) ? value.join(", ") : value));
-        });
-        if (!chips.childElementCount) chips.append(element("small", "", "Choose details below to build the creative direction."));
-        copy.append(chips);
-        return copy;
-      })(),
-      button("✦ Fill for me", "text-button", { guidedSurprise: "" })
-    );
+    const preview = element("section", `character-builder-preview${CHARACTER_CATEGORY_IDS.has(category.id) ? " has-character" : ""}`);
+    if (CHARACTER_CATEGORY_IDS.has(category.id)) {
+      preview.append(renderCharacterFigure(presentation));
+    } else {
+      const creativeMark = element("div", "creative-live-mark", presentation.icon);
+      creativeMark.append(element("span", "", "✦"));
+      preview.append(creativeMark);
+    }
+    const previewCopy = element("div", "character-builder-preview__copy");
+    previewCopy.append(element("p", "eyebrow", "Live direction"), element("strong", "", state.projectId ? "Continue your creation" : "Your creation takes shape here"));
+    const chips = element("div", "character-builder-preview__chips");
+    steps.filter((step) => {
+      const value = guidedAnswer(step);
+      return Array.isArray(value) ? value.length : value;
+    }).slice(0, 6).forEach((step) => {
+      const value = guidedAnswer(step);
+      chips.append(element("span", "", Array.isArray(value) ? value.join(", ") : value));
+    });
+    if (!chips.childElementCount) chips.append(element("small", "", "Choose details below to shape the live direction."));
+    previewCopy.append(chips);
+    const previewActions = element("div", "character-builder-preview__actions");
+    previewActions.append(button("✦ Fill open sections", "text-button", { guidedSurprise: "" }));
+    if (CHARACTER_CATEGORY_IDS.has(category.id)) previewActions.append(button("♡ Save this look", "text-button", { guidedSaveLook: "" }));
+    previewCopy.append(previewActions);
+    preview.append(previewCopy);
     section.append(preview);
+    section.append(renderGuidedOutputPicker(category));
 
     const dropdowns = element("div", "guided-dropdown-list");
+    const groups = [...new Set(steps.map((step) => step.group || "Creative Details"))];
+    const groupNav = element("nav", "guided-group-nav");
+    groupNav.setAttribute("aria-label", "Creative detail sections");
+    groups.forEach((group) => {
+      const groupSteps = steps.filter((step) => (step.group || "Creative Details") === group);
+      const groupComplete = groupSteps.filter((step) => {
+        const value = guidedAnswer(step);
+        return Array.isArray(value) ? value.length : String(value || "").trim();
+      }).length;
+      const activeGroup = (steps[state.guidedStep]?.group || "") === group;
+      const control = button("", `guided-group-chip${activeGroup ? " is-active" : ""}`, { guidedGroup: group });
+      control.append(element("strong", "", group), element("small", "", `${groupComplete}/${groupSteps.length}`));
+      groupNav.append(control);
+    });
+    section.append(groupNav);
     let currentGroup = "";
     steps.forEach((step, index) => {
       const group = step.group || "Creative Details";
       if (group !== currentGroup) {
-        dropdowns.append(element("p", "guided-dropdown-group", group));
+        const groupHeading = element("div", "guided-dropdown-group");
+        groupHeading.dataset.guidedGroupPanel = group;
+        const groupSteps = steps.filter((item) => (item.group || "Creative Details") === group);
+        const complete = groupSteps.filter((item) => {
+          const value = guidedAnswer(item);
+          return Array.isArray(value) ? value.length : String(value || "").trim();
+        }).length;
+        groupHeading.append(element("strong", "", group), element("small", "", `${complete} of ${groupSteps.length} complete`));
+        dropdowns.append(groupHeading);
         currentGroup = group;
       }
       const answer = guidedAnswer(step);
@@ -1287,7 +1496,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
         guidedStep: state.guidedStep,
         guidedAnswers: clone(state.guidedAnswers),
         guidedSeedGoal: state.guidedSeedGoal,
-        experienceVersion: 3
+        guidedOutput: state.guidedCategoryId ? (state.guidedOutput || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId))) : "",
+        experienceVersion: 4
       }
     };
     try {
@@ -1315,6 +1525,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     state.guidedStep = Math.max(0, Number(project.data?.guidedStep) || 0);
     state.guidedAnswers = clone(project.data?.guidedAnswers || {});
     state.guidedSeedGoal = project.data?.guidedSeedGoal || project.data?.goal || "";
+    state.guidedOutput = project.data?.guidedOutput || (state.guidedCategoryId ? defaultGuidedOutput(getCreationCategory(state.guidedCategoryId)) : "");
+    state.guidedGroup = "";
     state.history = [];
     state.historyIndex = -1;
     pushHistory("Project opened");
@@ -1333,7 +1545,21 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       return api;
     }
     if (options.reset) reset();
-    if (options.category) {
+    if (options.lookId) {
+      const look = (engine.settings.get().savedCharacterLooks || []).find((item) => item.id === options.lookId);
+      if (look) {
+        state.guidedCategoryId = look.categoryId || "person";
+        state.guidedAnswers = clone(look.answers || {});
+        state.guidedOutput = look.output || defaultGuidedOutput(getCreationCategory(state.guidedCategoryId));
+        state.guidedStep = 0;
+        state.guidedCustomStep = "";
+        state.guidedGroup = "";
+        persistGuidedDraft();
+        renderGuidedStep();
+      } else {
+        renderGuidedCategories();
+      }
+    } else if (options.category) {
       selectGuidedCategory(options.category);
     } else if (options.template) {
       state.specification = blankSpecification("");
@@ -1540,6 +1766,22 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       persistGuidedDraft();
       renderGuidedStep();
     }
+    if (target.dataset.guidedGroup) {
+      const steps = guidedSteps(state.guidedCategoryId, state.guidedAnswers);
+      const index = steps.findIndex((step) => (step.group || "Creative Details") === target.dataset.guidedGroup);
+      if (index >= 0) {
+        state.guidedStep = index;
+        state.guidedGroup = target.dataset.guidedGroup;
+        persistGuidedDraft();
+        renderGuidedStep();
+        requestAnimationFrame(() => [...root.querySelectorAll("[data-guided-group-panel]")].find((item) => item.dataset.guidedGroupPanel === state.guidedGroup)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      }
+    }
+    if (target.dataset.guidedOutput) {
+      state.guidedOutput = target.dataset.guidedOutput;
+      persistGuidedDraft();
+      state.view === "guided-review" ? renderGuidedReview() : renderGuidedStep();
+    }
     if (target.hasAttribute("data-guided-review")) renderGuidedReview();
     if (target.hasAttribute("data-guided-toggle-all")) {
       state.guidedShowAll = !state.guidedShowAll;
@@ -1595,7 +1837,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     }
     if (target.hasAttribute("data-guided-surprise")) {
       const category = getCreationCategory(state.guidedCategoryId);
-      guidedSteps(category).forEach((step) => {
+      guidedSteps(category, state.guidedAnswers).forEach((step) => {
         if (state.guidedAnswers[step.id] && (!Array.isArray(state.guidedAnswers[step.id]) || state.guidedAnswers[step.id].length)) return;
         const options = step.options || [];
         state.guidedAnswers[step.id] = options.length
@@ -1605,6 +1847,19 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       persistGuidedDraft();
       renderGuidedStep();
       showToast("A complete direction is ready to explore");
+    }
+    if (target.hasAttribute("data-guided-save-look")) {
+      const current = engine.settings.get().savedCharacterLooks || [];
+      const look = {
+        id: `look-${Date.now().toString(36)}`,
+        categoryId: state.guidedCategoryId,
+        name: [answerText("clothingStyle"), answerText("occasion"), answerText("clothingColor")].filter(Boolean).join(" · ") || "Saved character look",
+        answers: clone(state.guidedAnswers),
+        output: state.guidedOutput,
+        savedAt: new Date().toISOString()
+      };
+      engine.settings.set({ savedCharacterLooks: [look, ...current].slice(0, 30) });
+      showToast("Character look saved to your Library", "saved");
     }
     if (target.hasAttribute("data-guided-skip") || target.hasAttribute("data-guided-next")) {
       state.guidedStep += 1;
