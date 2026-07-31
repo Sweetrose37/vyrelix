@@ -2,9 +2,20 @@
 
 ## Purpose
 
-The Universal Creation Engine (UCE) turns Vyrelix from a character-only workspace into a modular creative platform. Every creation is represented by the same Project model, managed by the same lifecycle services, stored through the same expandable adapter, and surfaced through reusable mobile components.
+The Universal Creation Engine (UCE) makes Vyrelix one intelligent creative platform. Every creation is represented by the same Project model, managed by the same lifecycle services, stored through the same expandable adapter, and surfaced through reusable mobile components.
 
-No real AI provider is connected. Version 4 adds a lazy prompt module, and Version 5 adds a separate offline Mock Provider that consumes those prompts without changing the UCE lifecycle. Character Studio is the only active studio; other studios remain registered for future modules.
+Users never choose a studio, generator, or separate workflow. The Universal Creation Experience asks what they want to create and how they want to create it, then adapts relevant controls around that goal. No real AI provider is connected. The offline Mock Provider consumes prompts without changing the UCE lifecycle.
+
+## Universal Creation Experience
+
+`js/creation/creationExperience.js` is the user-facing entry layer. It always begins with:
+
+1. What would you like to create?
+2. How would you like to create it?
+
+The first answer accepts natural language or a suggested category. `creationSchemas.js` recognizes Person, Family, Baby, Toddler, Animal, Fantasy Character, Wedding Invitation, Birthday Invitation, Business Card, Poster, Logo, Product Mockup, Book Cover, Interior, Landscape, Vehicle, Social Media Graphic, Advertisement, and open-ended goals.
+
+The second answer selects Quick Create, Guided Creator, Advanced Creator, AI Creative Director, Inspire Me, Templates, or Reference Mode. Each mode renders only its relevant interface. Every result is normalized into the same Project model and sent through the same validation, storage, history, search, recent, prompt, and provider systems.
 
 ## Architecture
 
@@ -14,7 +25,7 @@ No real AI provider is connected. Version 4 adds a lazy prompt module, and Versi
 - `projectManager.js` owns create, rename, duplicate, archive, delete, favorite, and restore operations.
 - `validationEngine.js` enforces required fields, registered project types, unique names, numeric seeds, and valid references.
 - `storageEngine.js` is the expandable, corruption-tolerant local persistence boundary.
-- `studioManager.js` registers studios and exposes their supported project types.
+- `studioManager.js` retains internal project-type registration for compatibility; it is not a user-facing selector.
 - `moduleLoader.js` lazily loads optional studio implementations and caches their promises.
 - `generatorEngine.js` registers seeded generators. Character is active; future generators return Coming Soon.
 - `searchEngine.js` performs instant cached searches across name, tags, category, studio, date, favorite state, type, and status.
@@ -31,11 +42,11 @@ All project types use these required fields:
 
 `id`, `name`, `type`, `category`, `description`, `tags`, `thumbnail`, `favorite`, `createdAt`, `modifiedAt`, `version`, `creator`, `theme`, `artStyle`, `colorPalette`, `visibility`, `status`, and `randomSeed`.
 
-The model also includes `studio`, `data`, and `references`. `data` is the studio-owned extension point. A future World Studio can store world-specific values inside `data` while dashboard, search, storage, templates, import/export, and project lifecycle code continue to work unchanged.
+The model also includes `studio`, `data`, and `references`. New adaptive creations identify `studio` as `Universal Creative Engine`; `data` stores the selected goal, category, creation mode, relevant answers, reference metadata, and creative direction. Existing records retain their original values for backward compatibility.
 
 ## Project lifecycle
 
-1. A studio or template supplies partial project values.
+1. A creative goal, template, reference, or legacy builder supplies partial project values.
 2. `ProjectEngine.create()` normalizes them into a complete Project.
 3. `ValidationEngine` checks required fields, type registration, unique names, and value shapes.
 4. `ProjectManager` writes the project, records history, and updates the recent index.
@@ -43,7 +54,7 @@ The model also includes `studio`, `data`, and `references`. `data` is the studio
 6. Archive moves a project from `projects` to `archive`. Restore validates it and moves it back.
 7. Delete removes the record from active and archived collections while retaining a bounded history entry.
 
-The existing Character Builder now creates a universal Character Project and also preserves its original Phase 1 character record for backward compatibility.
+The existing Character Builder continues to create a universal Character Project and preserves its original Phase 1 character record for backward compatibility. It remains an internal compatible tool rather than the primary creation entry.
 
 ## Storage architecture
 
@@ -84,16 +95,16 @@ Studios receive these datasets through the UCE. They must not copy lists into st
 - `projectStatistics.js` derives dashboard totals.
 - `projectTemplates.js` provides Blank, Fantasy, Sci-Fi, Modern, Anime, Realistic, and custom template support.
 
-## Adding a future studio
+## Adding a future creative goal
 
-1. Add a descriptor under `js/studios/` with a unique `id`, display name, project type, description, icon, and active state.
-2. Export it from `js/studios/index.js`.
-3. Add its optional implementation through `creationEngine.registerStudio(descriptor, moduleFactory)` or register a lazy factory on `ModuleLoader`.
-4. Store studio-only fields inside `project.data`.
-5. Reuse `CORE_DATASETS` and `createProjectPreview()` rather than copying data or UI.
-6. Activate its generator only when an actual non-AI generator implementation exists.
+1. Add a category descriptor to `js/creation/creationSchemas.js`.
+2. Map it to a registered UCE project type.
+3. Define only the questions relevant to that goal.
+4. Store goal-specific answers inside `project.data`.
+5. Reuse `CORE_DATASETS`, templates, and `createProjectPreview()` rather than copying data or UI.
+6. Keep generation behind the existing prompt and provider boundaries.
 
-No core manager, project schema, dashboard component, or storage mechanism needs to be rewritten.
+No separate page, studio selector, core manager, project schema, dashboard component, or storage mechanism needs to be rewritten.
 
 ## Performance and accessibility
 

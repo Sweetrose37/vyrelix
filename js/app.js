@@ -26,9 +26,11 @@ const state = { step: 1, intensity: 3, filter: "all", query: "", visual: null, v
 const form = document.querySelector("#character-form");
 const savedList = document.querySelector("#saved-list");
 let navigation;
+let creationExperiencePromise = null;
 let visualStudioPromise = null;
 let promptStudioPromise = null;
 let aiStudioPromise = null;
+let pendingCreationOptions = null;
 
 function launch() {
   const splash = document.querySelector("#splash");
@@ -132,6 +134,26 @@ async function ensureVisualStudio() {
 }
 
 /**
+ * Lazily opens the studio-free adaptive entry layer for the Universal Creation Engine.
+ */
+async function ensureCreationExperience() {
+  if (creationExperiencePromise) return creationExperiencePromise;
+  creationExperiencePromise = import("./creation/creationExperience.js").then(({ initializeCreationExperience }) =>
+    initializeCreationExperience({
+      root: document.querySelector('[data-screen="create"]'),
+      engine: creationEngine,
+      navigate: navigation.navigate,
+      showToast
+    })
+  ).catch((error) => {
+    creationExperiencePromise = null;
+    showToast("Universal Creator could not be loaded", "error");
+    throw error;
+  });
+  return creationExperiencePromise;
+}
+
+/**
  * Lazily opens the complete local prompt-generation workspace.
  */
 async function ensurePromptStudio() {
@@ -148,7 +170,7 @@ async function ensurePromptStudio() {
     })
   ).catch((error) => {
     promptStudioPromise = null;
-    showToast("Prompt Studio could not be loaded", "error");
+    showToast("Prompt Builder could not be loaded", "error");
     throw error;
   });
   return promptStudioPromise;
@@ -207,6 +229,13 @@ function refreshSaved() {
 }
 
 function bindEvents() {
+  document.querySelectorAll('[data-route="create"]').forEach((trigger) => trigger.addEventListener("click", () => {
+    pendingCreationOptions = {
+      reset: trigger.hasAttribute("data-create-reset"),
+      mode: trigger.dataset.createMode || null,
+      template: trigger.dataset.template || null
+    };
+  }));
   document.querySelector("#builder-next").addEventListener("click", handleNext);
   document.querySelector("#builder-back").addEventListener("click", () => { state.step = Math.max(1, state.step - 1); updateBuilder(); });
   document.querySelector("#save-draft").addEventListener("click", () => { saveCharacter(); });
@@ -241,7 +270,7 @@ function bindEvents() {
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
     const isAbout = button.dataset.dialog === "about";
     openDialog(isAbout ? "About Vyrelix" : "Privacy", isAbout
-      ? "Vyrelix is a focused workspace for developing original characters, visual systems, professional prompts, and clearly labeled demo artwork through an offline Mock Provider."
+      ? "Vyrelix is one adaptive creative engine for developing original ideas, visual systems, professional prompts, and clearly labeled demo artwork through an offline Mock Provider."
       : "Your projects, prompts, provider settings, and demo images stay in this browser. Mock Provider uses no network connection.");
   }));
   document.querySelector("#notifications-button").addEventListener("click", () => showToast("You’re all caught up"));
@@ -348,6 +377,11 @@ document.addEventListener("click", (event) => {
 
 navigation = createNavigation({ onRouteChange: (route) => {
   if (route === "saved") refreshSaved();
+  if (route === "create") {
+    const options = pendingCreationOptions || {};
+    pendingCreationOptions = null;
+    ensureCreationExperience().then((controller) => controller.start(options));
+  }
   if (route === "visual") ensureVisualStudio();
   if (["prompt", "prompt-preview", "prompt-history", "ai-image", "image-gallery", "provider-settings", "test-mode"].includes(route)) {
     ensurePromptStudio().then((controller) => {

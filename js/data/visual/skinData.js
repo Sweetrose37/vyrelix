@@ -1,4 +1,4 @@
-/** Inclusive skin-tone and surface-finish metadata for Character Studio previews. */
+/** Inclusive skin-tone and surface-finish metadata for universal character previews. */
 import { createVisualOptions } from "./helpers.js";
 
 export const SKIN_TONES = Object.freeze([

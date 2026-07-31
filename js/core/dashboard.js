@@ -1,5 +1,5 @@
 /**
- * Mobile dashboard and Studio Selection renderer for the Universal Creation Engine.
+ * Mobile dashboard renderer for the Universal Creation Engine.
  * DOM updates are fragment-based and shared project previews are rendered in bounded batches.
  */
 import { createProjectPreview } from "../project/projectPreview.js";
@@ -21,44 +21,13 @@ function createStatistic(label, value, filter) {
   return button;
 }
 
-function createStudioCard(studio) {
-  const button = document.createElement("button");
-  const icon = document.createElement("span");
-  const copy = document.createElement("span");
-  const heading = document.createElement("span");
-  const title = document.createElement("h2");
-  const status = document.createElement("span");
-  const description = document.createElement("p");
-  button.type = "button";
-  button.className = `studio-option${studio.active ? " studio-option--active" : ""}`;
-  button.dataset.studioId = studio.id;
-  button.disabled = !studio.active;
-  button.setAttribute("aria-label", `${studio.name}. ${studio.active ? "Open studio" : "Coming Soon"}. ${studio.description}`);
-  icon.className = "studio-option__icon";
-  icon.setAttribute("aria-hidden", "true");
-  icon.textContent = studio.icon;
-  copy.className = "studio-option__copy";
-  heading.className = "studio-option__heading";
-  title.textContent = studio.name;
-  status.className = `badge${studio.active ? "" : " badge--soft"}`;
-  status.textContent = studio.active ? "Open" : "Coming Soon";
-  description.textContent = studio.description;
-  heading.append(title, status);
-  copy.append(heading, description);
-  button.append(icon, copy);
-  return button;
-}
-
 export function initializeDashboard({ engine, navigate, showToast }) {
   const statsRoot = document.querySelector("#dashboard-stats");
   const projectsRoot = document.querySelector("#dashboard-projects");
-  const studiosRoot = document.querySelector("#studio-selector");
   const search = document.querySelector("#project-search");
   const status = document.querySelector("#project-status-filter");
   const sort = document.querySelector("#project-sort");
   let dashboardFilter = "all";
-
-  studiosRoot.replaceChildren(...engine.studios.list().filter((studio) => studio.id !== "icon").map(createStudioCard));
 
   function render() {
     const projects = engine.projects.list();
@@ -81,11 +50,6 @@ export function initializeDashboard({ engine, navigate, showToast }) {
     renderInBatches(matches, (project) => createProjectPreview(project, { compact: true }), projectsRoot, { batchSize: 6 });
   }
 
-  studiosRoot.addEventListener("click", (event) => {
-    const studio = engine.studios.get(event.target.closest("[data-studio-id]")?.dataset.studioId);
-    if (!studio?.active) return;
-    navigate(studio.route || "home");
-  });
   statsRoot.addEventListener("click", (event) => {
     const target = event.target.closest("[data-dashboard-filter]");
     if (!target) return;
@@ -94,27 +58,6 @@ export function initializeDashboard({ engine, navigate, showToast }) {
     render();
   });
   [search, status, sort].forEach((control) => control.addEventListener(control === search ? "input" : "change", render));
-  document.querySelector("[data-random-character]").addEventListener("click", () => {
-    const generated = engine.generators.generate("Character", { datasets: engine.datasets });
-    try {
-      const project = engine.projects.create({
-        ...generated.value,
-        type: "Character",
-        description: "Seeded character concept created by the Universal Randomizer.",
-        tags: ["random", generated.value.category.toLocaleLowerCase()]
-      });
-      showToast(`${project.name} added to projects`, "saved");
-      render();
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
-  document.querySelector(".template-scroll").addEventListener("click", (event) => {
-    const template = event.target.closest("[data-template]")?.dataset.template;
-    if (!template) return;
-    if (template === "Blank") navigate("builder");
-    else showToast(`${template} template framework is ready for a future studio`, "success");
-  });
   document.addEventListener("vyrelix:projects-changed", render);
   render();
   return { render };

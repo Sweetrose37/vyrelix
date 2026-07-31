@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="./css/core/dashboard.css">
     <link rel="stylesheet" href="./css/core/studios.css">
     <link rel="stylesheet" href="./css/core/projects.css">
+    <link rel="stylesheet" href="./css/core/creation.css">
     <link rel="stylesheet" href="./css/visual/visual.css">
     <link rel="stylesheet" href="./css/visual/preview.css">
     <link rel="stylesheet" href="./css/visual/selectors.css">
@@ -72,10 +73,10 @@
           <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
             <div class="hero">
               <div class="eyebrow"><span></span> Universal creative engine</div>
-              <h1 class="large-title" id="home-title">Every idea.<br>One <em>studio.</em></h1>
-              <p class="body-text text-muted">Create, organize, and evolve original characters today—with worlds, scenes, objects, and more ready to grow from the same engine.</p>
-              <button class="button button--primary button--wide ripple" type="button" data-route="studios">
-                Explore studios <span aria-hidden="true">→</span>
+              <h1 class="large-title" id="home-title">Every idea.<br>One <em>engine.</em></h1>
+              <p class="body-text text-muted">Tell Vyrelix what you want to make. One intelligent creative engine adapts the experience around your goal.</p>
+              <button class="button button--primary button--wide ripple" type="button" data-route="create" data-create-reset>
+                Start creating <span aria-hidden="true">→</span>
               </button>
             </div>
 
@@ -93,27 +94,27 @@
             <section class="section-block" aria-labelledby="quick-title">
               <div class="section-heading">
                 <h2 class="medium-title" id="quick-title">Quick create</h2>
-                <span class="badge badge--soft">Character live</span>
+                <span class="badge badge--soft">One engine</span>
               </div>
               <div class="card-grid">
-                <button class="card card--interactive quick-card" type="button" data-route="builder" aria-label="Create a new character">
+                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset aria-label="Start a new creation">
                   <span class="card-icon" aria-hidden="true">✦</span>
                   <span>
-                    <strong>New character</strong>
-                    <small>Start a universal project</small>
+                    <strong>New creation</strong>
+                    <small>Describe anything you want to make</small>
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
-                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open Prompt Studio">
+                <button class="card card--interactive quick-card" type="button" data-route="prompt" aria-label="Open Prompt Builder">
                   <span class="card-icon" aria-hidden="true">⌁</span>
-                  <span><strong>Prompt Studio</strong><small>Generate from a saved project</small></span>
+                  <span><strong>Prompt Builder</strong><small>Continue from a saved project</small></span>
                   <span aria-hidden="true">›</span>
                 </button>
-                <button class="card card--interactive quick-card" type="button" data-random-character aria-label="Create a random character project">
+                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset aria-label="Start creating with inspiration">
                   <span class="card-icon" aria-hidden="true">⟳</span>
                   <span>
-                    <strong>Random character</strong>
-                    <small>Use a reusable seed</small>
+                    <strong>Inspire me</strong>
+                    <small>Generate and mix creative ideas</small>
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
@@ -126,13 +127,13 @@
                 <span class="caption">Framework ready</span>
               </div>
               <div class="template-scroll" aria-label="Available project templates">
-                <button type="button" data-template="Blank">Blank</button>
-                <button type="button" data-template="Fantasy">Fantasy</button>
-                <button type="button" data-template="Sci-Fi">Sci-Fi</button>
-                <button type="button" data-template="Modern">Modern</button>
-                <button type="button" data-template="Anime">Anime</button>
-                <button type="button" data-template="Realistic">Realistic</button>
-                <button type="button" data-template="Custom">Custom</button>
+                <button type="button" data-route="create" data-template="Blank" data-create-reset>Blank</button>
+                <button type="button" data-route="create" data-template="Fantasy" data-create-reset>Fantasy</button>
+                <button type="button" data-route="create" data-template="Sci-Fi" data-create-reset>Sci-Fi</button>
+                <button type="button" data-route="create" data-template="Modern" data-create-reset>Modern</button>
+                <button type="button" data-route="create" data-template="Anime" data-create-reset>Anime</button>
+                <button type="button" data-route="create" data-template="Realistic" data-create-reset>Realistic</button>
+                <button type="button" data-route="create" data-template="Custom" data-create-reset>Custom</button>
               </div>
             </section>
 
@@ -170,16 +171,50 @@
             </section>
           </section>
 
-          <section class="screen" data-screen="studios" aria-labelledby="studios-title">
-            <div class="screen-heading">
+          <section class="screen creation-screen" data-screen="create" aria-labelledby="creation-title">
+            <div class="screen-heading creation-heading">
               <div>
-                <p class="eyebrow">Choose your canvas</p>
-                <h1 class="large-title" id="studios-title">Creative studios</h1>
+                <p class="eyebrow" id="creation-step-label">Question 1 of 2</p>
+                <h1 class="large-title" id="creation-title">Create anything</h1>
               </div>
-              <span class="badge">12 modules</span>
+              <span class="badge">UCE</span>
             </div>
-            <p class="body-text studio-intro">One engine powers every creative discipline. Character Studio is open now; the foundation for every future studio is already in place.</p>
-            <div class="studio-selector" id="studio-selector" aria-live="polite"></div>
+            <div class="creation-progress" aria-hidden="true">
+              <span class="is-active" data-creation-progress></span>
+              <span data-creation-progress></span>
+              <span data-creation-progress></span>
+            </div>
+            <p class="sr-only" id="creation-live-status" aria-live="polite">Choose or describe what you want to create.</p>
+
+            <section class="creation-question" id="creation-question-one" aria-labelledby="creation-question-one-title">
+              <h2 class="medium-title" id="creation-question-one-title">What would you like to create?</h2>
+              <p class="body-text text-muted">Describe it naturally or choose a suggested category.</p>
+              <label class="field creation-goal-field">
+                <span>Your creative goal</span>
+                <textarea id="creation-goal" rows="4" maxlength="500" placeholder="e.g. An elegant wedding invitation with botanical details…" aria-label="Describe what you would like to create"></textarea>
+              </label>
+              <p class="creation-inference" id="creation-inference">Describe anything. Vyrelix will recognize the creative direction.</p>
+              <div class="creation-category-grid" id="creation-categories" aria-label="Suggested creation categories"></div>
+              <button class="button button--primary button--wide ripple" type="button" data-creation-continue>Continue</button>
+            </section>
+
+            <section class="creation-question is-hidden" id="creation-question-two" aria-labelledby="creation-question-two-title">
+              <h2 class="medium-title" id="creation-question-two-title">How would you like to create it?</h2>
+              <p class="body-text text-muted">Choose the amount of guidance that feels right. You can start over at any time.</p>
+              <div class="creation-mode-grid" id="creation-modes" aria-label="Creation modes"></div>
+              <button class="button button--outlined button--wide" type="button" data-creation-back>Back</button>
+            </section>
+
+            <section class="is-hidden" id="creation-workspace" aria-labelledby="adaptive-creation-title">
+              <div class="creation-summary">
+                <div>
+                  <strong id="adaptive-creation-title"><span id="creation-summary-category">Creation</span> · <span id="creation-summary-mode">Mode</span></strong>
+                  <small id="creation-summary-goal">Your creative goal</small>
+                </div>
+                <span class="badge">Adaptive</span>
+              </div>
+              <div id="adaptive-creation-root"></div>
+            </section>
           </section>
 
           <section class="screen" data-screen="builder" aria-labelledby="builder-title">
@@ -281,7 +316,7 @@
             <div class="screen-heading screen-heading--compact">
               <button class="icon-button" type="button" data-route="builder" aria-label="Back to Character Builder">‹</button>
               <div class="screen-heading__center">
-                <p class="eyebrow">Character Studio</p>
+                <p class="eyebrow">Universal creation</p>
                 <h1 class="medium-title" id="visual-title">Visual Engine</h1>
               </div>
               <button class="icon-button" type="button" data-random-visual aria-label="Randomize all compatible visual selections">⟳</button>
@@ -360,7 +395,7 @@
 
           <section class="screen prompt-studio" data-screen="prompt" aria-labelledby="prompt-studio-title">
             <div class="screen-heading">
-              <div><p class="eyebrow">Local generation engine</p><h1 class="large-title" id="prompt-studio-title">Prompt Studio</h1></div>
+              <div><p class="eyebrow">Local generation engine</p><h1 class="large-title" id="prompt-studio-title">Prompt Builder</h1></div>
               <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
             </div>
             <div class="notice"><span aria-hidden="true">✓</span><p>Build professional prompts locally, then test them with the offline Mock Provider. Nothing leaves this device.</p></div>
@@ -398,7 +433,7 @@
           </section>
 
           <section class="screen prompt-preview-screen" data-screen="prompt-preview" aria-labelledby="prompt-preview-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Builder">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
             <section class="prompt-output-card">
               <div class="prompt-preview__heading"><span class="badge" data-preview-type>Ready</span><span data-prompt-length>Concise</span></div><h2 class="section-title">Formatted prompt</h2><p class="prompt-output" data-preview-prompt>Generate a prompt to see it here.</p>
               <div class="prompt-action-grid"><button class="button button--copy" type="button" data-copy-part="prompt">Copy prompt</button><button class="button button--copy" type="button" data-copy-part="json">Copy JSON</button></div>
@@ -411,7 +446,7 @@
           </section>
 
           <section class="screen prompt-history-screen" data-screen="prompt-history" aria-labelledby="prompt-history-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt history</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Builder">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt history</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
             <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="prompt-history-search" placeholder="Search prompts" aria-label="Search prompt history"></label>
             <div class="prompt-history-list" id="prompt-history-list" aria-live="polite"></div>
           </section>
@@ -430,7 +465,7 @@
             <div class="mock-notice"><strong>Demo Mode</strong><span>Offline artwork simulation · No API key required</span></div>
             <section class="ai-request-card" aria-labelledby="ai-ready-title">
               <div class="ai-request-card__heading"><div><p class="eyebrow">Prompt ready</p><h2 class="section-title" id="ai-ready-title">Generation request</h2></div><span id="ai-provider-status">Offline demo ready</span></div>
-              <p id="ai-prompt-preview">Generate and save a prompt in Prompt Studio first.</p>
+              <p id="ai-prompt-preview">Generate and save a prompt in Prompt Builder first.</p>
               <label class="field"><span>Collection</span><input id="ai-collection" type="text" maxlength="48" value="All Generations" aria-label="Demo image collection"></label>
               <dl class="ai-request-meta"><div><dt>Estimated time</dt><dd id="ai-generation-estimate">2–5 seconds</dd></div><div><dt>Result type</dt><dd>Clearly labeled demo artwork</dd></div></dl>
             </section>
@@ -476,7 +511,7 @@
           </section>
 
           <section class="screen test-mode" data-screen="test-mode" aria-labelledby="test-mode-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Studio">‹</button><div class="screen-heading__center"><p class="eyebrow">Local diagnostics</p><h1 class="medium-title" id="test-mode-title">Developer Test Mode</h1></div><span class="badge">DEV</span></div>
+            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Builder">‹</button><div class="screen-heading__center"><p class="eyebrow">Local diagnostics</p><h1 class="medium-title" id="test-mode-title">Developer Test Mode</h1></div><span class="badge">DEV</span></div>
             <div class="notice"><span aria-hidden="true">i</span><p>These tools use local deterministic data and never call an AI service.</p></div>
             <div class="test-action-list">
               <button class="card card--interactive" type="button" data-test-action="sample-character"><span class="card-icon" aria-hidden="true">✦</span><span><strong>Generate Sample Character</strong><small>Create a compatible Character project</small></span><span aria-hidden="true">›</span></button>
@@ -690,10 +725,9 @@
           </section>
         </main>
 
-        <nav class="bottom-nav bottom-nav--five" aria-label="Primary navigation">
+        <nav class="bottom-nav bottom-nav--four" aria-label="Primary navigation">
           <button class="nav-item is-active" type="button" data-route="home" aria-label="Home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
-          <button class="nav-item" type="button" data-route="studios" aria-label="Creative studios"><span aria-hidden="true">◈</span><small>Studios</small></button>
-          <button class="nav-item" type="button" data-route="builder" aria-label="Build character"><span aria-hidden="true">✦</span><small>Build</small></button>
+          <button class="nav-item" type="button" data-route="create" data-create-reset aria-label="Create anything"><span aria-hidden="true">✦</span><small>Create</small></button>
           <button class="nav-item" type="button" data-route="saved" aria-label="Projects"><span aria-hidden="true">▱</span><small>Projects</small></button>
           <button class="nav-item" type="button" data-route="settings" aria-label="Settings"><span aria-hidden="true">⚙</span><small>Settings</small></button>
         </nav>

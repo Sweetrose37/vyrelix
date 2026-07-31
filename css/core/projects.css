@@ -4,6 +4,10 @@
   padding-inline: var(--space-1);
 }
 
+.bottom-nav--four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .bottom-nav--five .nav-item small {
   font-size: 0.56rem;
 }

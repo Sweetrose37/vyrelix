@@ -1,5 +1,5 @@
 /**
- * Registry for creative studios. New studios register descriptors without changing engine code.
+ * Compatibility registry for creative capabilities and their project types.
  */
 export class StudioManager {
   constructor() {

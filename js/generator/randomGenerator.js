@@ -14,7 +14,7 @@ export class RandomGenerator {
     this.visualEngine = visualEngine;
   }
 
-  /** Generates Character Studio identity metadata. */
+  /** Generates character-compatible identity metadata for the universal engine. */
   character() {
     return this.engine.generators.generate("Character", { datasets: this.engine.datasets }).value;
   }
@@ -43,7 +43,7 @@ export class RandomGenerator {
     return {
       ...character,
       type: "Character",
-      studio: "Character Studio",
+      studio: "Universal Creative Engine",
       description: "A generated demo character ready for prompt testing.",
       data: { archetype: character.category, visual }
     };

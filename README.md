@@ -1,6 +1,6 @@
 # Vyrelix
 
-Vyrelix is a premium mobile-only AI Creative Studio. Version 5 adds the Universal AI Provider Engine to the UCE, UVE, and Prompt Engine. Users can create Character projects, generate professional prompts, simulate complete image-generation requests, save clearly labeled demo artwork, browse history, manage collections, switch providers, and test failure or latency states without internet access or API keys.
+Vyrelix is a premium mobile-only creative platform powered by one Universal Creative Engine. Users begin with a creative goal, choose the amount of guidance they want, and receive an adaptive experience for people, invitations, brands, products, publications, environments, vehicles, campaigns, or anything else. Existing character, visual, prompt, project, gallery, provider, and offline demo capabilities remain available through the same universal project lifecycle.
 
 ## Technology
 
@@ -8,9 +8,10 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 
 ## Structure
 
-- `index.html` contains the accessible application shell, project dashboard, Studio Selection screen, Character Builder, collection, settings, and UI library.
+- `index.html` contains the accessible application shell, project dashboard, Universal Creation Experience, legacy character tools, collection, settings, and UI library.
 - `css/` separates tokens, typography, layout, component foundations, focused component modules, motion, utilities, mobile refinements, and product-level styles.
 - `js/core/` contains the Universal Creation Engine and its focused managers.
+- `js/creation/` contains the two-question adaptive entry experience, creative-goal schemas, category inference, creation modes, and UCE project handoff.
 - `js/project/` contains reusable project building, preview, templates, validation, statistics, import, and export modules.
 - `js/visual/` contains the lazily loaded Universal Visual Engine and its focused color, material, lighting, camera, style, composition, mood, validation, compatibility, storage, search, filter, template, randomizer, and preview modules.
 - `js/prompt/` contains the lazily loaded prompt composition, template, optimization, validation, negative prompt, history, search, storage, preview, and export facade modules.
@@ -19,8 +20,8 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 - `js/ai/` contains the provider manager, queue, request/response pipelines, image metadata, storage, history, gallery, downloader, error handling, and lazy UI controller.
 - `js/providers/` contains the universal adapter contract, registry, settings, validation, fully working Mock Provider, and inactive future-provider adapter.
 - `js/mock/` contains cached placeholder artwork, fake latency, demo generation, and sample data.
-- `js/studios/` contains registry descriptors for Character Studio and every scaffolded future studio.
-- `js/data/core/` is the single shared dataset source available to all studios.
+- `js/studios/` retains internal project-type descriptors for backward compatibility; users never select or switch studios.
+- `js/data/core/` is the single shared dataset source available to every creative goal.
 - `js/data/visual/` contains normalized visual datasets, including a deterministic catalog of more than 1,000 named colors.
 - Existing `js/` modules continue to provide navigation, UI feedback, legacy storage compatibility, settings, animations, and focused component controllers.
 - `utilities/` contains framework-free constants, helpers, validation, and controlled randomization utilities.
@@ -32,7 +33,7 @@ The app uses semantic HTML5, modular CSS3, and native JavaScript modules. It has
 
 ## Architecture
 
-Vyrelix uses a small single-page architecture. `app.js` composes the shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; UCE persistence flows through `StorageEngine`; and the large UVE and prompt workspaces load only when their routes open. CSS design tokens keep the gold-on-charcoal visual system consistent while focused feature styles preserve existing class contracts.
+Vyrelix uses a small single-page architecture. `app.js` composes the shell with `creationEngine.js`; `navigation.js` owns screen and browser-history state; `creationExperience.js` translates a goal and creation mode into adaptive fields; UCE persistence flows through `StorageEngine`; and the large UVE and prompt workspaces load only when their routes open. CSS design tokens keep the gold-on-charcoal visual system consistent while focused feature styles preserve existing class contracts.
 
 All saved content remains on the current device. Mock Provider makes no network requests, and storage keys are versioned so future migrations can be introduced without collisions.
 
@@ -62,7 +63,7 @@ Dialogs, sheets, and drawers restore focus after closing and trap keyboard focus
 
 ## Future expansion
 
-Character Studio is the first active studio. Creature, World, Scene, Environment, Object, Vehicle, Architecture, Logo, Mascot, Poster, Book Cover, and Icon project types are registered for future work. New studios plug into the registry, reuse the project model and shared data, and store domain values in `project.data` without architectural changes.
+Character, Creature, Environment, Object, Vehicle, Architecture, Logo, Poster, Book Cover, and related project types remain registered inside UCE. New user goals extend `creationSchemas.js`, reuse the universal project model and shared data, and store goal-specific values in `project.data` without introducing separate user-facing workflows.
 
 ## Phase boundary
 

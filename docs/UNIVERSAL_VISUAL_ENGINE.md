@@ -8,7 +8,7 @@ The UVE does not generate images or prompts, call external APIs, create clothing
 
 ## Loading and composition
 
-`js/visual/visualEngine.js` is the UVE composition root. The Universal Creation Engine registers it through `ModuleLoader`, and the application imports the Character Studio interface only when the `visual` route is opened. This keeps the 1,200-color generated catalog and other datasets out of the initial launch path.
+`js/visual/visualEngine.js` is the UVE composition root. The Universal Creation Engine registers it through `ModuleLoader`, and the application imports the universal visual workspace only when the `visual` route is opened. This keeps the 1,200-color generated catalog and other datasets out of the initial launch path.
 
 The visual composition root exposes:
 
@@ -81,9 +81,9 @@ Compatibility is additive:
 
 Rules return `{ compatible, reason }`, allowing future studios to explain conflicts accessibly.
 
-## Character Studio
+## Universal visual workspace
 
-Character Studio is the fully implemented adapter. Its mobile workspace provides:
+The character-compatible visual adapter powers the current mobile visual workspace. It provides:
 
 - searchable category selectors;
 - All, Favorites, and Recent views;

@@ -31,7 +31,7 @@ function readSettings(form) {
   };
 }
 
-/** Creates the prompt studio and returns its public controller. */
+/** Creates the prompt builder and returns its public controller. */
 export function initializePromptStudio({ engine, navigate, showToast, onPromptsChanged = () => {} }) {
   const form = document.querySelector("#prompt-form");
   const projectSelect = form.elements.projectId;

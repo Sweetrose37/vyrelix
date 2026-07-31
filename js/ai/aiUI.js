@@ -17,7 +17,7 @@ function sampleRecord(sample, index = 0) {
     title: sample.title,
     prompt: sample.prompt,
     negativePrompt: sample.negativePrompt,
-    studio: "Character Studio",
+    studio: "Universal Creative Engine",
     seed: index + 1,
     project: {
       mood: sample.theme,
@@ -53,7 +53,7 @@ export async function initializeAIStudio({ creationEngine, navigate, showToast, 
     const prompt = currentPrompt();
     const provider = engine.providers.active();
     document.querySelector("#ai-provider-badge").textContent = provider.name;
-    document.querySelector("#ai-prompt-preview").textContent = prompt?.prompt || "Generate and save a prompt in Prompt Studio first.";
+    document.querySelector("#ai-prompt-preview").textContent = prompt?.prompt || "Generate and save a prompt in Prompt Builder first.";
     document.querySelector("#ai-provider-status").textContent = provider.demo ? "Offline demo ready" : "Provider not configured";
     generateButton.disabled = !prompt || !provider.configured;
     estimate.textContent = engine.providers.settings.get().latencyMode === "instant" ? "Under 1 second" : engine.providers.settings.get().latencyMode === "slow" ? "About 7 seconds" : "2–5 seconds";
@@ -84,7 +84,7 @@ export async function initializeAIStudio({ creationEngine, navigate, showToast, 
   async function generate() {
     const prompt = currentPrompt();
     if (!prompt) {
-      openModal("error", { title: "Prompt required", copy: "Generate a prompt in Prompt Studio before creating demo artwork." });
+      openModal("error", { title: "Prompt required", copy: "Generate a prompt in Prompt Builder before creating demo artwork." });
       return;
     }
     generateButton.disabled = true;

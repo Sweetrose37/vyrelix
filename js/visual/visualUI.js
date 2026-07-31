@@ -1,5 +1,5 @@
 /**
- * Event-delegated mobile Character Studio interface for the Universal Visual Engine.
+ * Event-delegated mobile visual interface for the Universal Creation Engine.
  */
 import { VisualEngine, VISUAL_SELECTOR_CONFIG } from "./visualEngine.js";
 import { createVisualPreview, updateVisualPreview } from "./visualPreview.js";
@@ -191,7 +191,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
         return;
       }
       onApply(visual, engine);
-      showToast("Visual direction applied to Character Studio", "success");
+      showToast("Visual direction applied to your creation", "success");
     }
   });
 

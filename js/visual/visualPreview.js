@@ -4,7 +4,7 @@
 export function createVisualPreview() {
   const article = document.createElement("article");
   article.className = "visual-preview card";
-  article.setAttribute("aria-label", "Live Character Studio visual preview");
+  article.setAttribute("aria-label", "Live universal visual preview");
   article.innerHTML = `
     <div class="visual-preview__stage" role="img" aria-label="Abstract live character preview">
       <span class="visual-preview__halo" aria-hidden="true"></span>
