@@ -194,19 +194,46 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       "jet black": "#19151a", "soft black": "#292229", "dark brown": "#4a3029", chestnut: "#75462f", honey: "#c69a5a",
       platinum: "#e8dcc4", auburn: "#8f432d", copper: "#ad5d33", gray: "#918e93", white: "#eee9e2", pastel: "#c9a7d1", fantasy: "#7f62a7"
     }, "#3d2928");
-    const clothing = previewColor(answerText("clothingColor"), {
+    const garmentPalette = {
       black: "#27232d", ivory: "#efe3cf", chocolate: "#624033", camel: "#bd8c5b", blush: "#dfa6b5", berry: "#913b62",
-      ruby: "#a9283f", orange: "#c46737", golden: "#d5a93e", emerald: "#287057", sky: "#78b9d2", navy: "#243a62",
-      lavender: "#a795ca", silver: "#a8abb3", gold: "#bb8a35"
-    }, "#9b6a78");
+      white: "#fffdf8", stone: "#8e8a89", rose: "#c96383", burgundy: "#682b3c", ruby: "#a9283f", orange: "#c46737",
+      golden: "#d5a93e", yellow: "#ead16f", emerald: "#287057", mint: "#9bcfbd", sage: "#9aaa89", teal: "#287b79",
+      sky: "#78b9d2", blue: "#78b9d2", navy: "#243a62", lavender: "#a795ca", neon: "#b8e63d", rainbow: "#8b5cf6",
+      peach: "#efb195", silver: "#a8abb3", gold: "#bb8a35", cream: "#f1dfc5", pink: "#dfa6b5"
+    };
+    const clothing = previewColor(answerText("clothingColor"), garmentPalette, "#9b6a78");
+    const topColor = previewColor(answerText("topColor"), garmentPalette, clothing);
+    const bottomColor = previewColor(answerText("bottomColor"), garmentPalette, clothing);
+    const outfitColor = previewColor(answerText("outfitColor"), garmentPalette, clothing);
+    const outerwearColor = previewColor(answerText("outerwearColor"), garmentPalette, "#74566c");
+    const shoeColor = previewColor(answerText("shoeColor"), garmentPalette, "#443845");
+    const accessoryColor = previewColor(answerText("accessoryColor"), garmentPalette, "#bb8a35");
+    const jewelryColor = previewColor(answerText("jewelryColor"), garmentPalette, "#bb8a35");
+    const propColor = previewColor(answerText("propColor"), garmentPalette, "#416f78");
     figure.style.setProperty("--figure-skin", skin);
     figure.style.setProperty("--figure-hair", hair);
     figure.style.setProperty("--figure-clothing", clothing);
+    figure.style.setProperty("--figure-top", answerText("outfit") ? outfitColor : topColor);
+    figure.style.setProperty("--figure-bottom", answerText("outfit") ? outfitColor : bottomColor);
+    figure.style.setProperty("--figure-outfit", outfitColor);
+    figure.style.setProperty("--figure-outerwear", outerwearColor);
+    figure.style.setProperty("--figure-shoes", shoeColor);
+    figure.style.setProperty("--figure-accessory", accessoryColor);
+    figure.style.setProperty("--figure-jewelry", jewelryColor);
+    figure.style.setProperty("--figure-prop", propColor);
     figure.dataset.hair = valueSlug(answerText("hairStyle"));
     figure.dataset.pose = valueSlug(answerText("pose"));
     figure.dataset.expression = valueSlug(answerText("expression"));
     figure.dataset.fit = valueSlug(answerText("fit"));
     figure.dataset.pattern = valueSlug(answerText("pattern"));
+    figure.dataset.top = valueSlug(answerText("top"));
+    figure.dataset.bottom = valueSlug(answerText("bottom"));
+    figure.dataset.outfit = valueSlug(answerText("outfit"));
+    figure.dataset.outerwear = valueSlug(answerText("outerwear"));
+    figure.dataset.shoes = valueSlug(answerText("shoes"));
+    figure.dataset.accessories = valueSlug(answerText("accessories"));
+    figure.dataset.jewelry = valueSlug(answerText("jewelry"));
+    figure.dataset.props = valueSlug(answerText("props"));
     const hairBack = element("span", "character-live__hair-back");
     const head = element("div", "character-live__head");
     head.append(
@@ -216,20 +243,23 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
         eyes.append(element("i"), element("i"));
         return eyes;
       })(),
-      element("span", "character-live__mouth")
+      element("span", "character-live__mouth"),
+      element("span", "character-live__face-accessory")
     );
     const neck = element("span", "character-live__neck");
     const body = element("div", "character-live__body");
     body.append(
       element("span", "character-live__arm character-live__arm--left"),
       element("span", "character-live__torso"),
+      element("span", "character-live__outerwear"),
+      element("span", "character-live__jewelry"),
       element("span", "character-live__arm character-live__arm--right")
     );
     const lower = element("div", "character-live__lower");
     lower.append(element("span", "character-live__leg"), element("span", "character-live__leg"));
     const shoes = element("div", "character-live__shoes");
     shoes.append(element("span"), element("span"));
-    figure.append(hairBack, head, neck, body, lower, shoes);
+    figure.append(hairBack, head, neck, body, element("span", "character-live__outfit-layer"), lower, shoes, element("span", "character-live__carried-accessory"));
     stage.append(figure);
     stage.setAttribute("role", "img");
     stage.setAttribute("aria-label", `${presentation.label} preview. ${answerText("hairStyle", "Custom hair")}, ${answerText("clothingStyle", "original clothing")}, ${answerText("pose", "standing pose")}.`);
@@ -265,7 +295,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       return Array.isArray(value) ? value.length : String(value || "").trim();
     };
     if (!selected("artisticStyle")) insights.push(["Style opportunity", "Choose an artistic style or let Vyrelix select one that matches the character."]);
-    if (!selected("colorPalette") && !selected("clothingColor")) insights.push(["Color opportunity", "A palette will help the clothing, background, and final output feel connected."]);
+    if (!selected("colorPalette") && !selected("clothingColor") && !selected("topColor") && !selected("outfitColor")) insights.push(["Color opportunity", "A palette will help the clothing, background, and final output feel connected."]);
     if (selected("outfit") && (selected("top") || selected("bottom"))) insights.push(["Layering check", "You selected a complete outfit and separate garments. Vyrelix will treat the garments as styling variations."]);
     if (selected("clothingStyle") && !selected("shoes")) insights.push(["Finish the look", "Choose shoes to complete the wardrobe from head to toe."]);
     if (["baby", "toddler", "child"].includes(answerText("age").toLocaleLowerCase()) && selected("makeup") && answerText("makeup") !== "None") {
@@ -1853,7 +1883,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       const look = {
         id: `look-${Date.now().toString(36)}`,
         categoryId: state.guidedCategoryId,
-        name: [answerText("clothingStyle"), answerText("occasion"), answerText("clothingColor")].filter(Boolean).join(" · ") || "Saved character look",
+        name: [answerText("clothingStyle"), answerText("occasion"), answerText("outfitColor") || answerText("topColor") || answerText("clothingColor")].filter(Boolean).join(" · ") || "Saved character look",
         answers: clone(state.guidedAnswers),
         output: state.guidedOutput,
         savedAt: new Date().toISOString()

@@ -781,6 +781,14 @@
   --figure-skin: #bd7f5b;
   --figure-hair: #3d2928;
   --figure-clothing: #9b6a78;
+  --figure-top: var(--figure-clothing);
+  --figure-bottom: var(--figure-clothing);
+  --figure-outfit: var(--figure-clothing);
+  --figure-outerwear: #74566c;
+  --figure-shoes: #443845;
+  --figure-accessory: #bb8a35;
+  --figure-jewelry: #bb8a35;
+  --figure-prop: #416f78;
   position: relative;
   z-index: 1;
   display: grid;
@@ -834,6 +842,7 @@
 
 .character-live__eyes i { width: 5px; height: 3px; border-radius: 50%; background: #34232a; }
 .character-live__mouth { position: absolute; bottom: 8px; left: 50%; width: 10px; height: 4px; border-bottom: 2px solid #7d3f48; border-radius: 0 0 10px 10px; transform: translateX(-50%); }
+.character-live__face-accessory { position: absolute; z-index: 4; inset: 20px 4px auto; height: 10px; opacity: 0; }
 .character-live__neck { position: relative; z-index: 1; width: 13px; height: 10px; background: var(--figure-skin); }
 
 .character-live__body {
@@ -846,26 +855,125 @@
 }
 
 .character-live__torso {
+  position: relative;
   height: 54px;
   border-radius: 13px 13px 9px 9px;
   background:
     linear-gradient(135deg, rgba(255,255,255,.14), transparent 42%),
-    var(--figure-clothing);
+    var(--figure-top);
 }
 
 .character-live__arm {
   width: 10px;
   height: 50px;
   border-radius: 8px;
-  background: linear-gradient(var(--figure-clothing) 0 55%, var(--figure-skin) 55%);
+  background: linear-gradient(var(--figure-top) 0 55%, var(--figure-skin) 55%);
 }
 .character-live__arm--left { transform: rotate(4deg); transform-origin: top right; }
 .character-live__arm--right { transform: rotate(-4deg); transform-origin: top left; }
 
 .character-live__lower { display: grid; width: 40px; height: 44px; grid-template-columns: 1fr 1fr; gap: 4px; }
-.character-live__leg { border-radius: 4px 4px 8px 8px; background: color-mix(in srgb, var(--figure-clothing) 74%, #312c3d); }
+.character-live__leg { border-radius: 4px 4px 8px 8px; background: color-mix(in srgb, var(--figure-bottom) 82%, #312c3d); }
 .character-live__shoes { display: grid; width: 48px; grid-template-columns: 1fr 1fr; gap: 4px; }
-.character-live__shoes span { height: 8px; border-radius: 7px 7px 3px 3px; background: #443845; }
+.character-live__shoes span { height: 8px; border-radius: 7px 7px 3px 3px; background: var(--figure-shoes); }
+
+.character-live__outerwear {
+  position: absolute;
+  z-index: 4;
+  top: -2px;
+  left: 7px;
+  width: 54px;
+  height: 55px;
+  border: 3px solid var(--figure-outerwear);
+  border-top-width: 8px;
+  border-radius: 14px 14px 8px 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.character-live__jewelry {
+  position: absolute;
+  z-index: 6;
+  top: 5px;
+  left: 50%;
+  width: 18px;
+  height: 12px;
+  border: 2px solid var(--figure-jewelry);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  opacity: 0;
+  transform: translateX(-50%);
+}
+
+.character-live__outfit-layer {
+  position: absolute;
+  z-index: 3;
+  top: 101px;
+  width: 61px;
+  height: 48px;
+  border-radius: 6px 6px 14px 14px;
+  background: var(--figure-outfit);
+  clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.character-live__carried-accessory {
+  position: absolute;
+  z-index: 8;
+  right: -1px;
+  top: 93px;
+  width: 20px;
+  height: 25px;
+  border: 3px solid var(--figure-accessory);
+  border-radius: 5px 5px 9px 9px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.character-live-figure:not([data-outerwear="none"]):not([data-outerwear="default"]) .character-live__outerwear { opacity: .94; }
+.character-live-figure[data-outerwear*="cardigan"] .character-live__outerwear,
+.character-live-figure[data-outerwear*="blazer"] .character-live__outerwear { border-top-width: 4px; border-bottom: 0; }
+.character-live-figure[data-outerwear*="coat"] .character-live__outerwear,
+.character-live-figure[data-outerwear*="trench"] .character-live__outerwear,
+.character-live-figure[data-outerwear*="parka"] .character-live__outerwear { height: 78px; }
+.character-live-figure[data-outerwear*="cape"] .character-live__outerwear,
+.character-live-figure[data-outerwear*="cloak"] .character-live__outerwear { left: 1px; width: 66px; height: 82px; border: 0; border-radius: 20px 20px 30px 30px; background: var(--figure-outerwear); opacity: .78; }
+
+.character-live-figure[data-outfit*="dress"] .character-live__outfit-layer,
+.character-live-figure[data-outfit*="gown"] .character-live__outfit-layer,
+.character-live-figure[data-outfit*="robes"] .character-live__outfit-layer,
+.character-live-figure[data-outfit*="tutu"] .character-live__outfit-layer,
+.character-live-figure[data-bottom*="skirt"] .character-live__outfit-layer { opacity: 1; }
+.character-live-figure[data-bottom*="skirt"]:not([data-outfit*="dress"]):not([data-outfit*="gown"]) .character-live__outfit-layer { height: 35px; background: var(--figure-bottom); }
+.character-live-figure[data-outfit*="ball-gown"] .character-live__outfit-layer,
+.character-live-figure[data-outfit*="evening-gown"] .character-live__outfit-layer { top: 96px; width: 72px; height: 60px; }
+
+.character-live-figure[data-accessories*="glasses"] .character-live__face-accessory,
+.character-live-figure[data-accessories*="sunglasses"] .character-live__face-accessory {
+  display: block;
+  border-right: 10px solid var(--figure-accessory);
+  border-left: 10px solid var(--figure-accessory);
+  opacity: .85;
+}
+.character-live-figure[data-accessories*="glasses"] .character-live__face-accessory::after,
+.character-live-figure[data-accessories*="sunglasses"] .character-live__face-accessory::after { position: absolute; top: 4px; left: 50%; width: 8px; height: 2px; background: var(--figure-accessory); content: ""; transform: translateX(-50%); }
+.character-live-figure[data-accessories*="hat"] .character-live__face-accessory,
+.character-live-figure[data-accessories*="cap"] .character-live__face-accessory,
+.character-live-figure[data-accessories*="beanie"] .character-live__face-accessory {
+  inset: -9px -7px auto;
+  height: 22px;
+  border-radius: 22px 22px 7px 7px;
+  background: var(--figure-accessory);
+  opacity: 1;
+}
+.character-live-figure[data-accessories*="bag"] .character-live__carried-accessory,
+.character-live-figure[data-accessories*="backpack"] .character-live__carried-accessory,
+.character-live-figure[data-props*="briefcase"] .character-live__carried-accessory,
+.character-live-figure[data-props*="book"] .character-live__carried-accessory,
+.character-live-figure[data-props*="phone"] .character-live__carried-accessory { opacity: 1; }
+.character-live-figure[data-props]:not([data-props="none"]):not([data-props="default"]) .character-live__carried-accessory { background: var(--figure-prop); }
+.character-live-figure[data-jewelry]:not([data-jewelry="none"]):not([data-jewelry="default"]) .character-live__jewelry { opacity: 1; }
 
 .character-live-figure[data-expression="serious"] .character-live__mouth { width: 9px; height: 1px; border-bottom: 1px solid #703b43; border-radius: 0; }
 .character-live-figure[data-expression="surprised"] .character-live__mouth { width: 6px; height: 7px; border: 2px solid #7d3f48; border-radius: 50%; }
@@ -904,9 +1012,21 @@
 .character-live-figure.body-broad .character-live__torso { width: 55px; margin-left: -4px; clip-path: polygon(5% 0, 95% 0, 82% 100%, 18% 100%); }
 .character-live-figure[data-fit="oversized"] .character-live__torso { width: 58px; margin-left: -5px; }
 .character-live-figure[data-fit="cropped"] .character-live__torso { height: 39px; }
-.character-live-figure[data-pattern="stripes"] .character-live__torso { background: repeating-linear-gradient(0deg, var(--figure-clothing) 0 7px, rgba(255,255,255,.28) 7px 10px); }
-.character-live-figure[data-pattern="plaid"] .character-live__torso { background: repeating-linear-gradient(90deg, var(--figure-clothing) 0 9px, rgba(255,255,255,.24) 9px 11px); }
-.character-live-figure[data-pattern="polka-dots"] .character-live__torso { background-color: var(--figure-clothing); background-image: radial-gradient(rgba(255,255,255,.46) 1.6px, transparent 1.7px); background-size: 9px 9px; }
+.character-live-figure[data-top*="crop"] .character-live__torso,
+.character-live-figure[data-top*="corset"] .character-live__torso { height: 40px; border-radius: 10px 10px 4px 4px; }
+.character-live-figure[data-top*="hoodie"] .character-live__torso::before { position: absolute; top: -7px; left: 50%; width: 32px; height: 17px; border: 4px solid var(--figure-top); border-bottom: 0; border-radius: 18px 18px 0 0; content: ""; transform: translateX(-50%); }
+.character-live-figure[data-top*="button"] .character-live__torso::after,
+.character-live-figure[data-top*="oxford"] .character-live__torso::after { position: absolute; top: 2px; bottom: 3px; left: 50%; width: 1px; background: rgba(255,255,255,.48); content: ""; }
+.character-live-figure[data-bottom*="shorts"] .character-live__leg { background: linear-gradient(var(--figure-bottom) 0 42%, var(--figure-skin) 42%); }
+.character-live-figure[data-bottom*="jeans"] .character-live__leg { background: color-mix(in srgb, var(--figure-bottom) 62%, #315578); }
+.character-live-figure[data-shoes*="boot"] .character-live__shoes span { height: 14px; transform: translateY(-6px); border-radius: 4px 4px 3px 3px; }
+.character-live-figure[data-shoes*="heel"] .character-live__shoes span,
+.character-live-figure[data-shoes*="pump"] .character-live__shoes span,
+.character-live-figure[data-shoes*="wedge"] .character-live__shoes span { height: 6px; border-radius: 8px 3px 2px 2px; transform: skewX(-12deg); }
+.character-live-figure[data-shoes*="barefoot"] .character-live__shoes span { background: var(--figure-skin); }
+.character-live-figure[data-pattern="stripes"] .character-live__torso { background: repeating-linear-gradient(0deg, var(--figure-top) 0 7px, rgba(255,255,255,.28) 7px 10px); }
+.character-live-figure[data-pattern="plaid"] .character-live__torso { background: repeating-linear-gradient(90deg, var(--figure-top) 0 9px, rgba(255,255,255,.24) 9px 11px); }
+.character-live-figure[data-pattern="polka-dots"] .character-live__torso { background-color: var(--figure-top); background-image: radial-gradient(rgba(255,255,255,.46) 1.6px, transparent 1.7px); background-size: 9px 9px; }
 
 .creative-live-mark {
   position: relative;
