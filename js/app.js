@@ -1,211 +1,135 @@
 /**
- * Vyrelix application entry point: composes the existing shell with the Universal Creation Engine.
+ * Vyrelix launch application: composes the universal creation, project,
+ * visual-direction, prompt, collection, and device settings experiences.
  */
 import { createNavigation } from "./navigation.js";
 import { storage } from "./storage.js";
-import { copyText } from "./clipboard.js";
 import { initializeSettings } from "./settings.js";
 import { initializeRipples } from "./animations.js";
-import { showToast, openDialog, closeDialog, openSheet, closeSheet, renderSaved } from "./ui.js";
-import { validateRequired } from "../utilities/validators.js";
-import { createId, debounce } from "../utilities/helpers.js";
-import { clamp } from "../utilities/random.js";
-import { initializeButtons } from "./components/buttons.js";
-import { initializeCards } from "./components/cards.js";
-import { initializeForms, createSearchController } from "./components/forms.js";
-import { initializeModals, openModal } from "./components/modals.js";
-import { initializeDrawers } from "./components/drawer.js";
+import { showToast, openDialog, closeDialog, renderSaved } from "./ui.js";
+import { initializeModals } from "./components/modals.js";
 import { initializeBottomSheets, openBottomSheet, closeBottomSheet } from "./components/bottomSheet.js";
-import { initializeTabs } from "./components/tabs.js";
-import { initializeLoading, setButtonLoading } from "./components/loading.js";
-import { initializeGestures } from "./components/gestures.js";
+import { initializeForms, createSearchController } from "./components/forms.js";
+import { initializeLoading } from "./components/loading.js";
+import { debounce } from "../utilities/helpers.js";
 import { creationEngine } from "./core/creationEngine.js";
 import { initializeDashboard } from "./core/dashboard.js";
+import { downloadProject } from "./project/projectExporter.js";
+import { readProjectFile } from "./project/projectImporter.js";
 
-const state = { step: 1, intensity: 3, filter: "all", query: "", visual: null, visualMeta: null };
-const form = document.querySelector("#character-form");
+const state = { filter: "all", query: "" };
 const savedList = document.querySelector("#saved-list");
+const projectScreen = document.querySelector('[data-screen="project"]');
 let navigation;
-let creationExperiencePromise = null;
-let visualStudioPromise = null;
-let promptStudioPromise = null;
-let aiStudioPromise = null;
+let creationController;
+let promptController;
+let visualController;
 let pendingCreationOptions = null;
 
-function launch() {
-  const splash = document.querySelector("#splash");
-  const loading = document.querySelector("#loading");
-  const shell = document.querySelector("#app-shell");
-  const progress = document.querySelector("#launch-progress");
-  const seen = sessionStorage.getItem("vyrelix.seen");
-  const splashDelay = seen ? 80 : 950;
-  window.setTimeout(() => {
-    splash.classList.add("is-hidden");
-    loading.classList.remove("is-hidden");
-    requestAnimationFrame(() => { progress.style.width = "100%"; });
-    window.setTimeout(() => {
-      loading.classList.add("is-hidden");
-      shell.classList.remove("is-hidden");
-      sessionStorage.setItem("vyrelix.seen", "true");
-    }, seen ? 160 : 700);
-  }, splashDelay);
+const modeNames = Object.freeze({
+  quick: "Quick Create",
+  guided: "Guided Creator",
+  advanced: "Advanced Creator",
+  director: "Creative Director",
+  inspire: "Inspire Me",
+  templates: "Templates",
+  reference: "Reference Mode"
+});
+
+function activeProject() {
+  const id = creationEngine.settings.get().activeProjectId;
+  return creationEngine.projects.get(id) || creationEngine.projects.list()[0] || null;
 }
 
-function updateBuilder() {
-  document.querySelectorAll(".builder-step").forEach((step) => step.classList.toggle("is-active", Number(step.dataset.step) === state.step));
-  document.querySelector("#step-number").textContent = String(state.step).padStart(2, "0");
-  document.querySelector("#builder-progress").style.width = `${state.step / 3 * 100}%`;
-  document.querySelector(".progress--steps").setAttribute("aria-valuenow", String(state.step));
-  document.querySelector("#builder-back").disabled = state.step === 1;
-  document.querySelector("#builder-next").textContent = state.step === 3 ? "Save character" : "Continue";
+function setActiveProject(id) {
+  creationEngine.settings.set({ activeProjectId: id });
 }
 
-function serializeCharacter() {
-  const data = Object.fromEntries(new FormData(form));
-  return {
-    id: createId("character"), kind: "character",
-    title: data.name?.trim() || "Untitled character",
-    subtitle: `${data.archetype || "Original concept"} · just now`,
-    data: { ...data, intensity: state.intensity, visual: state.visual }, createdAt: Date.now()
-  };
+function readableLabel(key) {
+  return String(key)
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .replace(/^./, (letter) => letter.toUpperCase());
 }
 
-function saveCharacter() {
-  const character = serializeCharacter();
-  let project;
-  try {
-    project = creationEngine.projects.create({
-      name: character.title,
-      type: "Character",
-      category: character.data.archetype || "Original",
-      description: character.data.concept || "",
-      tags: [],
-      theme: state.visualMeta?.mood || character.data.presence || "Original",
-      artStyle: state.visualMeta?.artStyle || "Character concept",
-      colorPalette: state.visual ? Object.values(state.visual.colors) : character.data.color ? [character.data.color] : [],
-      data: { ...character.data, legacyCharacterId: character.id }
+function answerList(project) {
+  return Object.entries(project?.data?.answers || {})
+    .filter(([, value]) => String(value ?? "").trim())
+    .map(([key, value]) => [readableLabel(key), String(value)]);
+}
+
+function renderProject() {
+  const project = activeProject();
+  if (!project) {
+    projectScreen.querySelector("#project-detail-title").textContent = "No project selected";
+    projectScreen.querySelector("#project-detail-description").textContent = "Start a creation to build your first adaptive project.";
+    projectScreen.querySelector("#project-detail-meta").replaceChildren();
+    projectScreen.querySelector("#project-detail-answers").innerHTML = '<div class="empty-state empty-state--compact"><h3>Your creative work starts here</h3><p>Vyrelix will keep every answer organized on this device.</p><button class="button button--primary" type="button" data-route="create" data-create-reset>Start creating</button></div>';
+    projectScreen.querySelectorAll("[data-project-detail-favorite], [data-project-edit], [data-project-continue], [data-project-export], [data-project-duplicate], [data-project-archive]").forEach((button) => {
+      button.disabled = true;
     });
-  } catch (error) {
-    showToast(error.message, "error");
     return;
   }
-  const characters = storage.getCharacters();
-  characters.unshift({ ...character, projectId: project.id });
-  storage.saveCharacters(characters);
-  storage.saveRecentActivity(characters.slice(0, 8));
-  form.reset();
-  state.step = 1;
-  state.intensity = 3;
-  state.visual = null;
-  state.visualMeta = null;
-  document.querySelector("#intensity-output").textContent = "3";
-  updateBuilder();
-  refreshSaved();
-  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
-  showToast("Character saved on this device");
-  navigation.navigate("prompt");
-}
 
-async function ensureVisualStudio() {
-  if (visualStudioPromise) return visualStudioPromise;
-  visualStudioPromise = import("./visual/visualUI.js").then(({ initializeVisualStudio }) =>
-    initializeVisualStudio({
-      root: document.querySelector('[data-screen="visual"]'),
-      initial: state.visual,
-      showToast,
-      onApply: (visual, engine) => {
-        state.visual = visual;
-        state.visualMeta = {
-          primary: engine.getAsset("color", visual.colors.primaryId)?.name,
-          artStyle: engine.getAsset("artStyle", visual.artStyleId)?.name,
-          mood: engine.getAsset("mood", visual.moodId)?.name
-        };
-        const colorOption = [...form.elements.color.options].find((option) => option.textContent.toLocaleLowerCase() === state.visualMeta.primary?.toLocaleLowerCase());
-        if (colorOption) form.elements.color.value = colorOption.value;
-        navigation.navigate("builder");
-      }
-    })
-  ).catch((error) => {
-    visualStudioPromise = null;
-    showToast("Visual Engine could not be loaded", "error");
-    throw error;
-  });
-  return visualStudioPromise;
-}
-
-/**
- * Lazily opens the studio-free adaptive entry layer for the Universal Creation Engine.
- */
-async function ensureCreationExperience() {
-  if (creationExperiencePromise) return creationExperiencePromise;
-  creationExperiencePromise = import("./creation/creationExperience.js").then(({ initializeCreationExperience }) =>
-    initializeCreationExperience({
-      root: document.querySelector('[data-screen="create"]'),
-      engine: creationEngine,
-      navigate: navigation.navigate,
-      showToast
-    })
-  ).catch((error) => {
-    creationExperiencePromise = null;
-    showToast("Universal Creator could not be loaded", "error");
-    throw error;
-  });
-  return creationExperiencePromise;
-}
-
-/**
- * Lazily opens the complete local prompt-generation workspace.
- */
-async function ensurePromptStudio() {
-  if (promptStudioPromise) return promptStudioPromise;
-  promptStudioPromise = import("./prompt/promptUI.js").then(({ initializePromptStudio }) =>
-    initializePromptStudio({
-      engine: creationEngine,
-      navigate: navigation.navigate,
-      showToast,
-      onPromptsChanged: () => {
-        refreshSaved();
-        document.dispatchEvent(new CustomEvent("vyrelix:prompts-changed"));
-      }
-    })
-  ).catch((error) => {
-    promptStudioPromise = null;
-    showToast("Prompt Builder could not be loaded", "error");
-    throw error;
-  });
-  return promptStudioPromise;
-}
-
-/**
- * Lazily opens the offline-first AI Provider Engine.
- */
-async function ensureAIStudio() {
-  if (aiStudioPromise) return aiStudioPromise;
-  aiStudioPromise = import("./ai/aiUI.js").then(({ initializeAIStudio }) =>
-    initializeAIStudio({
-      creationEngine,
-      navigate: navigation.navigate,
-      showToast,
-      openModal
-    })
-  ).catch((error) => {
-    aiStudioPromise = null;
-    showToast("AI Provider Engine could not be loaded", "error");
-    throw error;
-  });
-  return aiStudioPromise;
-}
-
-function handleNext() {
-  if (state.step === 1) {
-    const field = form.elements.name;
-    const error = validateRequired(field.value, "Add a character name to continue.");
-    document.querySelector('[data-error-for="name"]').textContent = error;
-    field.closest(".field").classList.toggle("has-error", Boolean(error));
-    if (error) { field.focus(); return; }
+  projectScreen.querySelectorAll("button").forEach((button) => { button.disabled = false; });
+  projectScreen.querySelector("#project-detail-title").textContent = project.name;
+  projectScreen.querySelector("#project-detail-type").textContent = project.category || project.type;
+  projectScreen.querySelector("#project-detail-description").textContent = project.description;
+  projectScreen.querySelector("#project-detail-mark").textContent = (project.category || project.type || "V").slice(0, 1).toUpperCase();
+  const favorite = projectScreen.querySelector("[data-project-detail-favorite]");
+  favorite.textContent = project.favorite ? "♥" : "♡";
+  favorite.setAttribute("aria-pressed", String(project.favorite));
+  favorite.setAttribute("aria-label", `${project.favorite ? "Remove" : "Add"} project ${project.favorite ? "from" : "to"} favorites`);
+  projectScreen.querySelector("[data-project-archive]").textContent = project.status === "archived" ? "Restore" : "Archive";
+  if (project.status === "archived") {
+    projectScreen.querySelector("[data-project-detail-favorite]").disabled = true;
+    projectScreen.querySelector("[data-project-edit]").disabled = true;
+    projectScreen.querySelector('[data-project-continue="visual"]').disabled = true;
   }
-  if (state.step < 3) { state.step += 1; updateBuilder(); }
-  else saveCharacter();
+
+  const meta = [
+    ["Mode", modeNames[project.data?.creationMode] || "Adaptive"],
+    ["Status", project.status],
+    ["Updated", new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(project.modifiedAt))]
+  ];
+  projectScreen.querySelector("#project-detail-meta").replaceChildren(...meta.map(([term, value]) => {
+    const wrapper = document.createElement("div");
+    const dt = document.createElement("dt");
+    const dd = document.createElement("dd");
+    dt.textContent = term;
+    dd.textContent = value;
+    wrapper.append(dt, dd);
+    return wrapper;
+  }));
+
+  const answers = answerList(project);
+  const root = projectScreen.querySelector("#project-detail-answers");
+  root.replaceChildren(...(answers.length ? answers.map(([label, value]) => {
+    const item = document.createElement("article");
+    const heading = document.createElement("strong");
+    const copy = document.createElement("p");
+    heading.textContent = label;
+    copy.textContent = value;
+    item.append(heading, copy);
+    return item;
+  }) : [Object.assign(document.createElement("p"), { className: "text-muted", textContent: "No additional answers were saved for this project." })]));
+}
+
+function uniqueCopyName(project) {
+  const names = new Set(creationEngine.projects.list({ includeArchived: true }).map((item) => item.name.toLocaleLowerCase()));
+  let count = 1;
+  let candidate = `${project.name} Copy`;
+  while (names.has(candidate.toLocaleLowerCase())) {
+    count += 1;
+    candidate = `${project.name} Copy ${count}`;
+  }
+  return candidate;
+}
+
+function announceProjectsChanged() {
+  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
+  refreshSaved();
+  renderProject();
 }
 
 function getSavedItems() {
@@ -213,22 +137,252 @@ function getSavedItems() {
     ...project,
     kind: "project",
     title: project.name,
-    subtitle: `${project.type} · ${project.status} · ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(project.modifiedAt))}`,
-    createdAt: new Date(project.createdAt).getTime()
+    subtitle: `${project.category || project.type} · ${project.status} · ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(project.modifiedAt))}`,
+    createdAt: new Date(project.modifiedAt).getTime()
   }));
   return [...projects, ...storage.getPrompts()]
     .filter((item) => state.filter === "all" || (state.filter === "archived" ? item.status === "archived" : item.kind === state.filter && item.status !== "archived"))
-    .filter((item) => item.title.toLowerCase().includes(state.query))
-    .sort((a, b) => b.createdAt - a.createdAt);
+    .filter((item) => item.title.toLocaleLowerCase().includes(state.query))
+    .sort((left, right) => right.createdAt - left.createdAt);
 }
 
 function refreshSaved() {
-  const all = [...creationEngine.projects.list({ includeArchived: true }), ...storage.getPrompts()];
-  document.querySelector("#saved-count").textContent = `${all.length} item${all.length === 1 ? "" : "s"}`;
-  renderSaved(getSavedItems(), savedList);
+  const items = getSavedItems();
+  document.querySelector("#saved-count").textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+  renderSaved(items, savedList);
 }
 
-function bindEvents() {
+async function ensureCreationExperience() {
+  if (creationController) return creationController;
+  const { initializeCreationExperience } = await import("./creation/creationExperience.js");
+  creationController = initializeCreationExperience({
+    root: document.querySelector('[data-screen="create"]'),
+    engine: creationEngine,
+    navigate: navigation.navigate,
+    showToast
+  });
+  return creationController;
+}
+
+async function ensurePromptStudio() {
+  if (promptController) return promptController;
+  const { initializePromptStudio } = await import("./prompt/promptUI.js");
+  promptController = await initializePromptStudio({
+    engine: creationEngine,
+    navigate: navigation.navigate,
+    showToast,
+    onPromptsChanged: refreshSaved
+  });
+  return promptController;
+}
+
+async function ensureVisualStudio() {
+  if (visualController) return visualController;
+  const project = activeProject();
+  const { initializeVisualStudio } = await import("./visual/visualUI.js");
+  visualController = initializeVisualStudio({
+    root: document.querySelector('[data-screen="visual"]'),
+    initial: project?.data?.visual,
+    projectType: project?.type || "Object",
+    showToast,
+    onApply: (visual, engine) => {
+      const current = activeProject();
+      if (!current) return;
+      const primary = engine.getAsset("color", visual.colors.primaryId)?.name;
+      creationEngine.projects.update(current.id, {
+        data: { ...current.data, visual },
+        colorPalette: primary ? [primary] : current.colorPalette,
+        artStyle: engine.getAsset("artStyle", visual.artStyleId)?.name || current.artStyle,
+        theme: engine.getAsset("mood", visual.moodId)?.name || current.theme
+      }, "visual direction updated");
+      announceProjectsChanged();
+      navigation.navigate("project");
+    }
+  });
+  return visualController;
+}
+
+function openProject(id) {
+  const project = creationEngine.projects.get(id);
+  if (!project) return;
+  setActiveProject(id);
+  renderProject();
+  navigation.navigate("project");
+}
+
+function bindProjectActions() {
+  projectScreen.addEventListener("click", async (event) => {
+    const project = activeProject();
+    if (!project) return;
+    try {
+      if (event.target.closest("[data-project-detail-favorite]")) {
+        creationEngine.projects.favorite(project.id);
+        announceProjectsChanged();
+      }
+      if (event.target.closest("[data-project-edit]")) {
+        openBottomSheet({
+          heading: "Edit project",
+          content: [
+            Object.assign(document.createElement("label"), { className: "field", innerHTML: '<span>Project name</span><input name="projectName" maxlength="80">' }),
+            Object.assign(document.createElement("label"), { className: "field", innerHTML: '<span>Creative goal</span><textarea name="projectDescription" rows="4" maxlength="500"></textarea>' }),
+            Object.assign(document.createElement("button"), { type: "button", className: "button button--primary button--wide", textContent: "Save changes" })
+          ]
+        });
+        const sheet = document.querySelector("[data-sheet]");
+        sheet.querySelector('[name="projectName"]').value = project.name;
+        sheet.querySelector('[name="projectDescription"]').value = project.description;
+        sheet.querySelector(".button--primary").dataset.saveProjectEdit = project.id;
+      }
+      if (event.target.closest('[data-project-continue="prompt"]')) {
+        setActiveProject(project.id);
+        const controller = await ensurePromptStudio();
+        controller.selectProject?.(project.id);
+        navigation.navigate("prompt");
+      }
+      if (event.target.closest('[data-project-continue="visual"]')) {
+        setActiveProject(project.id);
+        await ensureVisualStudio();
+        navigation.navigate("visual");
+      }
+      if (event.target.closest("[data-project-export]")) {
+        downloadProject(project);
+        showToast("Project export prepared");
+      }
+      if (event.target.closest("[data-project-duplicate]")) {
+        const copy = creationEngine.projects.duplicate(project.id, uniqueCopyName(project));
+        setActiveProject(copy.id);
+        announceProjectsChanged();
+        showToast("Project duplicated");
+      }
+      if (event.target.closest("[data-project-archive]")) {
+        if (project.status === "archived") creationEngine.projects.restore(project.id);
+        else creationEngine.projects.archive(project.id);
+        announceProjectsChanged();
+        navigation.navigate("saved");
+        showToast(project.status === "archived" ? "Project restored" : "Project archived");
+      }
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const save = event.target.closest("[data-save-project-edit]");
+    if (!save) return;
+    const sheet = document.querySelector("[data-sheet]");
+    try {
+      creationEngine.projects.update(save.dataset.saveProjectEdit, {
+        name: sheet.querySelector('[name="projectName"]').value.trim(),
+        description: sheet.querySelector('[name="projectDescription"]').value.trim()
+      });
+      closeBottomSheet();
+      announceProjectsChanged();
+      showToast("Project updated");
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+}
+
+function bindSavedActions() {
+  savedList.addEventListener("click", (event) => {
+    const open = event.target.closest("[data-project-open]");
+    if (open) {
+      openProject(open.dataset.projectOpen);
+      return;
+    }
+    const action = event.target.closest("[data-project-action]");
+    if (!action) return;
+    const project = creationEngine.projects.get(action.dataset.projectId);
+    if (!project) return;
+    try {
+      if (action.dataset.projectAction === "favorite") creationEngine.projects.favorite(project.id);
+      if (action.dataset.projectAction === "menu") {
+        const options = project.status === "archived" ? ["Open", "Restore"] : ["Open", "Duplicate", "Archive"];
+        openBottomSheet({
+          heading: project.name,
+          content: options.map((label) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "button button--outlined button--wide";
+            button.dataset.savedMenu = label.toLocaleLowerCase();
+            button.dataset.projectId = project.id;
+            button.textContent = label;
+            return button;
+          })
+        });
+      }
+      announceProjectsChanged();
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-saved-menu]");
+    if (!button) return;
+    const project = creationEngine.projects.get(button.dataset.projectId);
+    if (!project) return;
+    try {
+      if (button.dataset.savedMenu === "open") openProject(project.id);
+      if (button.dataset.savedMenu === "duplicate") {
+        const copy = creationEngine.projects.duplicate(project.id, uniqueCopyName(project));
+        openProject(copy.id);
+      }
+      if (button.dataset.savedMenu === "archive") creationEngine.projects.archive(project.id);
+      if (button.dataset.savedMenu === "restore") creationEngine.projects.restore(project.id);
+      closeBottomSheet();
+      announceProjectsChanged();
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+}
+
+function addDataPortability() {
+  const information = document.querySelector('[data-screen="settings"] .settings-group:last-of-type');
+  const section = document.createElement("section");
+  section.className = "settings-group";
+  section.innerHTML = '<h2 class="section-title">Your data</h2><p class="body-text text-muted">Projects stay in this browser. Export a portable project before clearing browser data or moving devices.</p><div class="button-row"><button class="button button--outlined" type="button" data-export-active>Export current</button><label class="button button--outlined" for="project-import">Import project</label><input class="sr-only" id="project-import" type="file" accept="application/json,.json"></div>';
+  information.before(section);
+  section.querySelector("[data-export-active]").addEventListener("click", () => {
+    const project = activeProject();
+    if (!project) return showToast("Create or open a project first", "error");
+    downloadProject(project);
+  });
+  section.querySelector("#project-import").addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2_000_000) return showToast("Project files must be smaller than 2 MB", "error");
+    try {
+      const imported = await readProjectFile(file);
+      delete imported.id;
+      imported.name = `${imported.name} Imported`;
+      const project = creationEngine.projects.create(imported);
+      setActiveProject(project.id);
+      announceProjectsChanged();
+      openProject(project.id);
+      showToast("Project imported");
+    } catch (error) {
+      showToast(error.message, "error");
+    } finally {
+      event.target.value = "";
+    }
+  });
+}
+
+function bindGeneralEvents() {
+  document.addEventListener("click", (event) => {
+    const card = event.target.closest("[data-project-open]");
+    if (card && !savedList.contains(card)) openProject(card.dataset.projectOpen);
+  });
+  document.addEventListener("keydown", (event) => {
+    const card = event.target.closest?.("[data-project-open]");
+    if (card && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      openProject(card.dataset.projectOpen);
+    }
+  });
   document.querySelectorAll('[data-route="create"]').forEach((trigger) => trigger.addEventListener("click", () => {
     pendingCreationOptions = {
       reset: trigger.hasAttribute("data-create-reset"),
@@ -236,44 +390,12 @@ function bindEvents() {
       template: trigger.dataset.template || null
     };
   }));
-  document.querySelector("#builder-next").addEventListener("click", handleNext);
-  document.querySelector("#builder-back").addEventListener("click", () => { state.step = Math.max(1, state.step - 1); updateBuilder(); });
-  document.querySelector("#save-draft").addEventListener("click", () => { saveCharacter(); });
-  form.elements.concept.addEventListener("input", (event) => { document.querySelector("#concept-count").textContent = event.target.value.length; });
-  form.elements.detail.addEventListener("input", (event) => {
-    document.querySelector("#detail-output").textContent = ["Minimal", "Balanced", "Intricate"][Number(event.target.value) - 1];
-  });
-  document.querySelectorAll("[data-number-action]").forEach((button) => button.addEventListener("click", () => {
-    state.intensity = clamp(state.intensity + Number(button.dataset.numberAction), 1, 5);
-    document.querySelector("#intensity-output").textContent = String(state.intensity);
-  }));
-  document.querySelectorAll("[data-prompt-token]").forEach((button) => button.addEventListener("click", () => {
-    const area = document.querySelector("#prompt-draft");
-    area.value = `${area.value}${area.value.trim() ? ", " : ""}${button.dataset.promptToken}`;
-    button.classList.add("is-active");
-  }));
-  document.querySelector("#copy-prompt").addEventListener("click", async () => {
-    showToast(await copyText(document.querySelector("#prompt-draft").value) ? "Prompt draft copied" : "Add a prompt draft first");
-  });
-  document.querySelector("#save-prompt").addEventListener("click", () => {
-    const text = document.querySelector("#prompt-draft").value.trim();
-    if (!text) { showToast("Add a prompt draft first"); return; }
-    const prompts = storage.getPrompts();
-    prompts.unshift({ id: createId("prompt"), kind: "prompt", title: text.slice(0, 42), subtitle: "Prompt draft · just now", text, createdAt: Date.now() });
-    storage.savePrompts(prompts);
-    refreshSaved();
-    showToast("Prompt draft saved");
-  });
-  document.querySelector("#open-sheet").addEventListener("click", openSheet);
-  document.querySelectorAll("[data-close-sheet]").forEach((button) => button.addEventListener("click", closeSheet));
-  document.querySelectorAll("[data-close-modal]").forEach((button) => button.addEventListener("click", closeDialog));
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
-    const isAbout = button.dataset.dialog === "about";
-    openDialog(isAbout ? "About Vyrelix" : "Privacy", isAbout
-      ? "Vyrelix is one adaptive creative engine for developing original ideas, visual systems, professional prompts, and clearly labeled demo artwork through an offline Mock Provider."
-      : "Your projects, prompts, provider settings, and demo images stay in this browser. Mock Provider uses no network connection.");
+    const about = button.dataset.dialog === "about";
+    openDialog(about ? "About Vyrelix" : "Privacy", about
+      ? "Vyrelix is one adaptive creative platform for shaping ideas, visual direction, and production-ready creative briefs."
+      : "Projects and preferences stay in this browser. Vyrelix does not display developer information or transmit your creative work.");
   }));
-  document.querySelector("#notifications-button").addEventListener("click", () => showToast("You’re all caught up"));
   document.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
     state.filter = button.dataset.filter;
     document.querySelectorAll("[data-filter]").forEach((item) => {
@@ -283,149 +405,64 @@ function bindEvents() {
     });
     refreshSaved();
   }));
-  savedList.addEventListener("click", (event) => {
-    const projectAction = event.target.closest("[data-project-action]");
-    if (projectAction) {
-      handleProjectAction(projectAction.dataset.projectAction, projectAction.dataset.projectId);
-      return;
-    }
-    const button = event.target.closest("[data-delete-id]");
-    if (!button) return;
-    const method = button.dataset.deleteKind === "character" ? "Characters" : "Prompts";
-    const getter = storage[`get${method}`];
-    if (method === "Prompts") storage.removePrompt(button.dataset.deleteId);
-    else storage[`save${method}`](getter().filter((item) => item.id !== button.dataset.deleteId));
-    refreshSaved();
-    showToast("Item removed");
-  });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") { closeDialog(); closeSheet(); }
-  });
-}
-
-function migrateLegacyCharacters() {
-  const projects = creationEngine.projects.list();
-  storage.getCharacters().forEach((character) => {
-    if (projects.some((project) => project.id === character.projectId || project.data?.legacyCharacterId === character.id)) return;
-    try {
-      creationEngine.projects.create({
-        name: character.title,
-        type: "Character",
-        category: character.data?.archetype || "Original",
-        description: character.data?.concept || "",
-        theme: character.data?.presence || "Original",
-        artStyle: "Character concept",
-        colorPalette: character.data?.color ? [character.data.color] : [],
-        data: { ...character.data, legacyCharacterId: character.id }
-      });
-    } catch {
-      /* Duplicate legacy names remain safely stored in the Phase 1 collection. */
+    if (event.key === "Escape") {
+      closeDialog();
+      closeBottomSheet();
     }
   });
 }
 
-function handleProjectAction(action, id) {
-  const project = creationEngine.projects.get(id);
-  if (!project) return;
-  try {
-    if (action === "favorite") creationEngine.projects.favorite(id);
-    if (action === "menu") {
-      const labels = project.status === "archived" ? ["Restore", "Delete"] : ["Rename", "Duplicate", "Archive", "Delete"];
-      const content = labels.map((label) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `button button--wide ${label === "Delete" ? "button--danger" : "button--outlined"}`;
-        button.dataset.projectMenuAction = label.toLocaleLowerCase();
-        button.dataset.projectId = id;
-        button.textContent = label;
-        return button;
-      });
-      openBottomSheet({ heading: project.name, content });
-      return;
+navigation = createNavigation({
+  onRouteChange: (route) => {
+    if (route === "saved") refreshSaved();
+    if (route === "project") renderProject();
+    if (route === "create") {
+      const options = pendingCreationOptions || {};
+      pendingCreationOptions = null;
+      ensureCreationExperience().then((controller) => controller.start(options)).catch(() => showToast("Creator could not be opened", "error"));
     }
-    refreshSaved();
-    document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
-  } catch (error) {
-    showToast(error.message, "error");
-  }
-}
-
-document.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-project-menu-action]");
-  if (!button) return;
-  const action = button.dataset.projectMenuAction;
-  const id = button.dataset.projectId;
-  const project = creationEngine.projects.get(id);
-  try {
-    if (action === "rename") {
-      const name = window.prompt("Rename project", project.name);
-      if (name?.trim()) creationEngine.projects.rename(id, name);
+    if (route === "visual") ensureVisualStudio().catch(() => showToast("Visual direction could not be opened", "error"));
+    if (["prompt", "prompt-preview", "prompt-history"].includes(route)) {
+      ensurePromptStudio().then((controller) => {
+        if (route === "prompt") controller.selectProject?.(activeProject()?.id);
+        if (route === "prompt-history") controller.renderHistory();
+      }).catch(() => showToast("Creative brief builder could not be opened", "error"));
     }
-    if (action === "duplicate") creationEngine.projects.duplicate(id);
-    if (action === "archive") creationEngine.projects.archive(id);
-    if (action === "restore") creationEngine.projects.restore(id);
-    if (action === "delete" && window.confirm(`Delete ${project.name}? This cannot be undone.`)) creationEngine.projects.delete(id);
-    closeBottomSheet();
-    refreshSaved();
-    document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
-    const messages = { rename: "Project renamed", duplicate: "Project duplicated", archive: "Project archived", restore: "Project restored", delete: "Project deleted" };
-    showToast(messages[action] || "Project updated", action === "delete" ? "deleted" : "success");
-  } catch (error) {
-    showToast(error.message, "error");
   }
 });
 
-navigation = createNavigation({ onRouteChange: (route) => {
-  if (route === "saved") refreshSaved();
-  if (route === "create") {
-    const options = pendingCreationOptions || {};
-    pendingCreationOptions = null;
-    ensureCreationExperience().then((controller) => controller.start(options));
-  }
-  if (route === "visual") ensureVisualStudio();
-  if (["prompt", "prompt-preview", "prompt-history", "ai-image", "image-gallery", "provider-settings", "test-mode"].includes(route)) {
-    ensurePromptStudio().then((controller) => {
-      if (route === "prompt-history") controller.renderHistory();
-    });
-  }
-  if (["ai-image", "image-gallery", "provider-settings", "test-mode"].includes(route)) {
-    ensureAIStudio().then((controller) => {
-      if (route === "ai-image") controller.renderGenerator();
-      if (route === "image-gallery") controller.renderGallery();
-      if (route === "provider-settings") controller.renderProviders();
-    });
-  }
-} });
-migrateLegacyCharacters();
 initializeDashboard({ engine: creationEngine, navigate: navigation.navigate, showToast });
-const settings = initializeSettings(() => openDialog("Clear local storage?", "This removes all saved characters, prompts, history, and preferences from this device.", { destructive: true }));
-document.querySelector("#confirm-clear").addEventListener("click", () => {
-  const action = document.querySelector("#dialog").dataset.action;
-  if (action === "clear-storage") {
-    storage.clear(); refreshSaved(); settings.reset(); closeDialog(); document.dispatchEvent(new CustomEvent("vyrelix:projects-changed")); showToast("Local storage cleared", "deleted");
-  } else {
-    closeDialog();
-    showToast(action === "demo-delete" ? "Delete pattern confirmed" : "Action confirmed", action === "demo-delete" ? "deleted" : "success");
-  }
-});
+initializeSettings(() => openDialog("Clear local storage?", "This permanently removes projects, prompts, history, and preferences from this device.", { destructive: true }));
 initializeRipples();
-bindEvents();
 initializeModals();
 initializeBottomSheets();
-initializeDrawers();
-initializeTabs();
 initializeForms();
 initializeLoading();
-initializeButtons({ showToast, openModal, setLoading: setButtonLoading });
-initializeCards({ openModal });
+bindProjectActions();
+bindSavedActions();
+bindGeneralEvents();
+addDataPortability();
 createSearchController({
   input: document.querySelector("#saved-search"),
   suggestions: document.querySelector("#search-suggestions"),
   clearButton: document.querySelector("[data-search-clear]"),
-  getItems: () => getSavedItems(),
-  onQuery: debounce((query) => { state.query = query; refreshSaved(); }, 100)
+  getItems: getSavedItems,
+  onQuery: debounce((query) => {
+    state.query = query;
+    refreshSaved();
+  }, 100)
 });
-initializeGestures({ showToast, onPullRefresh: refreshSaved });
-updateBuilder();
+document.querySelector("#confirm-clear").addEventListener("click", () => {
+  storage.clear();
+  creationEngine.storage.clear();
+  refreshSaved();
+  closeDialog();
+  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
+  showToast("Local data cleared", "deleted");
+});
 refreshSaved();
-launch();
+renderProject();
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
+}

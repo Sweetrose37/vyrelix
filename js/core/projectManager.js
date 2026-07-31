@@ -46,6 +46,15 @@ export class ProjectManager {
   duplicate(id, name) {
     const source = this.get(id);
     if (!source) throw new Error("Project not found.");
+    if (!name) {
+      const names = new Set(this.list({ includeArchived: true }).map((project) => project.name.toLocaleLowerCase()));
+      let count = 1;
+      name = `${source.name} Copy`;
+      while (names.has(name.toLocaleLowerCase())) {
+        count += 1;
+        name = `${source.name} Copy ${count}`;
+      }
+    }
     const copy = this.projects.duplicate(source, name);
     return this.create(copy);
   }

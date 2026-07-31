@@ -7,7 +7,7 @@ import { createAssetPreview } from "./assetPreview.js";
 
 const GROUP_LABELS = Object.freeze({ color: "Colors", surface: "Surface", scene: "Direction", character: "Character", features: "Features" });
 
-export function initializeVisualStudio({ root, initial = null, showToast, onApply }) {
+export function initializeVisualStudio({ root, initial = null, projectType = "Object", showToast, onApply }) {
   const engine = new VisualEngine({ initial: initial || undefined });
   const previewRoot = root.querySelector("#visual-preview-root");
   const groupRoot = root.querySelector("#visual-groups");
@@ -22,6 +22,8 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
   let activeConfig = VISUAL_SELECTOR_CONFIG[0];
   let view = "all";
   let pageSize = 60;
+  const studioId = String(projectType).toLocaleLowerCase().replace(/\s+/g, "-");
+  const allowedGroups = new Set(["color", "surface", "scene", ...(new Set(["Character", "Creature", "Mascot"]).has(projectType) ? ["character", "features"] : [])]);
 
   previewRoot.replaceChildren(preview);
   templateSelect.replaceChildren(...engine.templates.list().map((template) => {
@@ -42,7 +44,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
   }
 
   function renderGroups() {
-    groupRoot.replaceChildren(...Object.entries(GROUP_LABELS).map(([key, label]) => createChip(label, "visualGroup", key, key === activeGroup)));
+    groupRoot.replaceChildren(...Object.entries(GROUP_LABELS).filter(([key]) => allowedGroups.has(key)).map(([key, label]) => createChip(label, "visualGroup", key, key === activeGroup)));
   }
 
   function renderCategories() {
@@ -71,7 +73,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
       category: categoryFilter.value,
       favorites: view === "favorites",
       recent: view === "recent",
-      studio: "character"
+      studio: studioId
     });
     const favorites = new Set(engine.storage.read("favorites"));
     const selected = selectedIds();
@@ -161,7 +163,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
     }
     if (event.target.closest("[data-random-current]")) {
       const context = activeConfig.dataset === "texture" ? { material: engine.getAsset("material", engine.builder.value.materialId) } : {};
-      const item = engine.randomizer.randomCategory(activeConfig.dataset, { studioId: "character", context });
+      const item = engine.randomizer.randomCategory(activeConfig.dataset, { studioId, context });
       if (item) engine.select(activeConfig, item.id);
       renderPreview();
       renderAssets();
@@ -174,8 +176,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
       showToast("Compatible visual direction randomized", "success");
     }
     if (event.target.closest("[data-save-visual]")) {
-      const name = window.prompt("Name this visual preset", "Character Visual");
-      if (!name?.trim()) return;
+      const name = `${projectType} direction ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date())}`;
       try {
         engine.savePreset(name);
         showToast("Visual preset saved on this device", "saved");
@@ -185,7 +186,7 @@ export function initializeVisualStudio({ root, initial = null, showToast, onAppl
     }
     if (event.target.closest("[data-apply-visual]")) {
       const visual = engine.builder.build();
-      const result = engine.validator.validate(visual, "character");
+      const result = engine.validator.validate(visual, studioId);
       if (!result.valid) {
         showToast(result.errors[0], "error");
         return;

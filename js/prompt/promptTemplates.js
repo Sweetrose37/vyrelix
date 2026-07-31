@@ -40,8 +40,9 @@ function narrative(sections) {
   name,
   /** Composes ordered semantic sections instead of concatenating keywords. */
   compose: (sections) => narrative([
-    `${opening} featuring ${sections.subject}`,
+    `${opening} for ${sections.output || "a creative asset"} featuring ${sections.subject}`,
     sections.identity,
+    sections.brief,
     sections.appearance,
     sections.visualDetails,
     sections.materials,
@@ -56,4 +57,3 @@ function narrative(sections) {
     sections.additional
   ])
 }));
-

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Vyrelix</title>
+  <rect width="512" height="512" rx="112" fill="#0b0b0f"/>
+  <path d="M112 112h78l66 196 66-196h78L292 400h-72L112 112Z" fill="#d9b66f"/>
+  <path d="M188 112h136l-68 186-68-186Z" fill="#f5e7bd" opacity=".32"/>
+</svg>

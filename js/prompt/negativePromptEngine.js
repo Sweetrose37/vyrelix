@@ -2,8 +2,8 @@
  * Reusable negative prompt defaults and device-local preset support.
  */
 export const DEFAULT_NEGATIVE_TERMS = Object.freeze([
-  "low quality", "blurry", "poor anatomy", "extra limbs", "cropped",
-  "duplicate", "text", "watermark", "logo", "low resolution"
+  "low quality", "blurry", "unintended cropping", "duplicate",
+  "watermark", "low resolution", "visual artifacts"
 ]);
 
 /** Builds a negative prompt from defaults and optional terms. */
@@ -22,4 +22,3 @@ export function saveNegativePreset(storage, name, value) {
   storage.saveNegativePreset(preset);
   return preset;
 }
-

@@ -56,6 +56,10 @@ export function renderSaved(items, container) {
     copy.append(title, subtitle);
     actions.className = "saved-item__actions";
     if (item.kind === "project") {
+      copy.dataset.projectOpen = item.id;
+      copy.tabIndex = 0;
+      copy.setAttribute("role", "button");
+      copy.setAttribute("aria-label", `Open ${item.title}`);
       const menu = document.createElement("button");
       if (item.status !== "archived") {
         const favorite = document.createElement("button");

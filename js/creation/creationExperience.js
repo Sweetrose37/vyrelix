@@ -60,6 +60,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   const goalInput = root.querySelector("#creation-goal");
   const categoryRoot = root.querySelector("#creation-categories");
+  const categorySearch = root.querySelector("#creation-category-search");
   const inference = root.querySelector("#creation-inference");
   const questionOne = root.querySelector("#creation-question-one");
   const questionTwo = root.querySelector("#creation-question-two");
@@ -84,7 +85,9 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     selectedIdea: "",
     selectedTemplate: "",
     reference: null,
-    referenceUrl: ""
+    referenceUrl: "",
+    showAllCategories: false,
+    categoryQuery: ""
   };
 
   function setStage(stage) {
@@ -101,7 +104,12 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
 
   function renderCategories() {
     const fragment = document.createDocumentFragment();
-    CREATION_CATEGORIES.forEach((category) => {
+    const query = state.categoryQuery.toLocaleLowerCase();
+    const categories = CREATION_CATEGORIES.filter((category) =>
+      !query || category.label.toLocaleLowerCase().includes(query) || category.keywords.some((keyword) => keyword.includes(query))
+    );
+    const visible = state.showAllCategories || query ? categories : categories.slice(0, 12);
+    visible.forEach((category) => {
       const item = button("creation-category", "", { creationCategory: category.id });
       item.setAttribute("aria-pressed", String(state.category?.id === category.id));
       item.classList.toggle("is-selected", state.category?.id === category.id);
@@ -109,6 +117,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       fragment.append(item);
     });
     categoryRoot.replaceChildren(fragment);
+    root.querySelector("[data-creation-browse-all]").textContent = state.showAllCategories ? "Show featured formats" : `Browse all ${CREATION_CATEGORIES.length} formats`;
   }
 
   function renderModes() {
@@ -284,6 +293,8 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   async function analyzeReference(file) {
+    if (file.size > 10_000_000) throw new Error("Reference images must be smaller than 10 MB.");
+    if (!file.type.startsWith("image/")) throw new Error("Choose a supported image file.");
     if (state.referenceUrl) URL.revokeObjectURL(state.referenceUrl);
     state.referenceUrl = URL.createObjectURL(file);
     const image = new Image();
@@ -387,9 +398,12 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       selectedTemplate: "",
       reference: null,
       referenceUrl: "",
+      showAllCategories: false,
+      categoryQuery: "",
       quickDefaults: {}
     });
     goalInput.value = "";
+    categorySearch.value = "";
     inference.textContent = "Describe anything. Vyrelix will recognize the creative direction.";
     renderCategories();
     setStage(1);
@@ -462,9 +476,10 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
           experienceVersion: 1
         }
       });
+      engine.settings.set({ activeProjectId: project.id });
       document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
       showToast(`${project.name} created`, "saved");
-      navigate("prompt");
+      navigate("project");
     } catch (error) {
       showToast(error.message || "Creation could not be saved", "error");
     }
@@ -508,6 +523,11 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   root.addEventListener("input", (event) => {
+    if (event.target === categorySearch) {
+      state.categoryQuery = categorySearch.value.trim();
+      renderCategories();
+      return;
+    }
     if (event.target !== goalInput) return;
     const value = goalInput.value.trim();
     if (!value) {
@@ -525,6 +545,11 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   });
 
   root.addEventListener("click", (event) => {
+    if (event.target.closest("[data-creation-browse-all]")) {
+      state.showAllCategories = !state.showAllCategories;
+      renderCategories();
+      return;
+    }
     const categoryButton = event.target.closest("[data-creation-category]");
     if (categoryButton) {
       selectCategory(getCreationCategory(categoryButton.dataset.creationCategory));

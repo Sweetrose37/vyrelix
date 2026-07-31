@@ -17,12 +17,16 @@ Copy-Item -LiteralPath (Join-Path $projectRoot "css") -Destination $distRoot -Re
 Copy-Item -LiteralPath (Join-Path $projectRoot "js") -Destination $distRoot -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot "utilities") -Destination $distRoot -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot "assets") -Destination $distRoot -Recurse
+Copy-Item -LiteralPath (Join-Path $projectRoot "manifest.webmanifest") -Destination $distRoot
+Copy-Item -LiteralPath (Join-Path $projectRoot "service-worker.js") -Destination $distRoot
 New-Item -ItemType File -Force -Path (Join-Path $distRoot ".nojekyll") | Out-Null
 
 $required = @(
   (Join-Path $distRoot "index.html"),
   (Join-Path $distRoot "css\style.css"),
   (Join-Path $distRoot "js\app.js"),
+  (Join-Path $distRoot "manifest.webmanifest"),
+  (Join-Path $distRoot "service-worker.js"),
   (Join-Path $distRoot "utilities\helpers.js"),
   (Join-Path $distRoot ".nojekyll")
 )

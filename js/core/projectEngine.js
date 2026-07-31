@@ -33,7 +33,7 @@ export class ProjectEngine {
       visibility: PROJECT_VISIBILITIES.includes(input.visibility) ? input.visibility : "private",
       status: PROJECT_STATUSES.includes(input.status) ? input.status : "draft",
       randomSeed: Number.isFinite(Number(input.randomSeed)) ? Number(input.randomSeed) : Math.floor(Math.random() * 2_147_483_647),
-      studio: input.studio || `${input.type || "Character"} Studio`,
+      studio: input.studio || "Universal Creative Engine",
       data: input.data && typeof input.data === "object" ? structuredClone(input.data) : {},
       references: Array.isArray(input.references) ? [...input.references] : []
     };

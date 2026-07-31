@@ -10,9 +10,6 @@
   .screen-stack { padding-inline: 24px; }
   .hero { padding-top: 14px; }
 }
-@media (orientation: landscape) and (max-height: 500px) {
-  body::after { position: fixed; z-index: 999; inset: 0; display: grid; padding: 40px; place-items: center; background: var(--bg-primary); color: var(--gray); content: "Vyrelix is designed for portrait mode."; text-align: center; }
-}
 @supports (padding: max(0px)) {
   .screen-stack { padding-left: max(var(--space-5), env(safe-area-inset-left)); padding-right: max(var(--space-5), env(safe-area-inset-right)); }
 }

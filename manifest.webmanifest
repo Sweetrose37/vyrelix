@@ -1,0 +1,20 @@
+{
+  "name": "Vyrelix Universal Creative Platform",
+  "short_name": "Vyrelix",
+  "description": "A private, adaptive creative platform for ideas, visual direction, and production-ready creative briefs.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0B0F",
+  "theme_color": "#0B0B0F",
+  "orientation": "any",
+  "categories": ["design", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "./assets/icons/vyrelix-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

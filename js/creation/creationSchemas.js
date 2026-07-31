@@ -57,9 +57,55 @@ const UNIVERSAL_FIELDS = Object.freeze([
   field("extraDetails", "Additional direction", "Anything else Vyrelix should understand", { type: "textarea" })
 ]);
 
+const PRODUCT_FIELDS = Object.freeze([
+  field("productName", "Product or collection name", "What is being presented?", { required: true }),
+  field("productDetails", "Product details", "Shape, ingredients, features, or construction", { type: "textarea" }),
+  field("audience", "Audience", "Who is it made for?"),
+  field("materials", "Materials and finish", "Paper, glass, metal, fabric, food styling"),
+  field("presentation", "Presentation", "Studio, lifestyle, retail, editorial"),
+  field("format", "Output format", "Front view, package system, detail shot, campaign")
+]);
+
+const STORY_FIELDS = Object.freeze([
+  field("title", "Title or working name", "Name this story or sequence", { required: true }),
+  field("premise", "Premise", "What happens and why does it matter?", { type: "textarea" }),
+  field("audience", "Audience", "Age, interests, or reading level"),
+  field("characters", "Characters or subjects", "Who leads the story?"),
+  field("setting", "World or setting", "Where and when does it happen?"),
+  field("tone", "Tone and style", "Playful, dramatic, educational, cinematic")
+]);
+
+const DIGITAL_FIELDS = Object.freeze([
+  field("productName", "Product or experience", "App, website, tool, or service", { required: true }),
+  field("userGoal", "User goal", "What should someone accomplish?", { type: "textarea" }),
+  field("audience", "Audience", "Who will use it?"),
+  field("content", "Key content", "Information, actions, and priority"),
+  field("style", "Interface style", "Clean, expressive, editorial, technical"),
+  field("platform", "Platform and viewport", "Mobile app, responsive web, desktop dashboard")
+]);
+
+const ASSET_FIELDS = Object.freeze([
+  field("assetSubject", "Subject", "What should the asset depict?", { required: true }),
+  field("purpose", "Purpose", "Where will it be used?"),
+  field("style", "Style", "Flat, dimensional, playful, realistic"),
+  field("palette", "Color direction", "Brand colors or palette"),
+  field("format", "Format", "Square, seamless, transparent, tileable"),
+  field("constraints", "Constraints", "Size, clarity, background, or production limits", { type: "textarea" })
+]);
+
 const category = ({ id, label, icon, projectType, keywords, fields, ideas }) => Object.freeze({
   id, label, icon, projectType, keywords: Object.freeze(keywords),
   fields: Object.freeze(fields), ideas: Object.freeze(ideas)
+});
+
+const expanded = (id, label, projectType, fields, keywords = []) => category({
+  id,
+  label,
+  icon: "✦",
+  projectType,
+  keywords: [label.toLocaleLowerCase(), ...keywords],
+  fields,
+  ideas: [`Signature ${label.toLocaleLowerCase()}`, `Editorial ${label.toLocaleLowerCase()}`, `Bold ${label.toLocaleLowerCase()} concept`]
 });
 
 export const CREATION_CATEGORIES = Object.freeze([
@@ -123,6 +169,51 @@ export const CREATION_CATEGORIES = Object.freeze([
   ]), ideas: ["Hero vehicle reveal", "Technical concept design", "Cinematic motion scene"] }),
   category({ id: "social-media-graphic", label: "Social Media Graphic", icon: "◫", projectType: "Poster", keywords: ["social media", "instagram", "social post", "story graphic"], fields: CAMPAIGN_FIELDS, ideas: ["Scroll-stopping announcement", "Branded carousel cover", "Polished story campaign"] }),
   category({ id: "advertisement", label: "Advertisement", icon: "◈", projectType: "Poster", keywords: ["advertisement", "advert", "ad campaign", "promotion"], fields: CAMPAIGN_FIELDS, ideas: ["Premium product campaign", "Direct-response promotion", "Emotional brand story"] }),
+  expanded("child", "Child", "Character", PEOPLE_FIELDS, ["kid", "children"]),
+  expanded("pet", "Pet", "Creature", PEOPLE_FIELDS, ["dog portrait", "cat portrait"]),
+  expanded("sci-fi-character", "Sci-Fi Character", "Character", PEOPLE_FIELDS, ["science fiction", "cyberpunk"]),
+  expanded("creature", "Creature", "Creature", PEOPLE_FIELDS, ["monster", "mythical creature"]),
+  expanded("architecture", "Architecture", "Architecture", UNIVERSAL_FIELDS, ["architectural concept"]),
+  expanded("building", "Building", "Architecture", UNIVERSAL_FIELDS, ["facade", "house design"]),
+  expanded("nature", "Nature", "Environment", UNIVERSAL_FIELDS, ["natural scene"]),
+  expanded("product", "Product", "Object", PRODUCT_FIELDS, ["product design"]),
+  expanded("packaging", "Packaging", "Object", PRODUCT_FIELDS, ["label design", "package design"]),
+  expanded("fashion", "Fashion", "Object", PRODUCT_FIELDS, ["clothing", "apparel"]),
+  expanded("jewelry", "Jewelry", "Object", PRODUCT_FIELDS, ["ring", "necklace"]),
+  expanded("furniture", "Furniture", "Object", PRODUCT_FIELDS, ["chair", "table"]),
+  expanded("food", "Food", "Object", PRODUCT_FIELDS, ["food photography", "dish"]),
+  expanded("menu", "Menu", "Poster", PRODUCT_FIELDS, ["restaurant menu"]),
+  expanded("brand-identity", "Brand Identity", "Logo", BRAND_FIELDS, ["brand system"]),
+  expanded("flyer", "Flyer", "Poster", CAMPAIGN_FIELDS),
+  expanded("brochure", "Brochure", "Poster", CAMPAIGN_FIELDS),
+  expanded("marketing-asset", "Marketing Asset", "Poster", CAMPAIGN_FIELDS),
+  expanded("youtube-thumbnail", "YouTube Thumbnail", "Poster", CAMPAIGN_FIELDS, ["video thumbnail"]),
+  expanded("magazine-cover", "Magazine Cover", "Book Cover", CAMPAIGN_FIELDS),
+  expanded("album-cover", "Album Cover", "Book Cover", CAMPAIGN_FIELDS, ["music cover"]),
+  expanded("storyboard", "Storyboard", "Scene", STORY_FIELDS, ["shot list"]),
+  expanded("children-book", "Children’s Book", "Book Cover", STORY_FIELDS, ["kids book", "picture book"]),
+  expanded("illustration", "Illustration", "Scene", STORY_FIELDS),
+  expanded("comic", "Comic", "Scene", STORY_FIELDS, ["graphic novel"]),
+  expanded("educational-material", "Educational Material", "Poster", STORY_FIELDS, ["worksheet", "learning resource"]),
+  expanded("presentation-graphic", "Presentation Graphic", "Poster", CAMPAIGN_FIELDS, ["slide graphic"]),
+  expanded("infographic", "Infographic", "Poster", CAMPAIGN_FIELDS, ["data graphic"]),
+  expanded("greeting-card", "Greeting Card", "Poster", INVITATION_FIELDS),
+  expanded("certificate", "Certificate", "Poster", INVITATION_FIELDS, ["award certificate"]),
+  expanded("wallpaper", "Wallpaper", "Environment", ASSET_FIELDS),
+  expanded("texture", "Texture", "Object", ASSET_FIELDS),
+  expanded("pattern", "Pattern", "Object", ASSET_FIELDS, ["seamless pattern"]),
+  expanded("icon", "Icon", "Icon", ASSET_FIELDS),
+  expanded("emoji", "Emoji", "Icon", ASSET_FIELDS),
+  expanded("sticker", "Sticker", "Icon", ASSET_FIELDS),
+  expanded("game-asset", "Game Asset", "Object", ASSET_FIELDS, ["game sprite"]),
+  expanded("concept-art", "Concept Art", "Scene", STORY_FIELDS),
+  expanded("pixel-art", "Pixel Art", "Scene", ASSET_FIELDS),
+  expanded("voxel-art", "Voxel Art", "Object", ASSET_FIELDS),
+  expanded("3d-concept", "3D Concept", "Object", PRODUCT_FIELDS, ["3d model", "three dimensional"]),
+  expanded("ui-concept", "UI Concept", "Object", DIGITAL_FIELDS, ["interface design"]),
+  expanded("app-screen", "App Screen", "Object", DIGITAL_FIELDS, ["mobile screen"]),
+  expanded("website-concept", "Website Concept", "Object", DIGITAL_FIELDS, ["web design", "landing page"]),
+  expanded("dashboard", "Dashboard", "Object", DIGITAL_FIELDS, ["analytics dashboard"]),
   category({ id: "anything", label: "Anything…", icon: "∞", projectType: "Object", keywords: [], fields: UNIVERSAL_FIELDS, ideas: ["Unexpected creative direction", "Elegant visual concept", "Bold experimental idea"] })
 ]);
 

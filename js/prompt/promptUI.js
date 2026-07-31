@@ -1,5 +1,5 @@
 /**
- * Lazily loaded mobile interface for generation, preview, history, export, and test mode.
+ * Lazily loaded interface for creative brief generation, preview, history, and export.
  */
 import { PromptStorage } from "./promptStorage.js";
 import { PromptHistory } from "./promptHistory.js";
@@ -61,7 +61,7 @@ export function initializePromptStudio({ engine, navigate, showToast, onPromptsC
   function renderProjects(preferredId = projectSelect.value) {
     const projects = engine.projects.list();
     const options = [new Option("Choose a saved project", "")];
-    projects.forEach((project) => options.push(new Option(`${project.name} · ${project.studio}`, project.id)));
+    projects.forEach((project) => options.push(new Option(`${project.name} · ${project.category || project.type}`, project.id)));
     projectSelect.replaceChildren(...options);
     projectSelect.value = projects.some((project) => project.id === preferredId) ? preferredId : projects[0]?.id || "";
     updateGenerateAvailability(generateButton, Boolean(projectSelect.value));
@@ -117,8 +117,6 @@ export function initializePromptStudio({ engine, navigate, showToast, onPromptsC
         <div class="prompt-history-card__actions">
           <button type="button" data-prompt-action="favorite" aria-label="${item.favorite ? "Remove from" : "Add to"} favorites" aria-pressed="${Boolean(item.favorite)}">${item.favorite ? "♥" : "♡"}</button>
           <button type="button" data-prompt-action="duplicate" aria-label="Duplicate prompt">⧉</button>
-          <button type="button" data-prompt-action="rename" aria-label="Rename prompt">✎</button>
-          <button type="button" data-prompt-action="delete" aria-label="Delete prompt">×</button>
         </div>
       </article>`).join("");
   }
@@ -175,47 +173,9 @@ export function initializePromptStudio({ engine, navigate, showToast, onPromptsC
       }
       if (action === "favorite") storage.toggleFavorite(id);
       if (action === "duplicate") history.duplicate(id);
-      if (action === "rename") {
-        const name = window.prompt("Rename prompt", storage.get(id)?.title || "");
-        if (name?.trim()) history.rename(id, name);
-      }
-      if (action === "delete" && window.confirm("Delete this generated prompt?")) history.remove(id);
       renderHistory(document.querySelector("#prompt-history-search").value);
       onPromptsChanged();
       showToast(action === "delete" ? "Prompt deleted" : "Prompt updated");
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  }
-
-  /** Runs developer-only demo and stress-test commands locally. */
-  function handleTestAction(action) {
-    try {
-      if (action === "sample-character" || action === "demo-project") {
-        const sample = random.completeProject();
-        const suffix = Date.now().toString(36).slice(-4);
-        const project = engine.projects.create({ ...sample, name: `${sample.name || "Demo Character"} ${suffix}` });
-        renderProjects(project.id);
-        refreshLive();
-        showToast("Demo character project loaded");
-      }
-      if (action === "sample-prompt") generate();
-      if (action === "stress") {
-        const projectId = projectSelect.value;
-        if (!projectId) throw new Error("Load a demo project first.");
-        const start = performance.now();
-        for (let index = 0; index < 250; index += 1) manager.generate(projectId, { ...random.prompt(), seed: index + 1 }, { save: false });
-        document.querySelector("#test-mode-status").textContent = `250 prompts validated in ${Math.round(performance.now() - start)} ms.`;
-      }
-      if (action === "reset") {
-        storage.reset();
-        currentRecord = null;
-        renderHistory();
-        renderCurrent();
-        onPromptsChanged();
-        document.querySelector("#test-mode-status").textContent = "Demo prompt data reset.";
-        showToast("Demo prompt data reset", "deleted");
-      }
     } catch (error) {
       showToast(error.message, "error");
     }
@@ -244,11 +204,9 @@ export function initializePromptStudio({ engine, navigate, showToast, onPromptsC
       showToast("Compatible prompt direction randomized");
     });
     document.querySelector("[data-save-negative]").addEventListener("click", () => {
-      const name = window.prompt("Name this negative prompt preset", "Quality Guard");
-      if (name?.trim()) {
-        saveNegativePreset(storage, name, form.elements.negativePrompt.value);
-        showToast("Negative prompt preset saved");
-      }
+      const name = `Quality Guard ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date())}`;
+      saveNegativePreset(storage, name, form.elements.negativePrompt.value);
+      showToast("Negative prompt preset saved");
     });
     document.querySelectorAll("[data-copy-part], [data-export-format]").forEach((button) => button.addEventListener("click", () => handlePreviewAction(button)));
     document.querySelector("[data-favorite-prompt]").addEventListener("click", () => {
@@ -264,9 +222,18 @@ export function initializePromptStudio({ engine, navigate, showToast, onPromptsC
       const button = event.target.closest("[data-prompt-action]");
       if (button) handleHistoryAction(button);
     });
-    document.querySelectorAll("[data-test-action]").forEach((button) => button.addEventListener("click", () => handleTestAction(button.dataset.testAction)));
-    document.querySelector("[data-open-ai-panel]").addEventListener("click", () => navigate("ai-image"));
     document.addEventListener("vyrelix:projects-changed", () => renderProjects());
-    return { storage, manager, refreshProjects: renderProjects, renderHistory };
+    return {
+      storage,
+      manager,
+      refreshProjects: renderProjects,
+      renderHistory,
+      selectProject(id) {
+        renderProjects(id);
+        projectSelect.value = id || "";
+        loadDraft();
+        refreshLive();
+      }
+    };
   });
 }

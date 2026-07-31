@@ -21,6 +21,9 @@ export function createProjectPreview(project, { compact = false } = {}) {
   const metadata = document.createElement("div");
   article.className = `card project-preview${compact ? " project-preview--compact" : ""}`;
   article.dataset.projectId = project.id;
+  article.dataset.projectOpen = project.id;
+  article.tabIndex = 0;
+  article.setAttribute("role", "button");
   article.setAttribute("aria-label", `${project.name}, ${project.type} project, ${project.status}`);
   thumbnail.className = "project-preview__thumbnail";
   thumbnail.setAttribute("role", "img");
@@ -33,7 +36,7 @@ export function createProjectPreview(project, { compact = false } = {}) {
   heading.append(title, badge);
   metadata.className = "project-preview__meta";
   metadata.append(
-    row("Studio", project.studio),
+    row("Goal", project.data?.goal || project.description),
     row("Category", project.category),
     row("Theme", project.theme),
     row("Art style", project.artStyle),
