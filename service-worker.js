@@ -1,4 +1,4 @@
-const CACHE_NAME = "vyrelix-v8-refined-experience";
+const CACHE_NAME = "vyrelix-v9-universal-builder";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
   "./css/core/creation.css",
   "./js/app.js",
   "./js/creation/creationExperience.js",
+  "./js/creation/guidedExperience.js",
   "./js/creation/creativeIntelligence.js",
   "./js/creation/creationSchemas.js"
 ];

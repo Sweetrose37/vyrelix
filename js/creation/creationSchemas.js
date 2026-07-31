@@ -110,6 +110,9 @@ const expanded = (id, label, projectType, fields, keywords = []) => category({
 
 export const CREATION_CATEGORIES = Object.freeze([
   category({ id: "person", label: "Person", icon: "◉", projectType: "Character", keywords: ["person", "portrait", "woman", "man", "human"], fields: PEOPLE_FIELDS, ideas: ["Editorial portrait", "Candid lifestyle moment", "Cinematic character study"] }),
+  category({ id: "woman", label: "Woman", icon: "◉", projectType: "Character", keywords: ["woman", "female portrait", "girl"], fields: PEOPLE_FIELDS, ideas: ["Luxury editorial portrait", "Confident everyday style", "Cinematic character study"] }),
+  category({ id: "man", label: "Man", icon: "◉", projectType: "Character", keywords: ["man", "male portrait", "boy"], fields: PEOPLE_FIELDS, ideas: ["Refined editorial portrait", "Modern everyday style", "Cinematic character study"] }),
+  category({ id: "teen", label: "Teen", icon: "◉", projectType: "Character", keywords: ["teen", "teenager", "youth"], fields: PEOPLE_FIELDS, ideas: ["Expressive youth portrait", "Modern street-style moment", "Imaginative character study"] }),
   category({ id: "family", label: "Family", icon: "⌂", projectType: "Character", keywords: ["family", "parents", "siblings", "couple"], fields: PEOPLE_FIELDS, ideas: ["Warm family portrait", "Joyful everyday memory", "Elegant generational keepsake"] }),
   category({ id: "baby", label: "Baby", icon: "♡", projectType: "Character", keywords: ["baby", "newborn", "infant"], fields: PEOPLE_FIELDS, ideas: ["Soft newborn portrait", "Whimsical nursery moment", "Timeless family keepsake"] }),
   category({ id: "toddler", label: "Toddler", icon: "✦", projectType: "Character", keywords: ["toddler", "young child", "little one"], fields: PEOPLE_FIELDS, ideas: ["Playful discovery scene", "Bright milestone portrait", "Storybook adventure"] }),

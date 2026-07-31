@@ -1,7 +1,7 @@
 /**
  * Minimal single-page navigation with history support and accessible state.
  */
-const routes = new Set(["home", "create", "project", "visual", "prompt", "prompt-preview", "prompt-history", "saved", "settings"]);
+const routes = new Set(["home", "create", "project", "visual", "prompt", "prompt-preview", "prompt-history", "saved", "library", "settings"]);
 const routeAliases = Object.freeze({
   studios: "create",
   builder: "create",
@@ -17,7 +17,7 @@ const routeTitles = Object.freeze({
   home: "Home", create: "Create Anything", project: "Project",
   visual: "Visual Direction", prompt: "Creative Brief",
   "prompt-preview": "Brief Preview", "prompt-history": "Brief History",
-  saved: "Projects", settings: "Settings"
+  saved: "Projects", library: "Creative Library", settings: "Profile"
 });
 
 export function createNavigation({ onRouteChange } = {}) {

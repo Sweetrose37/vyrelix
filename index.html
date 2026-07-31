@@ -58,12 +58,50 @@
           <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
             <div class="hero">
               <div class="eyebrow"><span></span> Universal creative engine</div>
-              <h1 class="large-title" id="home-title">Every idea.<br>One <em>engine.</em></h1>
-              <p class="body-text text-muted">Tell Vyrelix what you want to make. One intelligent creative engine adapts the experience around your goal.</p>
-              <button class="button button--primary button--wide ripple" type="button" data-route="create" data-create-reset>
-                Start creating <span aria-hidden="true">→</span>
+              <h1 class="large-title" id="home-title">Imagine it.<br><em>Create it.</em></h1>
+              <p class="body-text text-muted">Characters, fashion, books, brands, stickers, apps, and everything in between. One intelligent engine brings it together.</p>
+              <button class="button button--primary button--wide ripple" type="button" data-route="create" data-create-reset data-create-mode="guided">
+                Explore what you can create <span aria-hidden="true">→</span>
               </button>
             </div>
+
+            <section class="section-block creative-universe" aria-labelledby="creative-universe-title">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Made for every imagination</p>
+                  <h2 class="medium-title" id="creative-universe-title">Choose what you want to build</h2>
+                </div>
+                <button class="text-button" type="button" data-route="create" data-create-reset data-create-mode="guided">View all</button>
+              </div>
+              <div class="universe-feature-row" aria-label="Featured creative categories">
+                <button class="universe-card universe-card--character" type="button" data-route="create" data-create-reset data-create-category="person">
+                  <span class="universe-card__icon" aria-hidden="true">✦</span>
+                  <span><strong>Character Builder</strong><small>Build every detail from face to fashion</small></span>
+                  <span class="universe-card__arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="universe-card universe-card--stories" type="button" data-route="create" data-create-reset data-create-category="children-book">
+                  <span class="universe-card__icon" aria-hidden="true">▤</span>
+                  <span><strong>Books &amp; Stories</strong><small>Covers, picture books, and story worlds</small></span>
+                  <span class="universe-card__arrow" aria-hidden="true">›</span>
+                </button>
+              </div>
+              <div class="universe-category-scroll" aria-label="Creative categories">
+                <button type="button" data-route="create" data-create-reset data-create-category="woman"><span aria-hidden="true">♀</span><strong>Women</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="man"><span aria-hidden="true">♂</span><strong>Men</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="teen"><span aria-hidden="true">◇</span><strong>Teens</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="child"><span aria-hidden="true">★</span><strong>Children</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="toddler"><span aria-hidden="true">♡</span><strong>Toddlers</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="baby"><span aria-hidden="true">☺</span><strong>Babies</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="sticker"><span aria-hidden="true">✿</span><strong>Sticker Packs</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="logo"><span aria-hidden="true">◆</span><strong>Logos</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="packaging"><span aria-hidden="true">▣</span><strong>Packaging</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="product"><span aria-hidden="true">■</span><strong>Products</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="wedding-invitation"><span aria-hidden="true">✧</span><strong>Invitations</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="social-media-graphic"><span aria-hidden="true">@</span><strong>Social Media</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="app-screen"><span aria-hidden="true">▦</span><strong>Mobile Apps</strong></button>
+                <button type="button" data-route="create" data-create-reset data-create-category="poster"><span aria-hidden="true">▶</span><strong>Posters</strong></button>
+              </div>
+            </section>
 
             <section class="section-block dashboard-summary" aria-labelledby="dashboard-title">
               <div class="section-heading">
@@ -90,9 +128,9 @@
                   </span>
                   <span aria-hidden="true">›</span>
                 </button>
-                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-mode="build" aria-label="Open Build Mode">
-                  <span class="card-icon" aria-hidden="true">◇</span>
-                  <span><strong>Build something</strong><small>Assemble your idea with creative panels</small></span>
+                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset data-create-mode="guided" aria-label="Open Creative Builder">
+                  <span class="card-icon" aria-hidden="true">🪄</span>
+                  <span><strong>Creative Builder</strong><small>Choose details from expandable sections</small></span>
                   <span aria-hidden="true">›</span>
                 </button>
                 <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset data-create-mode="inspire" aria-label="Start creating with inspiration">
@@ -189,12 +227,12 @@
             <section class="project-answer-panel" aria-labelledby="project-answers-title">
               <div class="section-heading">
                 <h2 class="medium-title" id="project-answers-title">Creative direction</h2>
-                <button class="text-button" type="button" data-project-edit>✎ Edit in Build Mode</button>
+                <button class="text-button" type="button" data-project-edit>Continue editing</button>
               </div>
               <div id="project-detail-answers"></div>
             </section>
             <div class="project-detail-actions">
-              <button class="card card--interactive" type="button" data-project-continue="prompt"><span class="card-icon" aria-hidden="true">⌁</span><span><strong>Open Prompt Inspector</strong><small>Advanced prompt review, copy, and export controls</small></span><span aria-hidden="true">›</span></button>
+              <button class="card card--interactive" type="button" data-project-continue="prompt"><span class="card-icon" aria-hidden="true">🛠</span><span><strong>Advanced Controls</strong><small>Camera, composition, seed, negative prompt, and Prompt Inspector</small></span><span aria-hidden="true">›</span></button>
               <button class="card card--interactive" type="button" data-project-continue="visual"><span class="card-icon" aria-hidden="true">◈</span><span><strong>Shape visual direction</strong><small>Refine color, material, composition, mood, and style</small></span><span aria-hidden="true">›</span></button>
             </div>
             <div class="project-detail-toolbar">
@@ -260,10 +298,10 @@
 
           <section class="screen prompt-studio" data-screen="prompt" aria-labelledby="prompt-studio-title">
             <div class="screen-heading">
-              <div><p class="eyebrow">Advanced transparency</p><h1 class="large-title" id="prompt-studio-title">Prompt Inspector</h1></div>
+              <div><p class="eyebrow">Professional controls</p><h1 class="large-title" id="prompt-studio-title">Advanced Controls</h1></div>
               <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
             </div>
-            <div class="notice"><span aria-hidden="true">✓</span><p>Vyrelix builds prompts behind the scenes. Advanced users can inspect, refine, copy, and export them here.</p></div>
+            <div class="notice"><span aria-hidden="true">✓</span><p>Vyrelix handles prompt engineering automatically. These optional controls are available when you want camera, composition, seed, negative prompt, or Prompt Inspector access.</p></div>
             <form id="prompt-form" class="prompt-form">
               <label class="field"><span>Project <b aria-hidden="true">*</b></span><select name="projectId" required aria-label="Project to generate from"><option value="">Choose a saved project</option></select></label>
               <div class="prompt-form__pair">
@@ -337,8 +375,44 @@
             <div class="saved-list" id="saved-list"></div>
           </section>
 
+          <section class="screen library-screen" data-screen="library" aria-labelledby="library-title">
+            <div class="screen-heading">
+              <div><p class="eyebrow">Creative library</p><h1 class="large-title" id="library-title">Discover</h1></div>
+              <span class="badge">Curated</span>
+            </div>
+            <p class="body-text text-muted library-intro">Explore inspiration, professional starting points, and reusable visual directions without leaving the Universal Creative Engine.</p>
+            <div class="library-feature-grid">
+              <button class="card card--interactive library-feature" type="button" data-route="create" data-create-reset data-create-mode="inspire">
+                <span class="card-icon" aria-hidden="true">🎲</span>
+                <span><strong>Inspiration</strong><small>Curated concepts, palettes, and styles</small></span>
+                <span aria-hidden="true">›</span>
+              </button>
+              <button class="card card--interactive library-feature" type="button" data-route="create" data-create-reset data-create-mode="guided">
+                <span class="card-icon" aria-hidden="true">🪄</span>
+                <span><strong>Creative Builder</strong><small>Explore every category and expandable option</small></span>
+                <span aria-hidden="true">›</span>
+              </button>
+            </div>
+            <section class="section-block" aria-labelledby="library-templates-title">
+              <div class="section-heading"><h2 class="medium-title" id="library-templates-title">Starting styles</h2><span class="caption">Editable</span></div>
+              <div class="template-scroll" aria-label="Creative starting styles">
+                <button type="button" data-route="create" data-template="Blank" data-create-reset>Blank</button>
+                <button type="button" data-route="create" data-template="Fantasy" data-create-reset>Fantasy</button>
+                <button type="button" data-route="create" data-template="Sci-Fi" data-create-reset>Sci-Fi</button>
+                <button type="button" data-route="create" data-template="Modern" data-create-reset>Modern</button>
+                <button type="button" data-route="create" data-template="Anime" data-create-reset>Anime</button>
+                <button type="button" data-route="create" data-template="Realistic" data-create-reset>Realistic</button>
+              </div>
+            </section>
+            <section class="settings-group library-privacy-note">
+              <h2 class="section-title">Your creative collection</h2>
+              <p class="body-text text-muted">Favorites, templates, and inspiration stay private in this browser unless you export them.</p>
+              <button class="button button--outlined button--wide" type="button" data-route="saved">View saved projects</button>
+            </section>
+          </section>
+
           <section class="screen" data-screen="settings" aria-labelledby="settings-title">
-            <div class="screen-heading"><div><p class="eyebrow">Personalize</p><h1 class="large-title" id="settings-title">Settings</h1></div></div>
+            <div class="screen-heading"><div><p class="eyebrow">Your Vyrelix</p><h1 class="large-title" id="settings-title">Profile</h1></div></div>
             <section class="settings-group">
               <h2 class="section-title">Experience</h2>
               <label class="switch-row">
@@ -366,11 +440,12 @@
 
         </main>
 
-        <nav class="bottom-nav bottom-nav--four" aria-label="Primary navigation">
+        <nav class="bottom-nav bottom-nav--five" aria-label="Primary navigation">
           <button class="nav-item is-active" type="button" data-route="home" aria-label="Home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
           <button class="nav-item" type="button" data-route="create" data-create-reset aria-label="Create anything"><span aria-hidden="true">✦</span><small>Create</small></button>
           <button class="nav-item" type="button" data-route="saved" aria-label="Projects"><span aria-hidden="true">▱</span><small>Projects</small></button>
-          <button class="nav-item" type="button" data-route="settings" aria-label="Settings"><span aria-hidden="true">⚙</span><small>Settings</small></button>
+          <button class="nav-item" type="button" data-route="library" aria-label="Creative Library"><span aria-hidden="true">▦</span><small>Library</small></button>
+          <button class="nav-item" type="button" data-route="settings" aria-label="Profile"><span aria-hidden="true">◉</span><small>Profile</small></button>
         </nav>
       </div>
     </div>

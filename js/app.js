@@ -231,7 +231,7 @@ function bindProjectActions() {
       }
       if (event.target.closest("[data-project-edit]")) {
         const controller = await ensureCreationExperience();
-        controller.openProject(project);
+        controller.resumeProject(project);
         navigation.navigate("create");
       }
       if (event.target.closest('[data-project-continue="prompt"]')) {
@@ -379,7 +379,8 @@ function bindGeneralEvents() {
     pendingCreationOptions = {
       reset: trigger.hasAttribute("data-create-reset"),
       mode: trigger.dataset.createMode || null,
-      template: trigger.dataset.template || null
+      template: trigger.dataset.template || null,
+      category: trigger.dataset.createCategory || null
     };
   }));
   document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
