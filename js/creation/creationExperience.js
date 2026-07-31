@@ -235,7 +235,7 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
     drop.dataset.referenceDrop = "";
     drop.append(
       element("strong", "", state.references.length ? `${state.references.length} reference${state.references.length === 1 ? "" : "s"} ready` : "Drop, paste, or choose references"),
-      element("small", "", "Images are analyzed locally and never uploaded.")
+      element("small", "", "References stay on this device and are attached to your project direction.")
     );
     const input = element("input", "sr-only");
     input.type = "file";
