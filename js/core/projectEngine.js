@@ -15,6 +15,7 @@ export class ProjectEngine {
   create(input = {}) {
     const now = new Date().toISOString();
     return {
+      ...structuredClone(input),
       id: input.id || createId("project"),
       name: String(input.name || "Untitled project").trim(),
       type: input.type || "Character",

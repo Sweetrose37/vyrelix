@@ -745,19 +745,20 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   function saveProject() {
     updatePrompt();
     const spec = state.specification;
+    const existingProject = state.projectId ? engine.projects.get(state.projectId) : null;
     const answers = Object.fromEntries(spec.sections.map((section, index) => [`${section.kind}-${index + 1}`, section.value]).filter(([, value]) => String(value || "").trim()));
     const nameSeed = spec.sections.find((section) => section.kind === "subject")?.value || spec.goal || spec.categoryLabel;
     const patch = {
-      name: state.projectId ? engine.projects.get(state.projectId)?.name : uniqueProjectName(engine, nameSeed),
+      name: existingProject?.name || uniqueProjectName(engine, nameSeed),
       type: spec.projectType,
       category: spec.categoryLabel,
       description: spec.goal || "Original creative direction",
-      tags: [spec.categoryId, "dual-creation", state.view],
+      tags: [...new Set([...(existingProject?.tags || []), spec.categoryId, "dual-creation", state.view])],
       theme: spec.sections.find((section) => section.kind === "mood")?.value || "Original",
       artStyle: spec.sections.find((section) => section.kind === "artistic-style")?.value || "Adaptive direction",
       colorPalette: (spec.sections.find((section) => section.kind === "palette")?.value || "").split(",").map((value) => value.trim()).filter(Boolean),
       data: {
-        ...(state.projectId ? engine.projects.get(state.projectId)?.data : {}),
+        ...(existingProject?.data || {}),
         goal: spec.goal,
         creationCategory: spec.categoryId,
         creationMode: "dual-experience",
@@ -801,11 +802,34 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
       return api;
     }
     if (options.reset) reset();
-    if (options.mode === "build") {
+    if (options.template) {
+      state.specification = blankSpecification("");
+      if (options.template === "Custom") {
+        state.library = "panels";
+      } else {
+        const templateId = options.template.toLocaleLowerCase().replace(/\s+/g, "-");
+        const values = engine.templates.apply(templateId);
+        if (values.theme) state.specification.sections.push(createPanel("mood", values.theme, "template"));
+        const style = state.specification.sections.find((panel) => panel.kind === "artistic-style");
+        if (style && values.artStyle) {
+          style.value = values.artStyle;
+          style.source = "template";
+        }
+      }
+      ensureBuildSpecification();
+      pushHistory(`${options.template} template applied`);
+      renderBuild();
+    } else if (options.mode === "build") {
       state.specification = blankSpecification("");
       ensureBuildSpecification();
       renderBuild();
+    } else if (options.mode === "inspire") {
+      state.goal = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+      state.specification = null;
+      renderDescribe();
     } else if (options.mode === "describe") {
+      renderDescribe();
+    } else if (state.view === "describe") {
       renderDescribe();
     } else if (!state.specification || state.view === "choice") {
       renderChoice();
@@ -816,6 +840,9 @@ export function initializeCreationExperience({ root, engine, navigate, showToast
   }
 
   root.addEventListener("input", (event) => {
+    if (event.target.matches("#describe-idea")) {
+      state.goal = event.target.value;
+    }
     if (event.target.matches("[data-panel-value]")) {
       const panel = state.specification.sections.find((item) => item.uid === event.target.dataset.panelValue);
       if (panel) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "vyrelix-v7-mobile-dropdowns";
+const CACHE_NAME = "vyrelix-v8-refined-experience";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -31,8 +31,10 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || new URL(event.request.url).origin !== location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-      return response;
-    }).catch(() => caches.match("./index.html")))
+      if (!response.ok) return response;
+      return caches.open(CACHE_NAME)
+        .then((cache) => cache.put(event.request, response.clone()))
+        .then(() => response);
+    }).catch(() => event.request.mode === "navigate" ? caches.match("./index.html") : Response.error()))
   );
 });

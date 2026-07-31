@@ -16,6 +16,7 @@ import { creationEngine } from "./core/creationEngine.js";
 import { initializeDashboard } from "./core/dashboard.js";
 import { downloadProject } from "./project/projectExporter.js";
 import { readProjectFile } from "./project/projectImporter.js";
+import { APP_VERSION } from "../utilities/constants.js";
 
 const state = { filter: "all", query: "" };
 const savedList = document.querySelector("#saved-list");
@@ -24,9 +25,11 @@ let navigation;
 let creationController;
 let promptController;
 let visualController;
+let visualProjectId = "";
 let pendingCreationOptions = null;
 
 const modeNames = Object.freeze({
+  "dual-experience": "Universal Creative Engine",
   quick: "Quick Create",
   guided: "Guided Creator",
   advanced: "Advanced Creator",
@@ -177,8 +180,14 @@ async function ensurePromptStudio() {
 }
 
 async function ensureVisualStudio() {
-  if (visualController) return visualController;
   const project = activeProject();
+  if (visualController) {
+    if (visualProjectId !== project?.id) {
+      visualController.load({ initial: project?.data?.visual, projectType: project?.type || "Object" });
+      visualProjectId = project?.id || "";
+    }
+    return visualController;
+  }
   const { initializeVisualStudio } = await import("./visual/visualUI.js");
   visualController = initializeVisualStudio({
     root: document.querySelector('[data-screen="visual"]'),
@@ -199,6 +208,7 @@ async function ensureVisualStudio() {
       navigation.navigate("project");
     }
   });
+  visualProjectId = project?.id || "";
   return visualController;
 }
 
@@ -264,6 +274,13 @@ function bindSavedActions() {
     const open = event.target.closest("[data-project-open]");
     if (open) {
       openProject(open.dataset.projectOpen);
+      return;
+    }
+    const remove = event.target.closest("[data-delete-id]");
+    if (remove?.dataset.deleteKind === "prompt") {
+      storage.removePrompt(remove.dataset.deleteId);
+      refreshSaved();
+      showToast("Prompt deleted", "deleted");
       return;
     }
     const action = event.target.closest("[data-project-action]");
@@ -418,6 +435,9 @@ bindProjectActions();
 bindSavedActions();
 bindGeneralEvents();
 addDataPortability();
+document.querySelectorAll("[data-app-version]").forEach((item) => {
+  item.textContent = `${APP_VERSION} · Universal Creative Platform`;
+});
 createSearchController({
   input: document.querySelector("#saved-search"),
   suggestions: document.querySelector("#search-suggestions"),

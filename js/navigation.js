@@ -24,9 +24,10 @@ export function createNavigation({ onRouteChange } = {}) {
   const screens = [...document.querySelectorAll("[data-screen]")];
   const navItems = [...document.querySelectorAll(".nav-item[data-route]")];
 
-  function navigate(route, { replace = false } = {}) {
+  function navigate(route, { replace = false, focus = true } = {}) {
     const requested = routeAliases[route] || route;
     const target = routes.has(requested) ? requested : "home";
+    const current = screens.find((screen) => screen.classList.contains("is-active"))?.dataset.screen;
     screens.forEach((screen) => {
       const active = screen.dataset.screen === target;
       screen.classList.toggle("is-active", active);
@@ -41,13 +42,19 @@ export function createNavigation({ onRouteChange } = {}) {
       item.toggleAttribute("aria-current", active);
     });
     const url = target === "home" ? location.pathname : `#${target}`;
-    history[replace ? "replaceState" : "pushState"]({ route: target }, "", url);
+    history[replace || current === target ? "replaceState" : "pushState"]({ route: target }, "", url);
     document.querySelector(".screen-stack")?.scrollTo?.({ top: 0 });
     window.scrollTo({ top: 0, behavior: "instant" });
-    document.title = target === "home" ? "Vyrelix" : `${target[0].toUpperCase()}${target.slice(1)} · Vyrelix`;
     document.title = target === "home" ? "Vyrelix" : `${routeTitles[target]} · Vyrelix`;
     onRouteChange?.(target);
     document.dispatchEvent(new CustomEvent("vyrelix:route", { detail: { route: target } }));
+    if (focus) {
+      const heading = screens.find((screen) => screen.dataset.screen === target)?.querySelector("h1");
+      if (heading) {
+        heading.tabIndex = -1;
+        requestAnimationFrame(() => heading.focus({ preventScroll: true }));
+      }
+    }
   }
 
   document.addEventListener("click", (event) => {
@@ -55,6 +62,6 @@ export function createNavigation({ onRouteChange } = {}) {
     if (trigger) navigate(trigger.dataset.route);
   });
   window.addEventListener("popstate", () => navigate(location.hash.slice(1) || "home", { replace: true }));
-  navigate(location.hash.slice(1) || "home", { replace: true });
+  navigate(location.hash.slice(1) || "home", { replace: true, focus: false });
   return { navigate };
 }

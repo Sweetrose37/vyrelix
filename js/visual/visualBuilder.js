@@ -39,6 +39,11 @@ export class VisualBuilder {
     this.value = structuredClone(initial);
   }
 
+  replace(initial = DEFAULT_VISUAL) {
+    this.value = structuredClone(initial);
+    return this;
+  }
+
   set(path, value) {
     const segments = String(path).split(".");
     const final = segments.pop();

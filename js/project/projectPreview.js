@@ -27,7 +27,7 @@ export function createProjectPreview(project, { compact = false } = {}) {
   article.setAttribute("aria-label", `${project.name}, ${project.type} project, ${project.status}`);
   thumbnail.className = "project-preview__thumbnail";
   thumbnail.setAttribute("role", "img");
-  thumbnail.setAttribute("aria-label", project.thumbnail ? `Thumbnail for ${project.name}` : `Thumbnail placeholder for ${project.name}`);
+  thumbnail.setAttribute("aria-label", project.thumbnail && project.thumbnail !== "placeholder" ? `Thumbnail for ${project.name}` : `No thumbnail yet for ${project.name}`);
   thumbnail.textContent = project.name.slice(0, 2).toLocaleUpperCase();
   heading.className = "project-preview__heading";
   title.textContent = project.name;

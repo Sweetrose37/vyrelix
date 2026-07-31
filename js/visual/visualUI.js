@@ -22,8 +22,10 @@ export function initializeVisualStudio({ root, initial = null, projectType = "Ob
   let activeConfig = VISUAL_SELECTOR_CONFIG[0];
   let view = "all";
   let pageSize = 60;
-  const studioId = String(projectType).toLocaleLowerCase().replace(/\s+/g, "-");
-  const allowedGroups = new Set(["color", "surface", "scene", ...(new Set(["Character", "Creature", "Mascot"]).has(projectType) ? ["character", "features"] : [])]);
+  let activeProjectType = projectType;
+  let studioId = String(projectType).toLocaleLowerCase().replace(/\s+/g, "-");
+  let allowedGroups = new Set(["color", "surface", "scene", ...(new Set(["Character", "Creature", "Mascot"]).has(projectType) ? ["character", "features"] : [])]);
+  engine.builder.set("studioId", studioId);
 
   previewRoot.replaceChildren(preview);
   templateSelect.replaceChildren(...engine.templates.list().map((template) => {
@@ -176,7 +178,7 @@ export function initializeVisualStudio({ root, initial = null, projectType = "Ob
       showToast("Compatible visual direction randomized", "success");
     }
     if (event.target.closest("[data-save-visual]")) {
-      const name = `${projectType} direction ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date())}`;
+      const name = `${activeProjectType} direction ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date())}`;
       try {
         engine.savePreset(name);
         showToast("Visual preset saved on this device", "saved");
@@ -216,5 +218,30 @@ export function initializeVisualStudio({ root, initial = null, projectType = "Ob
   renderCategoryFilter();
   renderPreview();
   renderAssets();
-  return { engine, getVisual: () => engine.builder.build() };
+
+  function load({ initial: nextInitial = null, projectType: nextProjectType = "Object" } = {}) {
+    activeProjectType = nextProjectType;
+    studioId = String(nextProjectType).toLocaleLowerCase().replace(/\s+/g, "-");
+    allowedGroups = new Set(["color", "surface", "scene", ...(new Set(["Character", "Creature", "Mascot"]).has(nextProjectType) ? ["character", "features"] : [])]);
+    engine.builder.replace(nextInitial || undefined);
+    engine.builder.set("studioId", studioId);
+    activeGroup = allowedGroups.has(activeGroup) ? activeGroup : "color";
+    activeConfig = VISUAL_SELECTOR_CONFIG.find((config) => config.group === activeGroup) || VISUAL_SELECTOR_CONFIG[0];
+    search.value = "";
+    view = "all";
+    pageSize = 60;
+    root.querySelectorAll("[data-visual-view]").forEach((button) => {
+      const active = button.dataset.visualView === "all";
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    renderGroups();
+    renderCategories();
+    renderCategoryFilter();
+    renderPreview();
+    renderAssets();
+    return engine.builder.build();
+  }
+
+  return { engine, load, getVisual: () => engine.builder.build() };
 }
