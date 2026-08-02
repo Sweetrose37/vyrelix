@@ -19,14 +19,14 @@ test("direct Play stays inside the click-triggered path without a delayed call",
   assert.doesNotMatch(source,/touchstart|touchend/);
 });
 
-test("mobile eyebrow uses a safe inset without changing the hero card",async()=>{
+test("mobile welcome wording uses a safe inset without changing the hero card",async()=>{
   const css=await readFile(new URL("css/nyvera.css",root),"utf8");
-  assert.match(css,/@media\(max-width:430px\)\{\.hero\.studio-welcome>\.eyebrow\{[^}]*max-width:100%[^}]*padding-inline:\.25rem/);
-  assert.match(css,/@media\(max-width:360px\)\{\.hero\.studio-welcome>\.eyebrow\{letter-spacing:\.1em/);
+  assert.match(css,/@media\(max-width:430px\)\{\.hero\.studio-welcome>\.eyebrow,\.hero\.studio-welcome>\.display-title\{[^}]*width:100%[^}]*max-width:100%[^}]*box-sizing:border-box[^}]*padding-inline:\.875rem/);
+  assert.match(css,/@media\(max-width:360px\)\{\.hero\.studio-welcome>\.eyebrow\{letter-spacing:\.07em/);
 });
 
 test("service worker bypasses external audio and uses the mobile-radio cache",async()=>{
   const source=await readFile(new URL("service-worker.js",root),"utf8");
-  assert.match(source,/nyvera-app-shell-v1\.9\.0-kids-products/);
+  assert.match(source,/nyvera-app-shell-v1\.9\.1-mobile-welcome/);
   assert.match(source,/new URL\(event\.request\.url\)\.origin!==self\.location\.origin/);
 });
