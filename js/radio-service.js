@@ -7,6 +7,15 @@ const PLAYLIST_URL=/\.m3u(?:\?|$)|\.pls(?:\?|$)/i;
 const HLS_URL=/\.m3u8(?:\?|$)/i;
 let servers=[];
 
+export const IHEART_DIRECTORY="https://www.iheart.com/live/";
+export function iheartEmbedUrl(value){
+  try{
+    const url=new URL(String(value||"").trim());
+    if(url.protocol!=="https:"||!/(^|\.)iheart\.com$/i.test(url.hostname)||!/^\/live\/[^/]+-\d+\/?$/i.test(url.pathname))return "";
+    url.hostname="www.iheart.com";url.search="?embed=true&theme=dark";url.hash="";return url.href;
+  }catch{return ""}
+}
+
 const clean=value=>String(value??"").replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,500);
 const validUrl=(value,{httpsOnly=false}={})=>{try{const url=new URL(value);if(!["http:","https:"].includes(url.protocol))return "";if(httpsOnly&&url.protocol!=="https:")return "";return url.href}catch{return ""}};
 const timeoutSignal=ms=>{const controller=new AbortController();setTimeout(()=>controller.abort(),ms);return controller.signal};

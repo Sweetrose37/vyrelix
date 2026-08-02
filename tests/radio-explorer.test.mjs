@@ -29,3 +29,8 @@ test("saved searches support rename, open data, delete, and clear",()=>{
 test("recent locations are deduplicated and bounded to 25",()=>{
   storage.reset();for(let i=0;i<30;i++)storage.addRecentLocation({country:`Country ${i}`,countryCode:String(i),state:"",city:""});assert.equal(storage.recentLocations().length,25);storage.addRecentLocation({country:"Country 29",countryCode:"29",state:"",city:""});assert.equal(storage.recentLocations().length,25);assert.equal(storage.recentLocations()[0].country,"Country 29");storage.removeRecentLocation(0);assert.equal(storage.recentLocations().length,24);storage.clearRecentLocations();assert.equal(storage.recentLocations().length,0);
 });
+test("iHeart live station pages become official responsive dark-theme embeds",()=>{
+  assert.equal(service.iheartEmbedUrl("https://www.iheart.com/live/jingle-ball-radio-9165/"),"https://www.iheart.com/live/jingle-ball-radio-9165/?embed=true&theme=dark");
+  assert.equal(service.iheartEmbedUrl("https://evil.example/live/fake-1234/"),"");
+  assert.equal(service.iheartEmbedUrl("https://www.iheart.com/podcast/example-1234/"),"");
+});
