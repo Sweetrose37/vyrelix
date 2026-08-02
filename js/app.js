@@ -191,4 +191,4 @@ store.on(detail=>{if(detail.type==="corrupt")toast("Some saved data was damaged.
 
 applySettings();
 setTimeout(()=>{loading.classList.add("is-done");app.hidden=false;state.route="welcome";render();setTimeout(()=>loading.remove(),500);},store.settings().reducedMotion?80:900);
-if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(error=>console.error("Nyvera service worker registration failed",error)));
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).then(registration=>registration.update()).catch(error=>console.error("Nyvera service worker registration failed",error)));

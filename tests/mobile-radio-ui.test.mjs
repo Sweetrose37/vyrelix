@@ -10,6 +10,15 @@ test("the app keeps exactly one persistent audio element",async()=>{
   assert.match(html,/id="nyvera-radio-audio"\s+preload="none"/);
 });
 
+test("the persistent radio bar is hidden without removing the header radio access",async()=>{
+  const html=await readFile(new URL("index.html",root),"utf8");
+  const css=await readFile(new URL("css/radio.css",root),"utf8");
+  assert.match(html,/class="icon-button radio-launch"/);
+  assert.match(html,/radio\.css\?v=1\.10\.0/);
+  assert.match(css,/\.radio-mini\{display:none!important/);
+  assert.match(css,/\.radio-is-enabled \.app-shell\{padding-bottom:calc\(88px \+ var\(--safe-bottom\)\)\}/);
+});
+
 test("direct Play stays inside the click-triggered path without a delayed call",async()=>{
   const source=await readFile(new URL("js/radio.js",root),"utf8");
   const start=source.slice(source.indexOf("function startPlayback"),source.indexOf("function play("));
@@ -21,12 +30,19 @@ test("direct Play stays inside the click-triggered path without a delayed call",
 
 test("mobile welcome wording uses a safe inset without changing the hero card",async()=>{
   const css=await readFile(new URL("css/nyvera.css",root),"utf8");
-  assert.match(css,/@media\(max-width:430px\)\{\.hero\.studio-welcome>\.eyebrow,\.hero\.studio-welcome>\.display-title\{[^}]*width:100%[^}]*max-width:100%[^}]*box-sizing:border-box[^}]*padding-inline:\.875rem/);
+  const html=await readFile(new URL("index.html",root),"utf8");
+  assert.match(css,/@media\(max-width:600px\)\{\.hero\.studio-welcome>\.eyebrow,\.hero\.studio-welcome>\.display-title\{[^}]*width:calc\(100% - 3rem\)[^}]*max-width:calc\(100% - 3rem\)[^}]*margin-inline:1\.5rem[^}]*padding-inline:0/);
+  assert.match(css,/@media\(max-width:760px\)\{section\.hero\.studio-welcome>h1\.display-title\{[^}]*margin-left:2\.5rem!important[^}]*margin-right:1\.25rem!important/);
+  assert.match(css,/@media\(max-width:760px\)\{section\.hero\.studio-welcome>p\.eyebrow\{[^}]*width:calc\(100% - 2rem\)!important[^}]*text-align:left!important[^}]*transform:translateX\(2rem\)!important/);
+  assert.match(html,/nyvera\.css\?v=1\.10\.2/);
+  assert.match(html,/js\/app\.js\?v=1\.10\.3/);
+  assert.match(html,/js\/radio\.js\?v=1\.10\.3/);
   assert.match(css,/@media\(max-width:360px\)\{\.hero\.studio-welcome>\.eyebrow\{letter-spacing:\.07em/);
 });
 
 test("service worker bypasses external audio and uses the mobile-radio cache",async()=>{
   const source=await readFile(new URL("service-worker.js",root),"utf8");
-  assert.match(source,/nyvera-app-shell-v1\.9\.1-mobile-welcome/);
+  assert.match(source,/nyvera-app-shell-v1\.10\.3-mobile-delivery-refresh/);
+  assert.match(source,/\["style","script"\]\.includes\(event\.request\.destination\)/);
   assert.match(source,/new URL\(event\.request\.url\)\.origin!==self\.location\.origin/);
 });

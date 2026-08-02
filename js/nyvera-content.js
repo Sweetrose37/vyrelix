@@ -52,9 +52,9 @@ export const characterPoses={
  "Couple and Group":list("Standing Side by Side|Back-to-Back Pose|Walking Together|Seated Conversation|Coordinated Fashion Lineup|Group Laughing Naturally|Professional Team Pose|Family Portrait Arrangement|Friends Brunch Pose|Event Photo Pose")};
 export const kidsPoses={
  "Baby and Toddler":list("Baby Tummy-Time Pose|Baby Reaching for Toy|Baby Clapping|Baby Crawling|Baby Supported Sitting|Toddler Holding Parent’s Hand|Toddler Carrying Stuffed Animal|Toddler Building Blocks|Toddler Looking at Picture Book|Toddler Dancing|Toddler Waving|Toddler Sitting Cross-Legged"),
- "School and Learning":list("Raising Hand|Writing at Desk|Reading at Desk|Holding School Project|Carrying Backpack|Standing for School Picture|Using Classroom Tablet|Presenting Science Project|Drawing at Easel|Playing Instrument|Looking Through Microscope|Holding Report Card|Studying With Flashcards|Working on Group Project|Reading With Teacher"),
+ "School and Learning":list("Raising Hand|Writing at Desk|Reading at Desk|Holding School Project|Carrying Backpack|Using Classroom Tablet|Presenting Science Project|Drawing at Easel|Playing Instrument|Looking Through Microscope|Holding Report Card|Studying With Flashcards|Working on Group Project|Reading With Teacher"),
  "Play and Activity":list("Jumping Rope|Kicking Soccer Ball|Dribbling Basketball|Throwing Baseball|Riding Bicycle|Skating|Running Across Playground|Swinging|Climbing Playground Steps|Blowing Bubbles|Flying a Kite|Gardening|Building Sandcastle|Playing Board Game|Doing a Puzzle"),
- "Portrait and Lifestyle":list("Hands Behind Back|Holding Favorite Book|Hugging Stuffed Animal|Sitting on Bedroom Rug|Standing With Backpack|Leaning on Desk|Holding Art Supplies|Waving at Camera|Peace-Sign Pose|Hands Folded in Front|Looking Over Shoulder|Sitting on Bench|Sibling Side-by-Side Pose|Family Photo Pose|Graduation Cap Pose"),
+ "Portrait and Lifestyle":list("Hands Behind Back|Holding Favorite Book|Hugging Stuffed Animal|Sitting on Bedroom Rug|Standing With Backpack|Leaning on Desk|Holding Art Supplies|Waving at Camera|Peace-Sign Pose|Hands Folded in Front|Looking Over Shoulder|Sitting on Bench|Sibling Side-by-Side Pose|Graduation Cap Pose"),
  Teen:list("Casual Locker Pose|Studying at Café Table|Holding Laptop|Standing With Books|Seated on School Steps|Creative Portfolio Pose|Sports Team Portrait|Musician Portrait|Young Entrepreneur Product Pose|Graduation Portrait|Volunteer Event Pose|Club Meeting Pose")};
 
 export const characterExpressions={
@@ -63,9 +63,9 @@ export const characterExpressions={
  "Soft and Reflective":list("Dreamy|Reflective|Prayerful|Gentle Concern|Peaceful Reflection|Sentimental|Quietly Hopeful|Serene|Tender|Compassionate|Patient|Reassuring"),
  "Playful and Social":list("Playful Smirk|Knowing Smile|Friendly Wink|Excited Surprise|Amused|Flirty but Tasteful|Lighthearted|Curious Delight|Confident Grin|Sassy but Polished")};
 export const kidsExpressions={
- Positive:list("Big Happy Smile|Gentle Smile|Proud Smile|Excited Grin|Laughing|Delighted|Cheerful|Friendly|Hopeful|Kind|Brave|Encouraged|Grateful|Peaceful|Loving"),
+ Positive:list("Big Happy Smile|Gentle Smile|Proud Smile|Excited Grin|Laughing|Delighted|Friendly|Hopeful|Kind|Brave|Encouraged|Grateful|Peaceful|Loving"),
  "Learning and Focus":list("Concentrating|Curious Focus|Proud of My Work|Thinking Carefully|Listening Closely|Ready to Learn|Determined|Problem-Solving|Reading With Interest|Creative Focus"),
- "Soft and Emotional":list("Sleepy Contentment|Shy Smile|Comforted|Reassured|Thoughtful|Calm|Wonder|Gentle Curiosity|Quietly Proud|Caring"),
+ "Soft and Emotional":list("Sleepy Contentment|Shy Smile|Comforted|Reassured|Wonder|Gentle Curiosity|Quietly Proud|Caring"),
  Playful:list("Silly Smile|Playful Wink|Excited Surprise|Giggle|Mischievous but Sweet|Ready for Adventure|Birthday Excitement|Game-Time Focus|Dance Joy|Sports Celebration")};
 
 export const characterHairstyles={
@@ -75,9 +75,9 @@ export const characterHairstyles={
  "Straight and Wavy":list("Sleek Center-Part Bob|Sleek Side-Part Bob|Blunt Bob|Angled Bob|Shoulder-Length Silk Press|Long Silk Press|Layered Blowout|Feathered Layers|Hollywood Waves|Loose Body Waves|Beach Waves|Sleek Low Ponytail|High Wrapped Ponytail|French Twist|Chignon|Side-Part Pixie|Finger Waves|Bixie Cut|Shag Cut|Curtain-Bang Layers"),
  "Short and Masculine":list("Bald Fade|Low Taper Fade|High Fade|Burst Fade|Temple Fade|Caesar Cut|Textured Crop|Short Curls With Fade|Sponge Twists|Waves With Taper|Short Loc Fade|Braided Top Fade|Line-Up Cut|Salt-and-Pepper Low Cut|Classic Side Part")};
 export const kidsHairstyles={
- "Baby and Toddler":list("Single Baby Puff|Double Baby Puffs|Mini Puff Row|Soft Baby Curls|Tiny Coil Fro|Beaded Toddler Braids|Toddler Cornrow Pigtails|Curly Toddler Bob|Mini Twist Puffs|Side-Part Toddler Curls|Bow Headband Curls|Short Toddler Fade"),
+ "Baby and Toddler":list("Single Baby Puff|Double Baby Puffs|Mini Puff Row|Tiny Coil Fro|Beaded Toddler Braids|Toddler Cornrow Pigtails|Curly Toddler Bob|Mini Twist Puffs|Side-Part Toddler Curls|Bow Headband Curls|Short Toddler Fade"),
  "Girls and Feminine Styles":list("Bubble Ponytails|Braided Pigtails|Cornrow Ponytail|Beaded Cornrow Bob|Half-Up Puff Style|Heart-Part Braids|Crisscross Braids|Braided Space Buns|Curly Space Buns|Natural Hair Buns|School-Day Ponytail|Side Ponytail With Bow|Medium Knotless Braids|Shoulder-Length Twists|Tween Silk Press|Teen Layered Curls|Teen Braided Ponytail|Teen Loc Bob|Teen Half-Up Curls|Graduation Style With Cap Compatibility"),
- "Boys and Masculine Styles":list("Low Taper Curls|Mini Afro|Rounded Afro|Short Sponge Twists|Cornrow Rows|Two-Strand Twists|Short Starter Locs|Curly Top Fade|Low Cut With Line-Up|Waves|Braided Top|Teen Taper Fade|Teen Locs|Teen Twists|Teen Textured Crop"),
+ "Boys and Masculine Styles":list("Low Taper Curls|Mini Afro|Rounded Afro|Short Sponge Twists|Cornrow Rows|Two-Strand Twists|Short Starter Locs|Curly Top Fade|Low Cut With Line-Up|Braided Top|Teen Taper Fade|Teen Locs|Teen Twists|Teen Textured Crop"),
  "Neutral Styles":list("Chin-Length Curly Bob|Shoulder-Length Braids|Medium Natural Curls|Short Coily Cut|Half-Up Twists|Beaded Side Braids|Protective School Style|Sports-Friendly Braids|Swim-Friendly Cornrows|Hat-Compatible Low Braids")};
 
 export const characterClothing={
@@ -107,6 +107,6 @@ export const kidsLuxury={
  "School Luxury":list("Tailored School Blazer|Premium Sweater-Vest Uniform|Designer-Inspired Backpack Outfit|Luxury Picture-Day Look|Polished School Loafers Outfit|Fine-Knit School Set|Tailored Pleated Uniform|Premium School Coat|Elegant Academic Competition Outfit|Luxury Graduation Outfit"),
  "Occasion Luxury":list("Velvet Celebration Dress|Tailored Youth Suit|Satin-Lapel Teen Suit|Embroidered Ceremony Dress|Luxury Church Ensemble|Premium Wedding Guest Outfit|Pearl-Detail Modest Dress|Brocade Youth Jacket|Elegant Family Portrait Look|Sophisticated Teen Jumpsuit"),
  "Tween and Teen Luxury":list("Tailored Teen Pantsuit|Premium Knit Midi Dress|Structured Blazer and Trousers|Luxury Varsity-Inspired Jacket|Silk-Blend Blouse and Skirt|Monochrome Teen Fashion Set|Premium Travel Ensemble|Elegant Graduation Dress|Tailored Graduation Suit|High-End Contemporary Church Look"),
- "Luxury Outerwear and Accessories":list("Premium Wool Coat|Quilted Luxury Jacket|Tailored Trench Coat|Fine-Knit Scarf Set|Polished Loafers|Luxury Sneakers|Elegant Flats|Premium Mini Backpack|Age-Appropriate Pearl Jewelry|Satin Hair Accessory Set")};
+ "Luxury Outerwear and Accessories":list("Premium Wool Coat|Quilted Luxury Jacket|Tailored Trench Coat|Fine-Knit Scarf Set|Premium Mini Backpack|Age-Appropriate Pearl Jewelry|Satin Hair Accessory Set")};
 
 export const contentLibraries={character:{environment:characterScenes,pose:characterPoses,expression:characterExpressions,hairStyle:characterHairstyles,outfit:characterClothing,luxuryOutfit:characterLuxury},kids:{environment:kidsScenes,pose:kidsPoses,expression:kidsExpressions,hairStyle:kidsHairstyles,outfit:kidsClothing,luxuryOutfit:kidsLuxury}};

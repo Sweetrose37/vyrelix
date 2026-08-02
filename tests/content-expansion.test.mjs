@@ -13,7 +13,8 @@ test("Adult and Kids receive the complete measured expansion while Sticker stays
   assert.equal(totals(expansionReport.character),467);
   assert.equal(totals(expansionReport.kids),396);
   assert.equal(totals(expansionReport.character)+totals(expansionReport.kids),863);
-  assert.equal(rejections(expansionReport.character).length+rejections(expansionReport.kids).length,12);
+  assert.equal(rejections(expansionReport.character).length,2);
+  assert.equal(rejections(expansionReport.kids).length,0);
   assert.equal(workflowFor("sticker"),null);
   assert.equal(contentLibraries.sticker,undefined);
 });
