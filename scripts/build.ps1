@@ -18,6 +18,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $distRoot "js") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $distRoot "assets") | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot "css\nyvera.css") -Destination (Join-Path $distRoot "css")
 Copy-Item -LiteralPath (Join-Path $projectRoot "css\radio.css") -Destination (Join-Path $distRoot "css")
+Copy-Item -LiteralPath (Join-Path $projectRoot "css\unveiled.css") -Destination (Join-Path $distRoot "css")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\app.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-data.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-prompts.js") -Destination (Join-Path $distRoot "js")
@@ -26,6 +27,7 @@ Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-content.js") -Destinat
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-mockups.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-kids-products.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-adult-products.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-unveiled.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-storage.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-workflows.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio.js") -Destination (Join-Path $distRoot "js")
@@ -41,6 +43,7 @@ $required = @(
   (Join-Path $distRoot "index.html"),
   (Join-Path $distRoot "css\nyvera.css"),
   (Join-Path $distRoot "css\radio.css"),
+  (Join-Path $distRoot "css\unveiled.css"),
   (Join-Path $distRoot "js\app.js"),
   (Join-Path $distRoot "manifest.webmanifest"),
   (Join-Path $distRoot "service-worker.js"),
@@ -50,6 +53,7 @@ $required = @(
   (Join-Path $distRoot "js\nyvera-mockups.js"),
   (Join-Path $distRoot "js\nyvera-kids-products.js"),
   (Join-Path $distRoot "js\nyvera-adult-products.js"),
+  (Join-Path $distRoot "js\nyvera-unveiled.js"),
   (Join-Path $distRoot "js\nyvera-workflows.js"),
   (Join-Path $distRoot "js\radio.js"),
   (Join-Path $distRoot "js\radio-explorer.js"),
