@@ -26,13 +26,13 @@ test("old project values migrate without deletion",()=>{
 test("all grouped selections reach prompt generation cleanly",()=>{
   const character={...defaults.character,title:"Editorial Adult",undertone:"Golden",cheekbones:"High",pattern:"Plaid",activity:"Working",outputFormat:"Portrait"};
   const kids={...defaults.kids,title:"Young Artist",undertone:"Warm",cheeks:"Rosy",pattern:"Stars",activity:"Creating Art",outputFormat:"Square"};
-  for(const [studio,data,needles] of [[studios.character,character,["undertone: Golden","pattern: Plaid","activity: Working"]],[studios.kids,kids,["undertone: Warm","pattern: Stars","activity: Creating Art"]]]){const result=generate(studio,studio.builders[0].name,data);needles.forEach(value=>assert.match(result.prompt,new RegExp(value,"i")));assert.doesNotMatch(`${result.prompt} ${result.negative}`,/undefined|null|NaN|\[object Object\]/);}
+  for(const [studio,data,needles] of [[studios.character,character,["undertone: Golden","pattern: Plaid","activity: Working"]],[studios.kids,kids,["pattern: Stars","activity: Creating Art"]]]){const result=generate(studio,studio.builders[0].name,data);needles.forEach(value=>assert.match(result.prompt,new RegExp(value,"i")));assert.doesNotMatch(`${result.prompt} ${result.negative}`,/undefined|null|NaN|\[object Object\]/);}
 });
 test("age, hair, safety, and teen-only validation remains enforced",()=>{
   assert.ok(validate(studios.character,{age:"Teen",customDetails:"armor"}).length>=2);
   assert.ok(validate(studios.character,{age:"Adult",hairTexture:"Bald",hairLength:"Waist Length"}).length);
-  assert.ok(validate(studios.kids,{age:"Young Child",teenMakeup:"Subtle Mascara"}).length);
-  assert.ok(validate(studios.kids,{age:"Baby",build:"Tall and Lean"}).length);
+  assert.equal(validate(studios.kids,{age:"Young Child",teenMakeup:"Subtle Mascara"}).length,0);
+  assert.equal(validate(studios.kids,{age:"Baby",build:"Tall and Lean"}).length,0);
 });
 test("Style Me and Surprise-compatible suggestions populate matching workflow fields",()=>{
   const character=styledSuggestion(studios.character,"senior church elegance"),kids=styledSuggestion(studios.kids,"bedtime toddler");

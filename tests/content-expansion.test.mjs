@@ -43,7 +43,7 @@ test("representative requested categories are present",()=>{
   const adult=Object.fromEntries(libraryFields(characterWorkflow).map(field=>[field.id,new Set(field.options)]));
   const kids=Object.fromEntries(libraryFields(kidsWorkflow).map(field=>[field.id,new Set(field.options)]));
   for(const [field,choices] of Object.entries({environment:["Executive Boardroom","Church Sanctuary","Airport Lounge"],pose:["Runway Walk","Presenting at a Screen"],expression:["Calm Authority","Prayerful"],hairStyle:["Goddess Braids","Sisterlocks"],outfit:["Tailored Midi Dress","Monochrome Tracksuit"],luxuryOutfit:["Sculpted Blazer Suit","Pearl-Trim Modest Dress"]}))choices.forEach(choice=>assert.ok(adult[field].has(choice),choice));
-  for(const [field,choices] of Object.entries({environment:["Family Reading Room","Robotics Club","Soccer Field"],pose:["Baby Tummy-Time Pose","Presenting Science Project"],expression:["Ready to Learn","Sports Celebration"],hairStyle:["Double Baby Puffs","Teen Loc Bob"],outfit:["Cotton Romper","Cardigan School Uniform"],luxuryOutfit:["Luxury Picture-Day Look","Tailored Youth Suit"]}))choices.forEach(choice=>assert.ok(kids[field].has(choice),choice));
+  for(const [field,choices] of Object.entries({environment:["Family Reading Room","Robotics Club","Soccer Field"],pose:["Baby Tummy-Time Pose","Presenting Science Project"],expression:["Ready to Learn","Sports Celebration"],hairStyle:["Double Baby Puffs","Teen Loc Bob"],outfit:["Cotton Romper","Cardigan School Uniform"],luxuryOutfit:["Premium Picture-Day Look","Tailored Youth Suit"]}))choices.forEach(choice=>assert.ok(kids[field].has(choice),choice));
 });
 
 test("age rules prevent Baby, Toddler, Tween, and Teen mismatches",()=>{

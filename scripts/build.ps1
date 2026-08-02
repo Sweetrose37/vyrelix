@@ -21,9 +21,11 @@ Copy-Item -LiteralPath (Join-Path $projectRoot "css\radio.css") -Destination (Jo
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\app.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-data.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-prompts.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-kids-safety.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-content.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-mockups.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-kids-products.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-adult-products.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-storage.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-workflows.js") -Destination (Join-Path $distRoot "js")
 Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio.js") -Destination (Join-Path $distRoot "js")
@@ -43,9 +45,11 @@ $required = @(
   (Join-Path $distRoot "manifest.webmanifest"),
   (Join-Path $distRoot "service-worker.js"),
   (Join-Path $distRoot "js\nyvera-prompts.js"),
+  (Join-Path $distRoot "js\nyvera-kids-safety.js"),
   (Join-Path $distRoot "js\nyvera-content.js"),
   (Join-Path $distRoot "js\nyvera-mockups.js"),
   (Join-Path $distRoot "js\nyvera-kids-products.js"),
+  (Join-Path $distRoot "js\nyvera-adult-products.js"),
   (Join-Path $distRoot "js\nyvera-workflows.js"),
   (Join-Path $distRoot "js\radio.js"),
   (Join-Path $distRoot "js\radio-explorer.js"),

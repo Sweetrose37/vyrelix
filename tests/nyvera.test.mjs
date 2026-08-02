@@ -19,9 +19,9 @@ test("Character Studio age options are adult-only",()=>{
 
 test("Kids Studio generation protects age-appropriate human subjects",()=>{
   const result=generate(studios.kids,"Kids Character Builder",defaults.kids);
-  assert.match(result.prompt,/normal human Young Child/i);
+  assert.match(result.prompt,/wholesome, age-appropriate human young child/i);
   assert.match(result.prompt,/age-appropriate/i);
-  assert.match(result.negative,/fantasy species/i);
+  assert.match(result.negative,/fantasy elements/i);
   assert.doesNotMatch(result.prompt,/undefined|null|NaN|\[object Object\]/);
 });
 

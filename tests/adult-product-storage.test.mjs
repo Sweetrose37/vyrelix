@@ -1,0 +1,11 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+const values=new Map();
+globalThis.localStorage={getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
+const {store}=await import("../js/nyvera-storage.js");
+
+test("old Character projects remain readable without permanent product migration",()=>{const old={id:"old-character-1",studio:"character",builderType:"Full Character Builder",title:"Old Character",formData:{title:"Old Character",age:"Adult"},generatedPrompt:"old character prompt",negativePrompt:"old negative"};localStorage.setItem("nyvera_character_projects",JSON.stringify([old]));assert.deepEqual(store.getProject("character","old-character-1"),old);assert.equal(store.getProject("character","old-character-1").products,undefined)});
+test("multiple Adult products save inside one Original Character Project",()=>{const old=store.getProject("character","old-character-1"),products=[{productId:"adult-p1",productTitle:"Avery Card",productType:"Character Trading Card",formData:{},prompt:"card prompt",negativePrompt:"card negative",favorite:false},{productId:"adult-p2",productTitle:"Avery Editorial",productType:"Luxury Editorial",formData:{},prompt:"editorial prompt",negativePrompt:"editorial negative",favorite:true}],saved=store.saveProject({...old,productEnabled:true,productStatus:"completed",productType:products[1].productType,productFormData:products[1].formData,productPrompt:products[1].prompt,productNegativePrompt:products[1].negativePrompt,linkedProductIds:products.map(item=>item.productId),products});assert.equal(store.projects("character").length,1);assert.equal(saved.products.length,2);assert.deepEqual(saved.linkedProductIds,["adult-p1","adult-p2"]);assert.equal(saved.generatedPrompt,"old character prompt")});
+test("combined export preserves the source character and linked Adult products",()=>{const saved=store.getProject("character","old-character-1"),json=JSON.parse(JSON.stringify({...saved,type:"nyvera-project"}));assert.equal(json.generatedPrompt,"old character prompt");assert.equal(json.products[0].prompt,"card prompt");assert.equal(json.type,"nyvera-project")});
+
