@@ -1,11 +1,11 @@
-import {genres,recommendations,searchStations,popularStations,listCountries,listLanguages,resolveStream,registerClick} from "./radio-service.js";
+import {genres,recommendations,searchStations,popularStations,listCountries,listLanguages,directStream,resolveStream,registerClick} from "./radio-service.js";
 import {radioStorage} from "./radio-storage.js";
 import {worldExplorer} from "./radio-explorer.js";
 
 const audio=document.querySelector("#nyvera-radio-audio"),root=document.querySelector("#nyvera-radio-root");
 let settings=radioStorage.settings(),filters={...radioStorage.filters(),httpsOnly:settings.httpsOnly,minBitrate:settings.minBitrate,familyFriendly:settings.familyFriendly};
-let current=radioStorage.current(),stations=[],tab="discover",open=false,busy=false,error="",query=radioStorage.lastSearch();
-let worldSearchTimer;
+let current=radioStorage.current(),stations=[],tab="discover",open=false,busy=false,error="",status=current?"Tap Play to begin":"",query=radioStorage.lastSearch();
+let worldSearchTimer,connectionTimer;const resolvedStreams=new Map();
 const esc=value=>String(value??"").replace(/[&<>\"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const studio=()=>document.querySelector(".studio-shell--character")?"character":document.querySelector(".studio-shell--kids")?"kids":document.querySelector(".studio-shell--sticker")?"sticker":sessionStorage.getItem("nyvera_last_studio")||"main";
 const meta=s=>[s.country,s.language,s.codec,s.bitrate?`${s.bitrate} kbps`:""].filter(Boolean).join(" · ");
@@ -14,15 +14,15 @@ const fallback="./assets/icons/radio.svg";
 audio.volume=Math.max(0,Math.min(1,Number(settings.volume)||.65));audio.muted=Boolean(settings.muted);
 document.documentElement.classList.toggle("radio-is-enabled",settings.enabled);
 
-function stationCard(s){const favorite=radioStorage.isFavorite(s.stationuuid);return `<article class="radio-station" data-station="${esc(s.stationuuid)}"><img src="${settings.showLogos&&s.favicon?esc(s.favicon):fallback}" alt="" loading="lazy" data-radio-logo><div><h3>${esc(s.name)}</h3><p>${esc(meta(s))}${s.city?` · ${esc(s.city)}`:""}</p><p class="radio-tags">${esc(s.tags)}</p><small>${s.lastcheckok===1?"✓ Verified":"Unverified"} · ${Number(s.votes||0).toLocaleString()} votes</small></div><div class="radio-station__actions"><button type="button" data-radio-play="${esc(s.stationuuid)}">${current?.stationuuid===s.stationuuid&&!audio.paused?"Pause":"Play"}</button><button type="button" data-radio-favorite="${esc(s.stationuuid)}" aria-label="${favorite?"Remove from":"Add to"} favorites">${favorite?"♥":"♡"}</button><button type="button" data-radio-info="${esc(s.stationuuid)}">More Information</button></div></article>`}
+function stationCard(s){const favorite=radioStorage.isFavorite(s.stationuuid);let playable=true;try{directStream(s,audio)}catch{playable=false}return `<article class="radio-station" data-station="${esc(s.stationuuid)}"><img src="${settings.showLogos&&s.favicon?esc(s.favicon):fallback}" alt="" loading="lazy" data-radio-logo><div><h3>${esc(s.name)}</h3><p>${esc(meta(s))}${s.city?` · ${esc(s.city)}`:""}</p><p class="radio-tags">${esc(s.tags)}</p><small>${s.lastcheckok===1?"✓ Verified":"Unverified"} · ${Number(s.votes||0).toLocaleString()} votes</small></div><div class="radio-station__actions"><button type="button" data-radio-play="${esc(s.stationuuid)}" ${playable?"":"disabled title=\"This stream is not compatible with this browser\""}>${playable?current?.stationuuid===s.stationuuid&&!audio.paused?"Pause":"Play":"Unavailable"}</button><button type="button" data-radio-favorite="${esc(s.stationuuid)}" aria-label="${favorite?"Remove from":"Add to"} favorites">${favorite?"♥":"♡"}</button><button type="button" data-radio-info="${esc(s.stationuuid)}">More Information</button></div></article>`}
 function render(){
   root.className=`radio-theme--${studio()}`;
   if(!settings.enabled){root.innerHTML="";return}
-  const fav=current&&radioStorage.isFavorite(current.stationuuid),playing=current&&!audio.paused;
+  const fav=current&&radioStorage.isFavorite(current.stationuuid),playing=current&&!audio.paused,playerStatus=status||(playing?"Live":current&&audio.src?"Paused":current?"Tap Play to begin":meta(current||{}));
   root.innerHTML=`<section class="radio-mini ${settings.collapsed?"radio-mini--collapsed":""}" aria-label="Nyvera Live Radio">
     <img src="${settings.showLogos&&current?.favicon?esc(current.favicon):fallback}" alt="" data-radio-logo>
-    <div class="radio-mini__now"><small>${navigator.onLine?playing?"LIVE":"NYVERA LIVE RADIO":"OFFLINE"}</small><strong>${esc(current?.name||"Choose a live station")}</strong><span id="radio-status" aria-live="polite">${esc(error||meta(current||{}))}</span></div>
-    <div class="radio-mini__controls"><button type="button" data-radio-toggle aria-label="${playing?"Pause":"Play"}">${playing?"❚❚":"▶"}</button><button type="button" data-radio-stop aria-label="Stop">■</button><button type="button" data-radio-favorite-current aria-label="Favorite station">${fav?"♥":"♡"}</button>${current&&/could not|blocked|stopped responding|not supported|insecure|playlist/i.test(error)?'<button type="button" data-radio-retry-station>Retry</button><button type="button" data-radio-replacement>Try another</button>':""}<button type="button" data-radio-open aria-label="Browse live radio">Browse</button><button type="button" data-radio-collapse aria-label="${settings.collapsed?"Expand":"Collapse"} player">${settings.collapsed?"⌃":"⌄"}</button></div>
+    <div class="radio-mini__now"><small>${navigator.onLine?playing?"LIVE":"NYVERA LIVE RADIO":"OFFLINE"}</small><strong>${esc(current?.name||"Choose a live station")}</strong><span id="radio-status" aria-live="polite">${esc(playerStatus)}</span></div>
+    <div class="radio-mini__controls"><button type="button" data-radio-toggle aria-label="${playing?"Pause":"Play"}">${playing?"❚❚":"▶"}</button><button type="button" data-radio-stop aria-label="Stop">■</button><button type="button" data-radio-favorite-current aria-label="Favorite station">${fav?"♥":"♡"}</button>${current&&/could not|blocked|stopped responding|not supported|insecure|playlist|unavailable|network|decode|source/i.test(status)?'<button type="button" data-radio-retry-station>Retry</button><button type="button" data-radio-replacement>Try Another Station</button>':""}<button type="button" data-radio-open aria-label="Browse Stations">Browse Stations</button><button type="button" data-radio-collapse aria-label="${settings.collapsed?"Expand":"Collapse"} player">${settings.collapsed?"⌃":"⌄"}</button></div>
     <label class="radio-volume"><span>Volume</span><button type="button" data-radio-mute aria-label="${audio.muted?"Unmute":"Mute"}">${audio.muted?"🔇":"🔊"}</button><input type="range" min="0" max="1" step="0.05" value="${audio.volume}" data-radio-volume aria-label="Radio volume"></label>
   </section>
   <section class="radio-browser ${open?"is-open":""}" role="dialog" aria-modal="true" aria-labelledby="radio-title" ${open?"":"hidden"}>
@@ -47,12 +47,18 @@ const results=()=>busy?loading():errorState()||(stations.length?`<div class="rad
 
 async function load(kind="popular",value=""){busy=true;error="";render();try{if(kind==="countries")stations=await listCountries();else if(kind==="languages")stations=await listLanguages();else if(kind==="tag")stations=await searchStations({tag:value},filters);else stations=await popularStations(filters)}catch(e){stations=[];error=navigator.onLine?"The live directory did not respond. Try again.":"You are offline. Reconnect to browse live stations.";console.error(e)}finally{busy=false;render()}}
 function find(id){return stations.find(s=>s.stationuuid===id)||worldExplorer.stationById(id)||radioStorage.favorites().find(s=>s.stationuuid===id)||radioStorage.recent().find(s=>s.stationuuid===id)||current}
-async function play(station=current){
-  if(!navigator.onLine){error="You are offline. Live radio needs an internet connection.";render();return}
+const clearConnectionTimer=()=>{clearTimeout(connectionTimer);connectionTimer=null};
+function playbackFailed(cause){clearConnectionTimer();audio.pause();status=cause?.name==="NotAllowedError"?"Tap Play to begin — your browser requires a direct tap.":cause?.message||"Station unavailable. Try another station.";console.error("Nyvera Radio playback failed",{station:current?.name,url:current?.url_resolved,codec:current?.codec,cause});render()}
+function startPlayback(station,stream){
+  current=station;radioStorage.saveCurrent(current);status="Connecting…";
+  try{if(audio.src!==stream){audio.src=stream;audio.load()}const promise=audio.play();render();clearConnectionTimer();connectionTimer=setTimeout(()=>playbackFailed(new Error("Station unavailable: the stream did not connect in time.")),15000);Promise.resolve(promise).then(()=>{clearConnectionTimer();status="Live";radioStorage.addRecent(station,studio());registerClick(station.stationuuid);render()}).catch(playbackFailed)}catch(cause){playbackFailed(cause)}
+}
+function play(station=current){
+  if(!navigator.onLine){status="You are offline. Live radio needs an internet connection.";render();return}
   if(!station){open=true;render();return}
-  if(current?.stationuuid===station.stationuuid&&!audio.paused){audio.pause();return}
-  error="Connecting…";current=station;radioStorage.saveCurrent(current);render();
-  try{const stream=await resolveStream(station,audio);if(audio.src!==stream)audio.src=stream;await audio.play();radioStorage.addRecent(station,studio());registerClick(station.stationuuid);error=""}catch(e){audio.removeAttribute("src");audio.load();error=e?.name==="NotAllowedError"?"Playback was blocked. Tap Play again.":e?.message||"This station could not be played. Try another station.";console.error(e)}render();
+  if(current?.stationuuid===station.stationuuid&&!audio.paused){audio.pause();status="Paused";return}
+  current=station;radioStorage.saveCurrent(current);
+  try{const cached=resolvedStreams.get(station.stationuuid),stream=cached||directStream(station,audio);if(stream){startPlayback(station,stream);return}status="Resolving station playlist…";render();resolveStream(station,audio).then(resolved=>{resolvedStreams.set(station.stationuuid,resolved);status="Tap Play to begin";render()}).catch(playbackFailed)}catch(cause){playbackFailed(cause)}
 }
 function toggleFavorite(station){if(!station)return;radioStorage.toggleFavorite(station);render()}
 function saveSettings(next){settings=radioStorage.saveSettings(next);filters={...filters,httpsOnly:settings.httpsOnly,minBitrate:settings.minBitrate,familyFriendly:settings.familyFriendly};document.documentElement.classList.toggle("radio-is-enabled",settings.enabled);if(!settings.enabled){audio.pause();audio.removeAttribute("src");audio.load()}render();injectSettings()}
@@ -64,7 +70,7 @@ root.addEventListener("click",async event=>{
   else if(el.matches("[data-radio-close]")){open=false;render()}
   else if(el.matches("[data-radio-collapse]"))saveSettings({collapsed:!settings.collapsed});
   else if(el.matches("[data-radio-toggle]"))play();
-  else if(el.matches("[data-radio-stop]")){audio.pause();audio.removeAttribute("src");audio.load();error="Stopped";render()}
+  else if(el.matches("[data-radio-stop]")){clearConnectionTimer();audio.pause();audio.removeAttribute("src");audio.load();status="Tap Play to begin";render()}
   else if(el.matches("[data-radio-mute]")){audio.muted=!audio.muted;saveSettings({muted:audio.muted})}
   else if(el.matches("[data-radio-favorite-current]"))toggleFavorite(current);
   else if(el.matches("[data-radio-retry-station]"))play(current);
@@ -88,7 +94,7 @@ function injectSettings(){const grid=document.querySelector(".settings-grid");if
 document.addEventListener("change",event=>{const key=event.target.dataset.radioSetting;if(!key)return;const value=event.target.type==="checkbox"?event.target.checked:event.target.type==="range"?Number(event.target.value):event.target.value;saveSettings({[key]:value});if(key==="volume")audio.volume=Number(value)});
 document.addEventListener("click",event=>{const clear=event.target.dataset.radioSettingsClear;if(clear&&confirm(`Clear radio ${clear}?`)){clear==="favorites"?radioStorage.clearFavorites():radioStorage.clearRecent()}if(event.target.matches("[data-radio-reset]")&&confirm("Reset all radio preferences and history?")){audio.pause();audio.removeAttribute("src");radioStorage.reset();settings=radioStorage.settings();current=null;render();document.querySelector("[data-radio-settings]")?.remove();injectSettings()}});
 
-audio.addEventListener("playing",()=>{error="";render()});audio.addEventListener("pause",render);audio.addEventListener("waiting",()=>{error="Buffering…";render()});audio.addEventListener("stalled",()=>{error="Stream stalled. Retrying…";render()});audio.addEventListener("error",()=>{if(audio.src){error="This stream stopped responding. Choose Retry or another station.";render()}});
-window.addEventListener("online",()=>{error="Back online";render()});window.addEventListener("offline",()=>{audio.pause();error="Offline — live playback is unavailable.";render()});
+audio.addEventListener("playing",()=>{clearConnectionTimer();status="Live";render()});audio.addEventListener("pause",()=>{if(status==="Live")status="Paused";render()});audio.addEventListener("waiting",()=>{status="Buffering…";render()});audio.addEventListener("stalled",()=>{status="Buffering…";render()});audio.addEventListener("error",()=>{if(!audio.src)return;const messages={1:"Playback was aborted.",2:"Station unavailable due to a network failure.",3:"Station unavailable because the stream could not be decoded.",4:"Station unavailable because this source is not supported."};playbackFailed(new Error(messages[audio.error?.code]||"This stream stopped responding."))});
+window.addEventListener("online",()=>{status=current?"Tap Play to begin":"";render()});window.addEventListener("offline",()=>{clearConnectionTimer();audio.pause();status="Offline — live playback is unavailable.";render()});
 new MutationObserver(()=>{root.className=`radio-theme--${studio()}`;injectSettings()}).observe(document.querySelector("#app"),{subtree:true,childList:true,attributes:true});
 render();injectSettings();

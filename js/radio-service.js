@@ -3,6 +3,8 @@ import { radioStorage } from "./radio-storage.js";
 const DISCOVERY="https://all.api.radio-browser.info/json/servers";
 const FALLBACK_SERVERS=["https://de1.api.radio-browser.info","https://nl1.api.radio-browser.info","https://at1.api.radio-browser.info"];
 const SUPPORTED_CODECS=new Set(["MP3","AAC","AAC+","OGG","OPUS"]);
+const PLAYLIST_URL=/\.m3u(?:\?|$)|\.pls(?:\?|$)/i;
+const HLS_URL=/\.m3u8(?:\?|$)/i;
 let servers=[];
 
 const clean=value=>String(value??"").replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,500);
@@ -64,12 +66,23 @@ export async function listStates(countryOrCode,filters={verified:true,httpsOnly:
 export async function listCities(query,filters={verified:true,httpsOnly:true,minBitrate:0}){return citiesFromStations(await searchLocationStations(query,filters))}
 export async function registerClick(id){try{await request(`url/${encodeURIComponent(id)}`)}catch(error){console.warn("Station click registration failed",error)}}
 
-export async function resolveStream(station,audio){
-  const url=station.url_resolved;if(location.protocol==="https:"&&url.startsWith("http:"))throw new Error("This station uses an insecure stream that browsers block on HTTPS.");
-  if(station.codec&&!SUPPORTED_CODECS.has(station.codec)&&!url.match(/\.m3u8?(\?|$)|\.pls(\?|$)/i))throw new Error(`The ${station.codec} stream format is not supported by Nyvera.`);
-  if(/\.m3u8?(\?|$)/i.test(url)){if(audio.canPlayType("application/vnd.apple.mpegurl"))return url;throw new Error("This HLS stream is not supported by this browser.")}
-  if(/\.pls(\?|$)|\.m3u(\?|$)/i.test(url)){try{const response=await fetch(url,{signal:timeoutSignal(7000)});if(!response.ok)throw new Error("Playlist unavailable");const text=await response.text();const candidates=/\.pls/i.test(url)?[...text.matchAll(/^File\d+=(.+)$/gmi)].map(x=>x[1].trim()):text.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^https?:\/\//i.test(x));const stream=candidates.map(x=>validUrl(x)).find(Boolean);if(stream){if(location.protocol==="https:"&&stream.startsWith("http:"))throw new Error("Playlist resolves to an insecure stream.");return stream}}catch(error){console.warn("Playlist resolution failed",error);throw new Error("This station playlist could not be resolved.")}}
+const codecTypes={MP3:["audio/mpeg"],AAC:["audio/aac","audio/mp4","audio/mpeg"],"AAC+":["audio/aac","audio/mp4","audio/mpeg"],OGG:["audio/ogg"],OPUS:['audio/ogg; codecs="opus"',"audio/ogg"]};
+export function directStream(station,audio){
+  const url=validUrl(station?.url_resolved||station?.url);
+  if(!url)throw new Error("Station unavailable: no usable stream URL was provided.");
+  if(location.protocol==="https:"&&url.startsWith("http:"))throw new Error("This station uses an insecure stream that your mobile browser cannot play.");
+  if(PLAYLIST_URL.test(url))return "";
+  if(HLS_URL.test(url)){if(audio.canPlayType("application/vnd.apple.mpegurl")||audio.canPlayType("application/x-mpegURL"))return url;throw new Error("This HLS stream is not supported by this browser.")}
+  const codec=clean(station?.codec).toUpperCase(),types=codecTypes[codec];
+  if(codec&&!SUPPORTED_CODECS.has(codec))throw new Error(`The ${codec} stream format is not supported by Nyvera.`);
+  if(types&&typeof audio.canPlayType==="function"&&!types.some(type=>audio.canPlayType(type)))throw new Error(`The ${codec} stream format is not supported by this browser.`);
   return url;
+}
+
+export async function resolveStream(station,audio){
+  const direct=directStream(station,audio);if(direct)return direct;const url=station.url_resolved;
+  try{const response=await fetch(url,{signal:timeoutSignal(7000),headers:{Accept:"audio/x-mpegurl,audio/mpegurl,audio/x-scpls,text/plain"}});if(!response.ok)throw new Error("Playlist unavailable");const text=await response.text();const candidates=/\.pls(?:\?|$)/i.test(url)?[...text.matchAll(/^File\d+=(.+)$/gmi)].map(x=>x[1].trim()):text.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^https?:\/\//i.test(x));const stream=candidates.map(x=>validUrl(x)).find(Boolean);if(stream)return directStream({...station,url_resolved:stream},audio)}catch(error){console.warn("Playlist resolution failed",{station:station?.name,url,error});if(/insecure|not supported/i.test(error.message))throw error;throw new Error("This station playlist could not be resolved on this browser.")}
+  throw new Error("This station playlist did not contain a usable stream.");
 }
 
 export const genres=["R&B","Gospel","Jazz","Neo-Soul","Hip-Hop","Pop","Country","Classical","Lo-Fi","Rock","Old School","Reggae","Dance","Electronic","News","Talk","Sports","Christian","Children","International"];

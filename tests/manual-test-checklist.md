@@ -36,6 +36,14 @@ Test at 320, 360, 375, 390, 412, 430, 768, and 1024 CSS pixels. Confirm no horiz
 - [ ] No fantasy species, superhero/princess costumes, adult glamour, revealing clothing, weapons, or unsafe objects appear.
 - [ ] Nyvera Kids Luxury Clothing Line, age compatibility, Style Me, Surprise Me, and templates work.
 - [ ] Family, classroom, children’s book, story, coloring, activity, educational, school supply, wallpaper, affirmation, bookmark, and mockup workflows generate.
+- [ ] Every completed Kids result, including fresh Step 10 generation and reopened projects, offers Create a Product From This Project; Skip Product leaves all original result actions usable.
+- [ ] Search and filter all eight product categories and all four classifications; confirm cards show description, age, best source, sides, and classification.
+- [ ] Generate character/trading cards, book covers, notebooks, coloring/activity products, invitations, wall art, wallpapers, and packaging/mockups from representative source builders.
+- [ ] Test trading-card front/back fields, sizes, positive traits, exact item counts, and confirm no battle stats, weapons, attack power, combat ratings, or violent mechanics appear.
+- [ ] Leave branding blank and confirm no Nyvera logo, wordmark, emblem, monogram, watermark, or standalone N appears; enter explicit branding and confirm only that supplied branding is requested.
+- [ ] Verify exact names, punctuation, capitalization, scripture, facts, and educational text; test No Visible Text and its conflict warning.
+- [ ] Save multiple linked products, favorite one, edit, regenerate, duplicate only a product, export one product, and export the parent project without duplicating the Kids source.
+- [ ] Open a pre-product Kids project unchanged, then create and save a product; test the full flow at 320, 360, 375, 390, 412, 430, 768 px, and desktop with no horizontal overflow or radio/bottom-nav overlap.
 
 ## Sticker Studio
 
@@ -44,6 +52,14 @@ Test at 320, 360, 375, 390, 412, 430, 768, and 1024 CSS pixels. Confirm no horiz
 - [ ] Exact inventory count blocks invalid generation and Auto-Balance reaches the selected total.
 - [ ] Exact phrases, punctuation, and object lists are preserved; digital items make no shipping claim.
 - [ ] Style Me, Surprise Me, templates, save, edit, duplicate, delete, favorite, TXT, and JSON work.
+- [ ] Every completed Sticker result shows the optional Create a Product Mockup card; Skip Mockup leaves every original result action usable.
+- [ ] The mockup builder inherits the original title, format, exact count/inventory, style, theme, subjects, palette, border, finish, size, orientation, status, background, source prompt, negative prompt, and custom details.
+- [ ] Generate digital, printable, physical-pack, physical-sheet, and presentation-only mockups; confirm digital/printable prompts contain no shipping or included-physical-package claim.
+- [ ] Test full collection, selected samples, sheet only, and package-plus-loose arrangements; verify visible samples never replace the exact product total.
+- [ ] Leave branding blank and confirm no Nyvera mark, logo, N emblem, wordmark, or brand appears; then opt into placeholders and verify only supplied text is used.
+- [ ] Save multiple linked mockups, favorite one, edit, regenerate, duplicate only a mockup, export one mockup, and export the combined parent project without creating duplicate sticker projects.
+- [ ] Open a pre-mockup Sticker project and confirm it opens unchanged, offers the optional card, and gains mockup fields only after saving.
+- [ ] At 320, 360, 375, 390, 412, 430, 768 px and desktop, verify the card, grouped fields, sticky Generate controls, prompt wrapping, keyboard access, radio clearance, return path, and absence of horizontal scrolling.
 
 ## Shared systems and PWA
 
@@ -65,6 +81,11 @@ Test at 320, 360, 375, 390, 412, 430, 768, and 1024 CSS pixels. Confirm no horiz
 - Test station failure, blocked/unsupported stream, missing logo, directory timeout, offline mode, reconnection, Retry, and selecting a replacement station.
 - In Settings, test enable/disable, default volume, remember station, logos, HTTPS only, minimum bitrate, family metadata, clear actions, and radio reset.
 - At 320 px width and landscape mobile, confirm the player does not cover primary navigation and the browser dialog scrolls without horizontal page overflow.
+- On a physical Android Chrome device over the public HTTPS deployment, tap direct HTTPS MP3 and AAC stations and confirm Connecting → Live occurs from the first tap with audible sound.
+- Open M3U and PLS stations, wait for “Tap Play to begin,” then tap Play again; test a native HLS station where the device reports HLS support.
+- Test an HTTP stream, unsupported codec, empty URL, CORS-blocked playlist, decode failure, network timeout, and broken station; confirm Retry, Try Another Station, and Browse Stations remain usable.
+- Background and foreground the Android browser, lock/unlock where practical, refresh, reopen the installed PWA, and traverse every studio while confirming the single audio element remains mounted.
+- At 320, 360, 375, 390, 412, and 430 px, confirm “WHERE IMAGINATION BECOMES ART” is fully visible with no horizontal scrolling and that radio, Enter Nyvera, and bottom navigation are unchanged.
 
 # World Radio Explorer
 
@@ -92,3 +113,12 @@ Test at 320, 360, 375, 390, 412, 430, 768, and 1024 CSS pixels. Confirm no horiz
 - Restore an old draft and saved project; confirm titles, prompts, dates, status, favorites, templates, custom fields, and unknown legacy values survive.
 - While radio plays, traverse all ten steps in both studios and confirm the single global audio element remains mounted and playback does not restart.
 - Test widths 320, 360, 375, 390, 412, and 430 px, plus tablet and desktop. Confirm forms are not squeezed, the selections card is collapsible, controls remain visible, and no horizontal page overflow occurs.
+
+# Adult and Kids content libraries
+
+- Open Scenes, Poses, Expressions, Hairstyles, Clothing, and Luxury Clothing in both studios; confirm Current Options and all added categories are collapsible and preserve a selected value.
+- Search each long library by a partial phrase, clear the search, then filter each category and return to All categories; confirm no empty group remains visible during a search.
+- For Baby, Toddler, Young Child, Older Child, Tween, and Teen, confirm clearly mismatched age-labelled poses, hair, clothing, and school scenes are hidden while generic safe choices remain.
+- Exercise the workwear/office, runway/studio, athletic/activity, bedtime/pajamas, church/formal portrait, sports/sportswear, and close-up-footwear advisories and their Correct actions.
+- Generate Adult and Kids prompts containing selections whose labels already end in “Pose,” “Expression,” “Face,” “Eyes,” or “Hair”; confirm none repeat the descriptor and no product branding appears.
+- Use Style Me, Surprise Me Again several times, and every template; confirm selections draw from the expanded libraries, remain editable, and Surprise Me does not immediately repeat the prior concept.

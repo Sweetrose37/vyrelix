@@ -34,3 +34,23 @@ test("falls back when API discovery fails",async()=>{
 test("rejects unsupported direct stream codec",async()=>{
   await assert.rejects(()=>service.resolveStream({url_resolved:"https://example.com/live",codec:"WMA"},{canPlayType:()=>""}),/not supported/);
 });
+test("direct mobile stream selection is synchronous and codec-aware",()=>{
+  const supported={canPlayType:type=>/mpeg|aac|mp4/.test(type)?"probably":""};
+  assert.equal(service.directStream({url_resolved:"https://example.com/live",codec:"MP3"},supported),"https://example.com/live");
+  assert.equal(service.directStream({url_resolved:"https://example.com/live.aac",codec:"AAC"},supported),"https://example.com/live.aac");
+  assert.equal(service.directStream({url_resolved:"https://example.com/list.m3u",codec:"MP3"},supported),"");
+  assert.throws(()=>service.directStream({url_resolved:"http://example.com/live",codec:"MP3"},supported),/insecure stream that your mobile browser cannot play/);
+  assert.throws(()=>service.directStream({url_resolved:"",codec:"MP3"},supported),/no usable stream URL/);
+});
+test("native HLS is accepted and unsupported HLS fails clearly",()=>{
+  const station={url_resolved:"https://example.com/live.m3u8",codec:""};
+  assert.equal(service.directStream(station,{canPlayType:type=>type.includes("mpegurl")?"maybe":""}),station.url_resolved);
+  assert.throws(()=>service.directStream(station,{canPlayType:()=>""}),/HLS stream is not supported/);
+});
+test("M3U and PLS playlists resolve to validated HTTPS streams",async()=>{
+  const original=globalThis.fetch,audio={canPlayType:()=>"probably"};
+  globalThis.fetch=async url=>({ok:true,text:async()=>String(url).includes(".pls")?"[playlist]\nFile1=https://stream.example/live":"#EXTM3U\nhttps://stream.example/live"});
+  assert.equal(await service.resolveStream({url_resolved:"https://example.com/list.m3u",codec:"MP3"},audio),"https://stream.example/live");
+  assert.equal(await service.resolveStream({url_resolved:"https://example.com/list.pls",codec:"AAC"},audio),"https://stream.example/live");
+  globalThis.fetch=original;
+});

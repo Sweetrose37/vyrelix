@@ -12,10 +12,13 @@ The current repository was transformed in place from the former application so i
 
 - Dedicated loading, welcome, dashboard, builder, and result experiences for all three studios
 - Exact 10-step Character and Kids creation workflows with grouped review, edit-return behavior, conflict correction, and Step 10 generation/save controls
+- Searchable, collapsible Adult and Kids libraries with 863 duplicate-audited scenes, poses, expressions, hairstyles, realistic outfits, and luxury options
 - Nyvera Luxury Clothing Line for realistic adult fashion
 - Nyvera Kids Luxury Clothing Line for realistic, modest, age-appropriate fashion
 - Guided builders, editable templates, Style Me proposals, and compatible Surprise Me concepts
 - Exact sticker-count validation and automatic inventory balancing
+- Optional post-completion Sticker product mockups with inherited project data, exact-count protection, linked variants, and separate prompt/export controls
+- Optional post-completion Kids product creation with a duplicate-audited 126-format catalog, three compact stages, age guidance, trading-card safety, exact-text controls, and linked variants
 - Natural-language master prompts, negative prompts, selection summaries, and TXT/JSON downloads
 - Device-local projects, per-studio drafts, favorites, bounded history, search, filters, sorting, edit, duplicate, and delete
 - Per-studio reset, complete reset, settings persistence, reduced motion, text sizing, and high contrast
@@ -35,8 +38,11 @@ index.html                 Accessible application shell and metadata
 css/nyvera.css             Brand, studio themes, components, responsive/accessibility rules
 css/radio.css              Persistent mini player, station browser, and studio radio themes
 js/app.js                  Routing, views, interactions, project and settings UI
+js/nyvera-content.js       Grouped Adult/Kids content libraries, semantic deduplication, and age compatibility
 js/nyvera-data.js          Three studios, builders, options, defaults, and templates
 js/nyvera-prompts.js       Validation, compatibility, suggestions, and prompt generation
+js/nyvera-mockups.js       Optional Sticker mockup fields, inheritance, compatibility, assistance, and prompts
+js/nyvera-kids-products.js Optional Kids product catalog, inheritance, age rules, assistance, and prompts
 js/nyvera-storage.js       Namespaced storage, drafts, projects, history, and portability
 js/nyvera-workflows.js     Character and Kids 10-step definitions, legacy-field mapping, and migration
 js/radio.js                Persistent audio player, station browser, and radio settings UI
@@ -75,6 +81,8 @@ Radio Browser supplies station metadata; Nyvera does not proxy or own the broadc
 Direct MP3, AAC/AAC+, OGG, and Opus streams are accepted, subject to the browser's codec support. Nyvera reads M3U and PLS playlists and follows the first valid stream URL. M3U8/HLS works only when the browser reports native HLS support; no large HLS library is shipped. AAC and OGG support differs by browser. An HTTPS Nyvera page blocks HTTP streams by design because modern browsers treat them as mixed content.
 
 Browsers require a click or tap before audio starts. Selecting or restoring a station does not autoplay it. If playback fails, the mini player explains the condition and offers Retry and a related replacement when available. Missing and broken remote logos fall back to the local radio icon.
+
+Direct HTTPS MP3/AAC playback assigns the stream and calls the single persistent audio element from the same Play tap, which preserves Android’s user-gesture permission. M3U and PLS files are resolved first; after resolution the player explicitly asks for a second Play tap instead of attempting blocked delayed playback. A 15-second connection timeout prevents the player from remaining on Connecting indefinitely.
 
 ### Content and privacy notice
 
@@ -117,7 +125,19 @@ Character and Kids builders use exactly ten grouped screens. The first eight col
 
 Existing flat form values remain the storage format, so saved projects, drafts, templates, specialized builder values, imports, and exports stay compatible. Legacy fields not present in the base workflow are retained under the closest creative-direction group; unknown saved values are never deleted. Style Me and Surprise Me open Step 9 after acceptance so their populated values can be reviewed before generation.
 
-Workflow definitions and option lists live in `js/nyvera-workflows.js`. Prompt generation remains in `js/nyvera-prompts.js`, which now includes every additional grouped selection and filters empty values so prompts never contain `undefined`, `null`, `NaN`, or object stringification. Sticker Studio continues using its existing workflow.
+Workflow definitions live in `js/nyvera-workflows.js`; the expanded grouped option libraries and reusable semantic duplicate/age checks live in `js/nyvera-content.js`. Prompt generation remains in `js/nyvera-prompts.js`, which includes every additional grouped selection and filters empty values so prompts never contain `undefined`, `null`, `NaN`, or object stringification. Sticker Studio continues using its existing workflow.
+
+## Optional Sticker product mockups
+
+Every completed Sticker result offers an optional Product Mockup card without blocking the original save, copy, download, edit, duplicate, or navigation actions. The compact mockup builder inherits the sticker title, format, exact inventory, theme, style, palette, finish, border, background, product status, source prompt, negative prompt, and custom details.
+
+Mockup prompts and their deduplicated negative prompts remain separate from the original sticker prompt. Saved mockups are linked variants embedded inside the original Sticker project, so multiple presentations can be saved, favorited, duplicated, edited, exported alone, or exported with the parent project without creating duplicate sticker projects. Older Sticker projects receive no new fields until saved and can start a mockup from their existing result normally.
+
+## Optional Kids product creation
+
+Every completed Kids result offers an optional product path after the generated prompt and selection summary. Its searchable catalog contains 126 unique formats across collectibles, books, learning, printables, celebrations, decor, digital products, and mockups. The compact three-stage builder inherits the completed child identity and visual direction, warns about age fit without unnecessarily hiding products, and supports digital, printable, physical-design, and mockup-only classifications.
+
+Trading cards support coordinated front/back layouts and positive traits while excluding combat mechanics. Exact visible text stays separate from visual direction, and blank branding fields produce explicitly unbranded prompts with no Nyvera logo or standalone N mark. Saved products remain linked variants inside the original Kids project and can be favorited, edited, regenerated, duplicated independently, exported alone, or exported with the parent. Older Kids projects remain unchanged until saved.
 
 ## Test and build
 

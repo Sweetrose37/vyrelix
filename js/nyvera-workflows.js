@@ -1,3 +1,4 @@
+import {contentLibraries,addUniqueOptions} from "./nyvera-content.js";
 const list=value=>value.split("|");
 const field=(id,label,options=[],extra={})=>({id,label,options,type:"select",...extra});
 const multi=(id,label,options)=>field(id,label,options,{type:"multi"});
@@ -61,6 +62,10 @@ step("Review and Final Details","Review every choice before prompt generation.",
 step("Generate and Save","Create the final kids prompt and save the project.",[text("title","Project title","Name this kids project",{required:true})],{generate:true})
 ];
 
+const expansionReport={character:{},kids:{}};
+function applyLibrary(studioId,workflow){for(const [fieldId,categories] of Object.entries(contentLibraries[studioId])){const target=workflow.flatMap(step=>step.fields).find(field=>field.id===fieldId);if(!target)continue;const groups={"Current Options":[...target.options]},rejected=[];let added=0;for(const [category,candidates] of Object.entries(categories)){const result=addUniqueOptions(target.options,candidates,`${studioId}.${fieldId}.${category}`);target.options=result.options;rejected.push(...result.rejected);if(result.additions.length){groups[category]=result.additions;added+=result.additions.length}}target.optionGroups=groups;target.searchable=true;target.expansion={added,rejected};expansionReport[studioId][fieldId]={added,rejected:[...rejected]}}}
+applyLibrary("character",characterWorkflow);applyLibrary("kids",kidsWorkflow);
+export {expansionReport};
 const oldAlias={grooming:"makeup"};
 export function migrateWorkflowData(studioId,data={}){const next={...data};if(studioId==="character"&&next.grooming&&!next.makeup)next.makeup=next.grooming;if(next.body&&!next.height&&/for Age/.test(next.body))next.height=next.body;return next}
 export function workflowFor(studioId,legacyFields=[]){const base=studioId==="character"?characterWorkflow:studioId==="kids"?kidsWorkflow:null;if(!base)return null;const known=new Set(base.flatMap(x=>x.fields.map(f=>f.id))),extras=legacyFields.filter(f=>!known.has(f.id)&&!oldAlias[f.id]);if(!extras.length)return base.map(x=>({...x,fields:[...x.fields]}));const copy=base.map(x=>({...x,fields:[...x.fields]}));copy[7].fields.push(...extras.map(f=>({...f,section:"Existing builder details"})));return copy}
