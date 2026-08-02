@@ -14,7 +14,7 @@ test("the persistent radio bar is hidden without removing the header radio acces
   const html=await readFile(new URL("index.html",root),"utf8");
   const css=await readFile(new URL("css/radio.css",root),"utf8");
   assert.match(html,/class="icon-button radio-launch"/);
-  assert.match(html,/radio\.css\?v=1\.16\.0/);
+  assert.match(html,/radio\.css\?v=1\.17\.0/);
   assert.match(css,/\.radio-mini\{display:none!important/);
   assert.match(css,/\.radio-is-enabled \.app-shell\{padding-bottom:calc\(88px \+ var\(--safe-bottom\)\)\}/);
 });
@@ -35,22 +35,23 @@ test("mobile welcome wording uses a safe inset without changing the hero card",a
   assert.match(css,/@media\(max-width:760px\)\{section\.hero\.studio-welcome>h1\.display-title\{[^}]*margin-left:2\.5rem!important[^}]*margin-right:1\.25rem!important/);
   assert.match(css,/@media\(max-width:760px\)\{section\.hero\.studio-welcome>p\.eyebrow\{[^}]*width:calc\(100% - 2rem\)!important[^}]*text-align:left!important[^}]*transform:translateX\(2rem\)!important/);
   assert.match(html,/nyvera\.css\?v=1\.14\.0/);
-  assert.match(html,/js\/app\.js\?v=1\.18\.0/);
-  assert.match(html,/js\/radio\.js\?v=1\.16\.0/);
+  assert.match(html,/js\/app\.js\?v=1\.19\.0/);
+  assert.match(html,/js\/radio\.js\?v=1\.17\.0/);
   assert.match(css,/@media\(max-width:360px\)\{\.hero\.studio-welcome>\.eyebrow\{letter-spacing:\.07em/);
 });
 
 test("service worker bypasses external audio and uses the mobile-radio cache",async()=>{
   const source=await readFile(new URL("service-worker.js",root),"utf8");
-  assert.match(source,/nyvera-app-shell-v1\.18\.0-install-iheart/);
+  assert.match(source,/nyvera-app-shell-v1\.19\.0-persistent-iheart-reveal/);
   assert.match(source,/\["style","script"\]\.includes\(event\.request\.destination\)/);
   assert.match(source,/new URL\(event\.request\.url\)\.origin!==self\.location\.origin/);
 });
 
 test("iHeartRadio uses the official responsive web widget with mobile-safe controls",async()=>{
   const source=await readFile(new URL("js/radio.js",root),"utf8"),css=await readFile(new URL("css/radio.css",root),"utf8");
-  for(const text of ["iHeartRadio","data-iheart-directory","data-iheart-form","iheartEmbedUrl","iheartStationPageUrl","data-iheart-open-station","allow=\"autoplay; encrypted-media\""])assert.match(source,new RegExp(text));
+  for(const text of ["iHeartRadio","data-iheart-directory","data-iheart-form","iheartEmbedUrl","iheartStationPageUrl","data-iheart-open-station","data-iheart-show-player","ensureIHeartDock","Keep Playing While I Create","allow=\"autoplay; encrypted-media\""])assert.match(source,new RegExp(text));
   assert.match(css,/\.iheart-radio__player\{[^}]*width:100%[^}]*height:200px/);
+  assert.match(css,/\.iheart-persistent\.is-collapsed \.iheart-persistent__frame/);
   assert.match(css,/@media\(max-width:760px\)/);
   assert.match(css,/\.iheart-radio__intro\{align-items:flex-start;flex-direction:column\}/);
 });
