@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 400" role="img" aria-label="Sticker sheets, die-cut shapes, planner icons, and product packaging decoration">
+ <defs><linearGradient id="h"><stop stop-color="#fff"/><stop offset=".3" stop-color="#72eadb"/><stop offset=".62" stop-color="#f48edc"/><stop offset="1" stop-color="#ffe4a1"/></linearGradient></defs>
+ <g fill="none" stroke="url(#h)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="171" y="37" width="205" height="302" rx="22"/><rect x="194" y="65" width="159" height="243" rx="12"/>
+  <path d="M234 90l9 18 20 3-14 15 4 20-19-9-18 9 3-20-14-15 20-3z"/>
+  <circle cx="309" cy="119" r="28"/><path d="M219 179h108v42H219zM239 200h70"/>
+  <path d="M222 260q22-34 45 0 22-34 44 0-13 37-44 52-31-15-45-52z"/>
+  <path d="M68 88q30-37 60 0l-7 67H75zM81 101h35"/><path d="M405 243h84v109h-84zM405 243h84l-14-20h-56zM422 277h50M422 296h36M467 330h22v22z"/>
+  <path d="M96 243l8 18 19 8-19 8-8 19-8-19-19-8 19-8z"/><circle cx="80" cy="344" r="24"/><path d="M70 344h20M80 334v20"/>
+  <path d="M432 95l6 14 14 6-14 6-6 14-6-14-14-6 14-6zM453 169q12-19 25 0 13-19 26 0-8 21-26 30-18-9-25-30z"/>
+ </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" role="img" aria-labelledby="t d">
+ <title id="t">Nyvera sticker product studio</title><desc id="d">Original holographic sticker sheet, tablet, product pouch, phrase, icon, object, and planner stickers.</desc>
+ <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#5c1680"/><stop offset=".5" stop-color="#d42986"/><stop offset="1" stop-color="#087d80"/></linearGradient><linearGradient id="holo"><stop stop-color="#fff"/><stop offset=".2" stop-color="#8ff5e7"/><stop offset=".45" stop-color="#f6a4ee"/><stop offset=".7" stop-color="#a6b8ff"/><stop offset="1" stop-color="#fff5b6"/></linearGradient></defs>
+ <rect x="8" y="8" width="624" height="504" rx="44" fill="url(#bg)" stroke="url(#holo)" stroke-width="4"/>
+ <g opacity=".16" stroke="#fff"><path d="M30 80h580M30 140h580M30 200h580M30 260h580M30 320h580M30 380h580M30 440h580"/><path d="M80 30v460M140 30v460M200 30v460M260 30v460M320 30v460M380 30v460M440 30v460M500 30v460M560 30v460"/></g>
+ <rect x="187" y="72" width="278" height="381" rx="29" fill="#151027" stroke="url(#holo)" stroke-width="8"/><rect x="211" y="103" width="230" height="314" rx="17" fill="#faf8ff"/>
+ <g stroke="#fff" stroke-width="9" stroke-linejoin="round">
+  <path d="M253 140q27-28 54 0l-6 58q-21 28-42 0z" fill="#ff7dba"/><path d="M271 144l-18-14M289 144l18-14"/>
+  <path d="M351 132l12 25 28 4-20 20 5 28-25-13-25 13 5-28-20-20 28-4z" fill="#69d9cf"/>
+  <rect x="239" y="231" width="166" height="53" rx="24" fill="#7d4fbc"/><path d="M267 257h111" stroke="#fff" stroke-width="6"/>
+  <path d="M248 328q25-38 50 0 24-38 49 0-15 42-49 60-35-18-50-60z" fill="#f6c55c"/>
+  <rect x="356" y="309" width="62" height="75" rx="10" fill="#58c9e8"/><path d="M368 328h38M368 346h38M368 364h25" stroke-width="5"/>
+ </g>
+ <g stroke="#fff" stroke-width="7"><path d="M67 147q35-45 71 0l-9 78H75z" fill="#6ee2cd"/><path d="M77 157h51"/><circle cx="117" cy="316" r="45" fill="#ef6caa"/><path d="M94 316h46M117 293v46"/></g>
+ <g><path d="M491 289h103v133H491z" fill="#321147" stroke="#fff" stroke-width="6"/><path d="M491 289h103l-18-24h-67z" fill="url(#holo)"/><path d="M512 334h61M512 356h43" stroke="#fff" stroke-width="6"/><path d="M562 398h32v24z" fill="#fff" opacity=".55"/></g>
+ <g fill="url(#holo)"><circle cx="90" cy="85" r="10"/><circle cx="544" cy="91" r="12"/><path d="M530 168l8 18 18 8-18 8-8 18-8-18-18-8 18-8z"/><path d="M117 440l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/></g>
+</svg>

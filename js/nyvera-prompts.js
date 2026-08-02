@@ -1,0 +1,71 @@
+const clean=value=>Array.isArray(value)?value.filter(Boolean).join(", "):String(value??"").trim();
+const sentence=value=>value?`${value.replace(/[.\s]+$/g,"")}.`:"";
+const values=data=>Object.fromEntries(Object.entries(data).filter(([,v])=>Array.isArray(v)?v.length:clean(v)));
+const unbrand=value=>Array.isArray(value)?value.map(unbrand):String(value??"").replace(/Nyvera Kids Luxury Clothing Line/gi,"premium age-appropriate luxury clothing").replace(/Nyvera Luxury Clothing Line/gi,"premium unbranded luxury clothing").replace(/\bNyvera\b/gi,"").replace(/\s{2,}/g," ").trim();
+const promptValues=data=>Object.fromEntries(Object.entries(values(data)).map(([key,value])=>[key,unbrand(value)]));
+const negativeParts=value=>(Array.isArray(value)?value:[value]).flatMap(item=>String(item??"").split(",")).map(item=>item.replace(/^avoid\s+/i,"").trim()).filter(Boolean);
+const negativeKey=value=>value.toLocaleLowerCase().replace(/[.\s]+$/g,"").replace(/\s+/g," ");
+const dedupeNegative=(...sources)=>{const seen=new Set(),result=[];sources.flatMap(negativeParts).forEach(item=>{const key=negativeKey(item);if(!seen.has(key)){seen.add(key);result.push(item)}});return result.join(", ")};
+const noBranding="no logos, no brand names, no wordmarks, no signatures, no watermarks, no emblems, no monograms, no standalone letter N symbols";
+
+export function validate(studio,data){
+  const errors=[];const d=values(data);
+  if(studio.id==="character"){
+    if(!d.age)errors.push("Choose an adult age group.");
+    if(["Baby","Toddler","Child","Tween","Teen","Teenager"].some(term=>clean(d.age).includes(term)))errors.push("Character Studio accepts adults only.");
+    if(["Bald","Shaved"].includes(d.hairTexture)&&["Mid Back","Waist Length","Extra Long"].includes(d.hairLength))errors.push("Bald or shaved hair cannot use a long hair length.");
+    const custom=Object.entries(d).filter(([key])=>key!=="negative").map(([,value])=>clean(value)).join(" ");if(/\b(weapon|wings?|magic staff|fantasy robe|superhero suit|armor)\b/i.test(custom))errors.push("Character details must not include weapons, wings, magical objects, armor, or fantasy/superhero clothing.");
+  }
+  if(studio.id==="kids"){
+    if(!d.age)errors.push("Choose a child age group.");
+    if(d.age==="Baby"&&d.build&&!d.build.includes("Baby"))errors.push("Baby creations need Baby Build proportions.");
+    if(d.age==="Toddler"&&d.build&&!d.build.includes("Toddler"))errors.push("Toddler creations need Toddler Build proportions.");
+    if(d.age!=="Teen"&&clean(d.grooming).includes("Teen Only"))errors.push("That grooming option is available only for teens.");
+    if(d.age!=="Teen"&&d.teenMakeup)errors.push("Teen-only makeup is available only when Teen is selected.");
+    const custom=Object.entries(d).filter(([key])=>key!=="negative").map(([,value])=>clean(value)).join(" ");if(/\b(adult clubwear|revealing clothing|weapon|fantasy costume|superhero suit|princess costume|prince costume|adult glamour)\b/i.test(custom))errors.push("Kids details must remain safe, realistic, and age-appropriate.");
+  }
+  if(studio.id==="sticker"){
+    if(!d.title)errors.push("Add a sticker product title.");
+    if(!d.count||Number(d.count)<1)errors.push("Choose an exact sticker count.");
+    const total=["phraseCount","iconCount","objectCount","decorativeCount","humanCount"].reduce((sum,key)=>sum+(Number(d[key])||0),0);
+    if(total&&total!==Number(d.count))errors.push(`Inventory is ${total}; it must equal the selected total of ${d.count}.`);
+    if(d.background==="Transparent Background"&&d.finish==="Transparent"&&d.border==="No Border")errors.push("Transparent stickers need a visible border or non-transparent finish for cutting clarity.");
+  }
+  if(d.environment==="Transparent Background"&&d.backgroundDetail)errors.push("Transparent background conflicts with detailed environment direction.");
+  return errors;
+}
+
+export function autoBalance(data){
+  const count=Math.max(1,Number(data.count)||1),keys=["phraseCount","iconCount","objectCount","decorativeCount","humanCount"],active=keys.filter(key=>Number(data[key])>0);const targets=active.length?active:["iconCount","objectCount","decorativeCount"];const base=Math.floor(count/targets.length),remainder=count%targets.length;keys.forEach(k=>data[k]="0");targets.forEach((k,i)=>data[k]=String(base+(i<remainder?1:0)));return data;
+}
+
+export function generate(studio,builderType,data){
+  const summary=values(data),d=promptValues(data);let prompt="",negative="",mockupPrompt="";
+  if(studio.id==="character"){
+    const expanded=Object.entries(d).filter(([key])=>!["title","presentation","age","role","body","skin","face","eyeColor","hairTexture","hairStyle","hairColor","clothing","outfit","shoes","accessories","jewelry","expression","pose","environment","lighting","palette","artStyle","composition","peopleCount","relationships","coordination","quality","negative","customDetails","templateId"].includes(key)).map(([key,value])=>`${key.replace(/([A-Z])/g," $1")}: ${clean(value)}`).join("; ");
+    prompt=[`Create a normal human ${d.age||"adult"} with a ${d.presentation||"custom adult presentation"}${d.role?`, portrayed as a ${d.role}`:""}.`,sentence([d.body,d.skin,d.face?`${d.face} face`:"",d.eyeColor?`${d.eyeColor} eyes`:""].filter(Boolean).join(", ")),sentence([d.hairTexture,d.hairStyle,d.hairColor].filter(Boolean).join(" ")+" hair"),sentence(`Dress the adult in realistic ${d.clothing||"clothing"}${d.outfit?`: ${d.outfit}`:""}${d.shoes?`, with ${d.shoes}`:""}`),sentence(d.accessories?.length?`Include ${clean(d.accessories)}`:""),sentence(d.jewelry?.length?`Jewelry: ${clean(d.jewelry)}`:""),sentence(`${d.expression||"natural"} expression, ${d.pose||"standing"} pose`),sentence(`Scene: ${d.environment||"professional studio"}, ${d.lighting||"soft daylight"}, ${d.palette||"balanced palette"}`),sentence(`Render as ${d.artStyle||"semi-realistic"} art in a ${d.composition||"full body"} composition`),sentence(d.peopleCount?`Include exactly ${d.peopleCount} distinct adults; relationships or roles: ${d.relationships||"distinct group members"}; ${d.coordination||"distinct realistic outfits"}; prevent cloned faces, hair, or clothing`:""),sentence(expanded?`Additional selected direction: ${expanded}`:""),sentence(clean(d.quality)||"Premium detail, clean anatomy, professional commercial finish"),sentence(d.customDetails)].filter(Boolean).join(" ");
+    prompt=`${prompt} The finished image must be completely unbranded: ${noBranding}. Do not place visible text in the image.`;
+    negative=dedupeNegative(summary.negative,"children, teenagers, fantasy species, magical powers, superhero clothing, armor, weapons, costume clothing",noBranding);
+  }else if(studio.id==="kids"){
+    const specialized=Object.entries(d).filter(([key])=>!["age","presentation","role","build","skin","face","eyeColor","hairTexture","hairStyle","hairColor","grooming","clothing","shoes","accessories","expression","pose","supportingPeople","environment","lighting","palette","artStyle","composition","negative","customDetails","templateId","bookType","learningGoal","pageCount","trimSize","detailLevel"].includes(key)).map(([key,value])=>`${key.replace(/([A-Z])/g," $1")}: ${clean(value)}`).join("; ");
+    const base=[`Create a normal human ${d.age||"child"} with a ${d.presentation||"child presentation"}${d.role?`, shown as a ${d.role}`:""}.`,sentence([d.build,d.skin,d.face?`${d.face} face`:"",d.eyeColor?`${d.eyeColor} eyes`:""].filter(Boolean).join(", ")),sentence([d.hairTexture,d.hairStyle,d.hairColor].filter(Boolean).join(" ")+" hair"),sentence(`Use realistic, modest, age-appropriate ${d.clothing||"children’s clothing"}${d.shoes?` with ${d.shoes}`:""}`),sentence(d.accessories?.length?`Include safe accessories: ${clean(d.accessories)}`:""),sentence(d.supportingPeople?.length?`Supporting human figures: ${clean(d.supportingPeople)}, each with a distinct face, hair, clothing, expression, and pose`:""),sentence(`${d.expression||"joyful"} expression and ${d.pose||"natural"} pose`),sentence(`Scene: ${d.environment||"studio"}, ${d.lighting||"soft daylight"}, ${d.palette||"friendly balanced palette"}`),sentence(`Render in ${d.artStyle||"storybook"} style with a ${d.composition||"full body"} composition and commercial-quality clarity`),sentence(d.detailLevel?`Clean black-and-white line art on white, no shading, crisp closed printable outlines, ${d.detailLevel} age-appropriate detail, safe margins`:""),sentence(specialized?`Specialized product requirements: ${specialized}`:""),sentence(d.customDetails)].filter(Boolean).join(" ");
+    prompt=d.bookType?`COVER PROMPT\n${base} Create a commercially polished ${d.bookType} cover with ${d.textPlacement||"safe text placement"}.\n\nCHARACTER REFERENCE PROMPT\n${base} Show consistent front, side, expression, clothing, and color references.\n\nINTERIOR SCENE PROMPT\n${base} Maintain exact character consistency across the ${d.pageCount||"24"}-page, ${d.trimSize||"standard trim"} interior.\n\nSTORY OUTLINE PROMPT\nPlan an age-appropriate ${d.bookType} outline about ${d.learningGoal||"positive growth"}, with a clear beginning, middle, resolution, and page-by-page illustration notes.${d.fullStory==="Full Story"?" Include the complete original story text.":" Do not write the full story."}`:base;
+    prompt=`${prompt} The finished image must be completely unbranded: ${noBranding}. Do not place visible text in the image unless the selected product explicitly requires exact educational text.`;
+    negative=dedupeNegative(summary.negative,"fantasy species, magical beings, superheroes, princess or prince costumes, adult glamour, revealing clothing, weapons, unsafe objects, adult body proportions",noBranding);
+  }else{
+    const total=Number(d.count)||1;const inventory=[[d.phraseCount,"phrase stickers"],[d.iconCount,"icon stickers"],[d.objectCount,"themed object stickers"],[d.decorativeCount,"decorative stickers"],[d.humanCount,"concise human-figure stickers"]].filter(([n])=>Number(n)>0).map(([n,label])=>`${n} ${label}`).join(", ");
+    prompt=[`Create an exact ${total}-piece ${d.productType||"sticker product"} titled “${d.title||"Original Sticker Collection"}” around the theme ${d.theme||"an original cohesive theme"}.`,sentence(`Use a consistent ${d.style||"clean commercial"} style, ${d.palette||"balanced palette"}, ${d.border||"white die-cut border"}, and ${d.finish||"matte"} finish`),sentence(inventory?`The exact inventory is: ${inventory}`:"Every sticker must be distinct and fully visible"),sentence(d.subjects?.length?`Subject categories: ${clean(d.subjects)}`:""),sentence(d.exactText?`Preserve this exact wording and punctuation: ${d.exactText}. Verify spelling carefully`:""),sentence(d.objectList?`Use only this exact object list: ${d.objectList}`:""),sentence(`Arrange as ${d.layout||"a balanced grid"} in ${d.orientation||"portrait"} format on ${d.background||"a white sheet"}${d.sheetSize?`, sized ${d.sheetSize}`:""}`),sentence(`Keep all ${total} stickers separate with even spacing, complete subjects, crisp edges, cutting clarity, small-size readability, and production-ready commercial quality`),sentence(d.useType==="Digital Download"?"Present clearly as a digital download; make no physical shipping claim":""),sentence(d.customDetails)].filter(Boolean).join(" ");
+    prompt=`${prompt} Keep the artwork and product presentation completely unbranded: ${noBranding}. Include only exact user-supplied phrase text when provided.`;
+    negative=dedupeNegative(summary.negative,"overlapping stickers, duplicates, cropped stickers, incomplete subjects, blurry edges, incorrect sticker count, misspelled text, inconsistent style, unrelated products",noBranding);
+    if(d.productType?.includes("Mockup")||d.productType?.includes("Packaging"))mockupPrompt=`Create a professional, completely unbranded ${d.productType.toLowerCase()} presentation for “${d.title}” showing exactly ${total} stickers. Match the ${d.theme} theme, ${d.palette||"cohesive"} palette, ${d.finish||"premium"} finish, and ${d.useType||"selected product status"}. Include a blank, unbranded label area with no logo or wordmark, realistic studio lighting, a polished retail camera angle, and no unrelated products.${d.useType==="Digital Download"?" Use only the exact functional words ‘digital download’ and make no physical shipping claim.":""} ${noBranding}.`;
+  }
+  return {prompt:prompt.replace(/[ \t]+/g," ").trim(),negative, mockupPrompt:mockupPrompt.replace(/[ \t]+/g," ").trim(),summary};
+}
+
+export function styledSuggestion(studio,concept=""){
+  const base={};const lower=concept.toLowerCase();
+  if(studio.id==="character")Object.assign(base,{age:lower.includes("senior")?"Senior Adult":lower.includes("middle")?"Middle-Aged Adult":"Adult",presentation:lower.includes("man")?"Man":"Woman",clothing:lower.includes("church")?"Church Clothing":lower.includes("business")?"Professional Workwear":"Smart Casual",environment:lower.includes("church")?"Church":"Professional Studio",expression:"Confident",artStyle:"Semi-Realistic",composition:"Full Body"});
+  if(studio.id==="kids")Object.assign(base,{age:lower.includes("baby")?"Baby":lower.includes("toddler")?"Toddler":lower.includes("teen")?"Teen":lower.includes("tween")?"Tween":"Young Child",presentation:lower.includes("boy")?"Boy":"Girl",build:lower.includes("baby")?"Baby Build":lower.includes("toddler")?"Toddler Build":"Average for Age",clothing:lower.includes("church")?"Church Clothing":lower.includes("school")?"School Clothing":"Everyday Casual",environment:lower.includes("school")?"Classroom":lower.includes("bedtime")?"Bedroom":"Studio",artStyle:"Storybook"});
+  if(studio.id==="sticker")Object.assign(base,{title:concept||"Inspired Sticker Collection",productType:lower.includes("pack")?"Sticker Pack":"Sticker Sheet",theme:concept||"creative inspiration",style:lower.includes("holographic")?"Holographic":lower.includes("luxury")?"Luxury":"Kawaii",count:"12",phraseCount:lower.includes("encouragement")?"6":"0",iconCount:"3",objectCount:"6",decorativeCount:lower.includes("encouragement")?"3":"3",humanCount:"0",border:"White Die-Cut Border",finish:lower.includes("holographic")?"Holographic":"Glossy"});
+  return base;
+}

@@ -1,506 +1,146 @@
-/**
- * Vyrelix launch application: composes the universal creation, project,
- * visual-direction, prompt, collection, and device settings experiences.
- */
-import { createNavigation } from "./navigation.js";
-import { storage } from "./storage.js";
-import { initializeSettings } from "./settings.js";
-import { initializeRipples } from "./animations.js";
-import { showToast, openDialog, closeDialog, renderSaved } from "./ui.js";
-import { initializeModals } from "./components/modals.js";
-import { initializeBottomSheets, openBottomSheet, closeBottomSheet } from "./components/bottomSheet.js";
-import { initializeForms, createSearchController } from "./components/forms.js";
-import { initializeLoading } from "./components/loading.js";
-import { debounce } from "../utilities/helpers.js";
-import { creationEngine } from "./core/creationEngine.js";
-import { initializeDashboard } from "./core/dashboard.js";
-import { downloadProject } from "./project/projectExporter.js";
-import { readProjectFile } from "./project/projectImporter.js";
-import { APP_VERSION } from "../utilities/constants.js";
+import { APP_VERSION,studios,defaults,fieldsFor } from "./nyvera-data.js";
+import { store } from "./nyvera-storage.js";
+import { generate,validate,autoBalance,styledSuggestion } from "./nyvera-prompts.js";
+import { workflowFor,flatWorkflowFields,migrateWorkflowData } from "./nyvera-workflows.js";
 
-const state = { filter: "all", query: "" };
-const savedList = document.querySelector("#saved-list");
-const projectScreen = document.querySelector('[data-screen="project"]');
-let navigation;
-let creationController;
-let promptController;
-let visualController;
-let visualProjectId = "";
-let pendingCreationOptions = null;
+const main=document.querySelector("#app-main"),app=document.querySelector("#app"),loading=document.querySelector("#loading-screen"),toastRegion=document.querySelector("#toast-region"),dialogLayer=document.querySelector("#dialog-layer"),saveStatus=document.querySelector("#save-status");
+const state={route:"welcome",studio:null,builder:null,fields:[],workflow:null,step:0,returnToReview:false,generating:false,form:{},project:null,result:null,dirty:false,filter:"all",sort:"newest",query:"",builderFilter:"all"};
+let autosaveTimer;
 
-const modeNames = Object.freeze({
-  "dual-experience": "Universal Creative Engine",
-  quick: "Quick Create",
-  guided: "Creative Builder",
-  advanced: "Advanced Creator",
-  director: "Creative Director",
-  inspire: "Inspire Me",
-  templates: "Templates",
-  reference: "Reference Mode"
+const esc=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+const clone=value=>JSON.parse(JSON.stringify(value));
+const studio=()=>state.studio?studios[state.studio]:null;
+const studioClass=id=>`studio-shell studio-shell--${id}`;
+const iconSvg=(name,className="studio-svg-icon")=>`<svg class="${className}" aria-hidden="true"><use href="./assets/icons/studio-icons.svg#${name||"sparkle"}"></use></svg>`;
+const artworkPath=id=>`./assets/artwork/studio-${id}-ai.jpg`;
+const titleCase=value=>String(value).replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase());
+const slug=value=>String(value||"nyvera-project").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"").slice(0,80)||"nyvera-project";
+
+function toast(message,type="success"){
+  const item=document.createElement("div");item.className=`toast ${type==="error"?"toast--error":""}`;item.textContent=message;toastRegion.append(item);setTimeout(()=>item.remove(),3200);
+}
+function setActiveNav(route){document.querySelectorAll("[data-nav]").forEach(button=>button.classList.toggle("is-active",button.dataset.nav===route||(route==="favorites"&&button.dataset.nav==="favorites")));}
+function focusMain(){main.focus({preventScroll:true});window.scrollTo({top:0,behavior:store.settings().reducedMotion?"auto":"smooth"});}
+function navigate(route,{push=true}={}){
+  if(state.dirty&&["builder","result"].includes(state.route)&&!["builder","result"].includes(route)&&!confirm("You have unsaved changes. Save and exit before leaving?"))return;
+  state.route=route;state.dirty=false;
+  const hash=route==="studio"&&state.studio?`#/${state.studio}-studio/dashboard`:route==="builder"?`#/${state.studio}-studio/builder/${state.builder?.id}`:route==="result"?`#/${state.studio}-studio/result`:`#/${route}`;
+  if(push&&location.hash!==hash)history.pushState({route,studio:state.studio},"",hash);
+  render();focusMain();
+}
+function applySettings(){const s=store.settings();document.body.classList.toggle("reduce-motion",s.reducedMotion||!s.animations);document.body.classList.toggle("high-contrast",s.highContrast);document.body.classList.toggle("text-large",s.textSize==="large");}
+
+function render(){
+  setActiveNav(state.route==="studio"||state.route==="builder"||state.route==="result"?"create":state.route);
+  if(state.route==="welcome")return renderWelcome();if(state.route==="home")return renderHome();if(state.route==="studio")return renderStudio();if(state.route==="builder")return renderBuilder();if(state.route==="result")return renderResult();if(state.route==="projects"||state.route==="favorites")return renderProjects();if(state.route==="history")return renderHistory();if(state.route==="settings")return renderSettings();renderHome();
+}
+
+function renderWelcome(){
+  main.innerHTML=`<section class="screen hero studio-welcome"><p class="eyebrow">Where Imagination Becomes Art</p><h1 class="display-title">Welcome to Nyvera</h1><p class="lead">Build unforgettable people.<br>Create joyful childhood worlds.<br>Turn ideas into sticker collections.</p><div class="hero-actions"><button class="button button--primary" data-action="enter">Enter Nyvera <span aria-hidden="true">→</span></button></div><p class="section-copy">Three creative studios. One powerful imagination.</p></section>`;
+}
+function renderHome(){
+  main.innerHTML=`<section class="screen"><div class="hero hero--main"><div><p class="eyebrow">Three creative studios · One powerful imagination</p><h1 class="display-title">Where imagination becomes <em>art.</em></h1><p class="lead">Build polished prompts and product specifications with dedicated experiences for adults, kids, and stickers.</p></div><img class="main-hero-mark" src="./assets/icons/nyvera-mark.svg" alt="" width="220" height="220"></div><section class="section"><div class="section-heading"><div><p class="eyebrow">Choose your studio</p><h2 class="section-title">Start creating</h2></div></div><div class="card-grid">${Object.values(studios).map(s=>`<button class="studio-card studio-card--${s.id}" data-studio="${s.id}" type="button"><span class="studio-icon">${iconSvg(s.icon)}</span>${s.label?`<span class="studio-label">${s.label}</span>`:""}<h3>${s.name}</h3><p>${s.description}</p><span class="button button--primary">Enter ${s.short}</span></button>`).join("")}</div></section><section class="section"><div class="button-row"><button class="button" data-nav="projects">Open Projects</button><button class="button" data-nav="settings">Open Settings</button></div></section></section>`;
+  main.querySelector(".main-hero-mark")?.remove();
+}
+
+function openStudio(id){state.studio=id;sessionStorage.setItem("nyvera_last_studio",id);renderStudioLoading(id);}
+function renderStudioLoading(id){const s=studios[id];main.innerHTML=`<section class="${studioClass(id)} studio-loading screen" role="status"><div class="studio-loading__art"><img src="${artworkPath(id)}" alt="" width="640" height="426"></div><div><p class="eyebrow">${s.name.toUpperCase()}</p><h1 class="display-title">${s.loading}</h1><p class="lead">${id==="kids"?"Preparing Your Creative Adventure...":id==="character"?"Adult style, face, hair, and fashion details are coming together.":"Preparing your polished sticker product..."}</p><div class="loading-track"><span></span></div></div></section>`;setTimeout(()=>navigate("studio"),store.settings().reducedMotion?50:720);}
+function dashboardExtra(){return [{action:"style-me",name:"Style Me",icon:"palette",copy:"Turn a simple concept into a complete direction."},{action:"surprise-me",name:"Surprise Me",icon:"shuffle",copy:"Generate a compatible original concept."},{action:"templates",name:`${studio().short.replace(" Studio","")} Templates`,icon:"sheet",copy:"Start with an editable professional template."},{action:"continue-draft",name:"Continue Last Project",icon:"sparkle",copy:"Resume your most recent autosaved draft."},{action:"history",name:"History",icon:"history",copy:"Reopen recent prompt generations."},{action:"switch-studio",name:"Switch Studio",icon:"switch",copy:"Choose another Nyvera experience."}];}
+function renderStudio(){
+  const s=studio();if(!s)return navigate("home");
+  main.innerHTML=`<section class="${studioClass(s.id)} screen"><div class="studio-welcome"><div class="studio-welcome__copy"><p class="eyebrow">${s.name}</p><h1 class="display-title">${s.welcome}</h1><p class="lead">${s.welcomeCopy}</p><div class="hero-actions"><button class="button button--primary" data-builder="${s.builders[0].id}">${s.id==="character"?"Build My Character":s.id==="kids"?"Start Creating":"Create Stickers"}</button><button class="button" data-action="style-me">Style Me</button><button class="button" data-action="surprise-me">Surprise Me</button><button class="button" data-action="templates">Choose a Template</button></div></div><figure class="studio-art-frame"><img src="./assets/illustrations/${s.id}-hero.svg" alt="${s.id==="character"?"Editorial group of diverse adult characters in realistic fashion":s.id==="kids"?"Diverse human children reading, drawing, and learning":"Holographic sticker sheet, tablet, and sticker product display"}" width="640" height="520" fetchpriority="high"></figure></div><section class="section studio-dashboard"><div class="section-heading"><div><p class="eyebrow">${s.short} dashboard</p><h2 class="section-title">Choose a builder</h2></div><button class="button button--quiet" data-action="switch-studio">Switch Studio</button></div><div class="builder-grid">${[...s.builders,...dashboardExtra()].map(b=>`<button class="builder-card" type="button" ${b.id?`data-builder="${b.id}"`:`data-action="${b.action}"`}><span class="builder-card__icon">${iconSvg(b.icon)}</span><span><strong>${b.name}</strong><small>${b.copy||builderDescription(b.name)}</small></span><span aria-hidden="true">›</span></button>`).join("")}</div></section></section>`;
+  const studioImage=main.querySelector(".studio-art-frame img");
+  if(studioImage)studioImage.src=artworkPath(s.id);
+}
+function builderDescription(name){if(name.includes("Character"))return "Build a safe, detailed human character.";if(name.includes("Book"))return "Create coordinated cover, reference, scene, and outline prompts.";if(name.includes("Coloring")||name.includes("Printable")||name.includes("Activity"))return "Design a clear commercial-quality printable.";if(name.includes("Mockup")||name.includes("Packaging"))return "Plan a polished retail presentation.";if(name.includes("Sheet")||name.includes("Pack"))return "Build an exact-count cohesive collection.";return "Open this specialized guided workflow.";}
+
+function startBuilder(id,seed=null,templateId=null){
+const s=studio(),builder=s.builders.find(b=>b.id===id)||s.builders[0],legacy=fieldsFor(s.id,builder.name);state.builder=builder;state.workflow=workflowFor(s.id,legacy);state.fields=state.workflow?flatWorkflowFields(state.workflow):legacy;state.step=seed&&!templateId&&state.workflow?8:0;state.returnToReview=false;state.form=migrateWorkflowData(s.id,seed?{...clone(defaults[s.id]),...seed}:{});state.project=null;state.result=null;if(templateId)state.form.templateId=templateId;
+  if(s.id==="kids"){if(builder.name.startsWith("Baby"))Object.assign(state.form,{age:"Baby",build:"Baby Build",shoes:"Baby Shoes"});if(builder.name.startsWith("Toddler"))Object.assign(state.form,{age:"Toddler",build:"Toddler Build",shoes:"Toddler Shoes"});if(builder.name.startsWith("Teen"))Object.assign(state.form,{age:"Teen",build:"Tall and Lean",clothing:"Teen Fashion"});}
+  if(s.id==="sticker"){const map={"Single Sticker Builder":"Single Sticker","Sticker Sheet Builder":"Sticker Sheet","Sticker Pack Builder":"Sticker Pack","Phrase Sticker Builder":"Phrase Collection","Icon Sticker Builder":"Icon Collection","Object Sticker Builder":"Object Collection","Decorative Sticker Builder":"Decorative Collection","Digital Planner Sticker Builder":"Digital Planner Collection","Sticker Mockup Builder":"Sticker Mockup","Product Packaging Prompt Builder":"Product Packaging"};if(map[builder.name])state.form.productType=map[builder.name];}
+  navigate("builder");scheduleAutosave();
+}
+function optionDisabled(f,option){const cropped=["Bald","Shaved"].includes(state.form.hairTexture);if(f.id==="hairLength"&&cropped&&["Chin Length","Shoulder Length","Mid Back","Waist Length","Extra Long"].includes(option))return true;if(f.id==="hairDetails"&&cropped&&["Defined Baby Hairs","Baby Hairs","Beads","Gold Cuffs","Pearls","Flowers","Ribbons","Clips","Bows","Scrunchies","Barrettes","School Hair Accessories"].includes(option))return true;return false}
+const normalizedChoice=value=>String(value).replace(/^avoid\s+/i,"").replace(/[-\s]+/g," ").trim().toLowerCase();
+function renderField(f){const value=state.form[f.id]??(f.type==="multi"?[]:"");if(f.type==="textarea"||f.type==="text")return `<label class="field"><span>${f.label}${f.required?" *":""}</span>${f.type==="textarea"?`<textarea data-field="${f.id}" placeholder="${esc(f.placeholder)}">${esc(value)}</textarea>`:`<input data-field="${f.id}" value="${esc(value)}" placeholder="${esc(f.placeholder)}" ${f.inputMode?`inputmode="${f.inputMode}"`:""}>`}</label>`;if(f.type==="multi")return `<fieldset class="field"><legend>${f.label}</legend><div class="option-grid">${f.options.map(option=>`<label class="choice"><input type="checkbox" data-field="${f.id}" value="${esc(option)}" ${value.some(saved=>normalizedChoice(saved)===normalizedChoice(option))?"checked":""} ${optionDisabled(f,option)?"disabled":""}><span>${option}</span></label>`).join("")}</div></fieldset>`;return `<label class="field"><span>${f.label}${f.required?" *":""}</span><select data-field="${f.id}"><option value="">Choose an option</option>${f.options.map(option=>`<option ${value===option?"selected":""} ${optionDisabled(f,option)?"disabled":""}>${option}</option>`).join("")}</select></label>`;}
+function selectionItems(){return state.fields.map(f=>({label:f.label,value:state.form[f.id]})).filter(x=>Array.isArray(x.value)?x.value.length:String(x.value??"").trim());}
+function renderBuilder(){
+  if(state.workflow)return renderWorkflowBuilder();
+  const s=studio(),f=state.fields[state.step];if(!s||!f)return navigate("studio");const pct=Math.round(((state.step+1)/state.fields.length)*100);const stickerStatus=s.id==="sticker"?countStatus():"";
+  main.innerHTML=`<section class="${studioClass(s.id)} screen"><div class="progress-wrap"><div class="progress-meta"><button class="button button--quiet" data-action="back-dashboard">← Dashboard</button><span>Step ${state.step+1} of ${state.fields.length}</span></div><div class="progress" aria-label="${pct}% complete"><span style="width:${pct}%"></span></div></div><div class="builder-layout"><div class="panel"><p class="eyebrow">${state.builder.name}</p><h1 class="section-title">${f.label}</h1><p class="section-copy">Choose what fits your vision. Required fields are marked with an asterisk.</p><div class="section">${renderField(f)}${stickerStatus}</div><div class="builder-controls"><button class="button" data-action="previous" ${state.step===0?"disabled":""}>Previous</button><button class="button button--quiet" data-action="clear-step">Clear Current Step</button><button class="button" data-action="save-exit">Save and Exit</button><button class="button button--primary" data-action="${state.step===state.fields.length-1?"generate":"continue"}">${state.step===state.fields.length-1?"Create My Prompt":"Continue"}</button></div></div><aside class="panel builder-summary"><p class="eyebrow">Current selections</p><ul class="summary-list">${selectionItems().slice(-12).map(x=>`<li><strong>${x.label}</strong>${esc(Array.isArray(x.value)?x.value.join(", "):x.value)}</li>`).join("")||"<li>Selections will appear here.</li>"}</ul></aside></div></section>`;
+}
+function visibleField(f){return !f.showIf||Object.entries(f.showIf).every(([key,value])=>state.form[key]===value)}
+function workflowConflicts(){const d=state.form,items=[];state.fields.filter(f=>f.required&&visibleField(f)&&!(Array.isArray(d[f.id])?d[f.id].length:String(d[f.id]??"").trim())).forEach(f=>items.push({message:`Missing required field: ${f.label}.`,step:state.workflow.findIndex(s=>s.fields.includes(f))}));if(["Bald","Shaved"].includes(d.hairTexture)&&["Mid Back","Waist Length","Extra Long"].includes(d.hairLength))items.push({message:"Bald or shaved hair conflicts with a long hair length.",fix:"short-hair"});if(d.environment==="Transparent Background"&&d.backgroundDetail)items.push({message:"Transparent Background conflicts with detailed environment direction.",fix:"clear-background-detail"});if(state.studio==="kids"&&d.age==="Baby"&&d.build!=="Baby Build")items.push({message:"Babies require Baby Build proportions.",fix:"baby-build"});if(state.studio==="kids"&&d.age==="Toddler"&&d.build!=="Toddler Build")items.push({message:"Toddlers require Toddler Build proportions.",fix:"toddler-build"});if(state.studio==="kids"&&d.age!=="Teen"&&d.teenMakeup)items.push({message:"Teen-only makeup cannot be used for this age.",fix:"remove-teen-makeup"});if(d.clothing==="Pajamas"&&!/[Bb]edroom|Nursery|Home/.test(d.environment||""))items.push({message:"Suggestion: pajamas work best in a home, nursery, or bedroom scene.",fix:"pajama-scene",advisory:true});if(state.studio==="character"&&/Bridal/.test(`${d.clothing} ${d.outfit}`)&&!/wedding/i.test(`${d.environment} ${d.backgroundDetail}`))items.push({message:"Suggestion: bridal wear works best in a wedding-related setting.",fix:"bridal-scene",advisory:true});if(state.studio==="character"&&d.clothing==="Athletic Wear"&&!/activity|fitness|gym|outdoor/i.test(`${d.environment} ${d.backgroundDetail}`))items.push({message:"Suggestion: athletic wear works best in an activity-related setting.",fix:"athletic-scene",advisory:true});if(state.studio==="kids"&&/School Uniform/.test(`${d.clothing} ${d.outfit}`)&&!/School|Classroom/.test(d.environment||""))items.push({message:"Suggestion: school uniforms work best in a school environment.",fix:"school-scene",advisory:true});return items}
+function stepValues(stepIndex){const part=state.workflow[stepIndex];return part.fields.filter(visibleField).map(f=>({label:f.label,value:state.form[f.id]})).filter(x=>Array.isArray(x.value)?x.value.length:String(x.value??"").trim())}
+function workflowSummary(){return state.workflow.slice(0,8).map((part,index)=>{const values=stepValues(index);return `<details ${index===state.step?"open":""}><summary><strong>${esc(part.title)}</strong><span>${values.length} selected</span></summary><ul class="summary-list">${values.map(x=>`<li><strong>${esc(x.label)}</strong>${esc(Array.isArray(x.value)?x.value.join(", "):x.value)}</li>`).join("")||"<li>No selections yet.</li>"}</ul><button class="button button--quiet" type="button" data-edit-step="${index}">Edit</button></details>`}).join("")}
+function reviewContent(){const conflicts=workflowConflicts(),cards=state.workflow.slice(0,8).map((part,index)=>{const values=stepValues(index);return `<article class="review-card"><div><span class="completion ${values.length?"is-complete":""}" aria-label="${values.length?"Complete":"Incomplete"}">${values.length?"✓":"!"}</span><h2>${esc(part.title)}</h2></div><p>${values.map(x=>`<strong>${esc(x.label)}:</strong> ${esc(Array.isArray(x.value)?x.value.join(", "):x.value)}`).join("<br>")||"No selections yet."}</p><button class="button" type="button" data-edit-step="${index}">Edit</button></article>`}).join("");const preview=state.workflow.slice(0,8).map((part,index)=>`${part.title}: ${stepValues(index).map(x=>`${x.label}=${Array.isArray(x.value)?x.value.join(", "):x.value}`).join("; ")||"not set"}`).join("\n");return `<section class="review-grid">${cards}</section><section class="workflow-subsection"><h2>Final Custom Details and Negative Guidance</h2>${state.workflow[8].fields.map(renderField).join("")}</section><section class="workflow-subsection"><h2>Conflict Check</h2>${conflicts.length?`<ul class="conflict-list">${conflicts.map((x,i)=>`<li>${esc(x.message)} ${x.fix?`<button class="button button--quiet" data-conflict-fix="${x.fix}">Correct</button>`:x.step>=0?`<button class="button button--quiet" data-edit-step="${x.step}">Edit</button>`:""}</li>`).join("")}</ul>`:'<p class="success-message">✓ No conflicts detected.</p>'}</section><section class="workflow-subsection"><h2>Prompt Preparation Preview</h2><pre class="prompt-preview">${esc(preview)}</pre><p>The final prompt is not generated until Step 10.</p></section>`}
+function generatedStep(){const r=state.result,p=state.project;return `<section class="generate-panel">${state.workflow[9].fields.map(renderField).join("")}<button class="button button--primary button--wide" data-action="generate" ${state.generating?"disabled":""}>${state.generating?"Generating detailed prompt…":state.studio==="character"?"Generate My Character Prompt":"Generate My Kids Prompt"}</button>${r&&p?`<h2>Generated Main Prompt</h2><div class="prompt-box">${esc(r.prompt)}</div><button class="button" data-copy="main">Copy Main Prompt</button><h2>Generated Negative Prompt</h2><div class="prompt-box">${esc(r.negative)}</div><button class="button" data-copy="negative">Copy Negative Prompt</button><h2>Full Selection Summary</h2><div class="prompt-box">${selectionItems().map(x=>`${esc(x.label)}: ${esc(Array.isArray(x.value)?x.value.join(", "):x.value)}`).join("<br>")}</div><div class="button-row"><button class="button button--primary" data-action="save-project">${state.studio==="character"?"Save Character":"Save Project"}</button><button class="button" data-action="favorite-result">${p.favorite?"♥ Favorited":"♡ Favorite"}</button><button class="button" data-action="download-txt">Download TXT</button><button class="button" data-action="export-project">Export JSON</button><button class="button" data-action="edit-result">Edit ${state.studio==="character"?"Character":"Project"}</button><button class="button" data-action="duplicate-result">Duplicate ${state.studio==="character"?"Character":"Project"}</button><button class="button" data-action="create-another">Create Another</button><button class="button" data-action="back-dashboard">Return to ${studio().short} Dashboard</button><button class="button" data-action="switch-studio">Switch Studio</button></div>`:""}</section>`}
+function renderWorkflowBuilder(){const s=studio(),part=state.workflow[state.step];if(!s||!part)return navigate("studio");const pct=(state.step+1)*10,content=part.review?reviewContent():part.generate?generatedStep():`<div class="workflow-fields">${part.fields.filter(visibleField).map((f,index)=>`${f.section&&index===0?`<p class="subsection-label">Section ${esc(f.section)}</p>`:""}${renderField(f)}${f.note?`<p class="field-note">${esc(f.note)}</p>`:""}`).join("")}</div>`;main.innerHTML=`<section class="${studioClass(s.id)} screen workflow-screen"><div class="progress-wrap"><div class="progress-meta"><button class="button button--quiet" data-action="back-dashboard">← Dashboard</button><strong>Step ${state.step+1} of 10 — ${esc(part.title)}</strong><span>${pct}%</span></div><div class="progress" aria-label="${pct}% complete"><span style="width:${pct}%"></span></div></div><div class="builder-layout"><div class="panel"><p class="eyebrow">${esc(state.builder.name)}</p><h1 class="section-title">Step ${state.step+1} of 10 — ${esc(part.title)}</h1><p class="section-copy">${esc(part.description)}</p>${content}<div class="builder-controls"><button class="button" data-action="previous" ${state.step===0?"disabled":""}>Previous</button><button class="button button--quiet" data-action="clear-step">Clear Step</button><button class="button" data-action="save-exit">Save and Exit</button>${state.step<9?`<button class="button button--primary" data-action="continue">Continue</button>`:""}</div><p class="autosave-note" aria-live="polite">Autosave is ${store.settings().autosave?"on":"off"}. ${saveStatus.textContent||"Current changes are kept in your draft."}</p></div><aside class="panel builder-summary workflow-summary"><p class="eyebrow">Current Selections</p>${workflowSummary()}</aside></div></section>`}
+function countStatus(){const d=state.form,total=["phraseCount","iconCount","objectCount","decorativeCount","humanCount"].reduce((n,k)=>n+(Number(d[k])||0),0),target=Number(d.count)||0,remaining=target-total;return `<div class="count-status ${remaining===0?"is-valid":"is-error"}"><strong>Inventory: ${total} / ${target}</strong><br>${remaining===0?"Exact count matched.":remaining>0?`${remaining} sticker${remaining===1?"":"s"} remaining.`:`Remove ${Math.abs(remaining)} sticker${remaining===-1?"":"s"}.`} <button class="button button--quiet" type="button" data-action="auto-balance">Auto-Balance Counts</button></div>`;}
+function readField(target){const id=target.dataset.field,fieldDef=state.fields.find(f=>f.id===id);if(fieldDef?.type==="multi")state.form[id]=[...document.querySelectorAll(`[data-field="${CSS.escape(id)}"]:checked`)].map(x=>x.value);else state.form[id]=target.value;state.dirty=true;scheduleAutosave();}
+function scheduleAutosave(){if(!store.settings().autosave||!state.studio||!state.builder)return;clearTimeout(autosaveTimer);saveStatus.textContent="Saving…";autosaveTimer=setTimeout(()=>{store.saveDraft(state.studio,{builderType:state.builder.name,builderId:state.builder.id,formData:state.form,step:state.step,projectId:state.project?.id||null});saveStatus.textContent="Saved";setTimeout(()=>saveStatus.textContent="",1700);},450);}
+function continueBuilder(){if(state.workflow){const required=state.workflow[state.step].fields.filter(f=>f.required&&visibleField(f)),missing=required.find(f=>!(Array.isArray(state.form[f.id])?state.form[f.id].length:String(state.form[f.id]??"").trim()));if(missing)return toast(`Choose ${missing.label.toLowerCase()} before continuing.`,"error");state.step=state.returnToReview&&state.step<8?8:Math.min(state.step+1,9);state.returnToReview=false;renderBuilder();focusMain();return}const f=state.fields[state.step],value=state.form[f.id];if(f.required&&!(Array.isArray(value)?value.length:String(value??"").trim()))return toast(`Choose ${f.label.toLowerCase()} before continuing.`,"error");state.step=Math.min(state.step+1,state.fields.length-1);renderBuilder();focusMain();}
+function finishGeneration(){store.saveDraft(state.studio,{builderType:state.builder.name,builderId:state.builder.id,formData:state.form,step:state.step});state.result=generate(studio(),state.builder.name,state.form);state.project={id:state.project?.id,studio:state.studio,builderType:state.builder.name,title:state.form.title||`${state.builder.name.replace(" Builder","")} ${new Date().toLocaleDateString()}`,formData:clone(state.form),generatedPrompt:state.result.prompt,negativePrompt:state.result.negative,mockupPrompt:state.result.mockupPrompt||"",selectionSummary:state.result.summary,templateId:state.form.templateId||null,status:"completed",favorite:state.project?.favorite||false};state.generating=false;if(state.workflow){state.step=9;state.route="builder";renderBuilder();focusMain()}else navigate("result")}
+function generateResult(){const errors=[...validate(studio(),state.form),...(state.workflow?workflowConflicts().filter(x=>!x.advisory).map(x=>x.message):[])];if(errors.length)return showDialog("Let’s fix this first",`<ul>${[...new Set(errors)].map(e=>`<li>${esc(e)}</li>`).join("")}</ul>`,[{label:"Return to builder",value:"close"}]);if(state.workflow){state.generating=true;renderBuilder();setTimeout(finishGeneration,store.settings().reducedMotion?80:450)}else finishGeneration();}
+
+function renderResult(){const s=studio(),p=state.project,r=state.result;if(!s||!p||!r)return navigate("studio");const heading=s.id==="character"?"Your Character Is Ready":s.id==="kids"?"Your Kids Creation Is Ready":"Your Sticker Project Is Ready";main.innerHTML=`<section class="${studioClass(s.id)} screen"><article class="result-card result-card--${s.id}"><p class="eyebrow">${s.name}</p><h1 class="section-title">${heading}</h1><label class="field"><span>Project title</span><input data-result-title value="${esc(p.title)}"></label>${s.id==="sticker"?`<div class="project-card__meta"><span class="badge">${esc(state.form.productType)}</span><span class="badge">Exact count: ${esc(state.form.count)}</span><span class="badge">${esc(state.form.style)}</span></div>`:""}<h2>Generated master prompt</h2><div class="prompt-box" id="main-prompt">${esc(r.prompt)}</div><div class="button-row"><button class="button button--primary" data-copy="main">Copy Prompt</button><button class="button" data-action="download-txt">Download TXT</button></div><h2>Negative prompt</h2><div class="prompt-box" id="negative-prompt">${esc(r.negative)}</div><button class="button" data-copy="negative">Copy Negative Prompt</button>${r.mockupPrompt?`<h2>Mockup prompt</h2><div class="prompt-box" id="mockup-prompt">${esc(r.mockupPrompt)}</div><button class="button" data-copy="mockup">Copy Mockup Prompt</button>`:""}<h2>Selection summary</h2><div class="prompt-box">${selectionItems().map(x=>`${esc(x.label)}: ${esc(Array.isArray(x.value)?x.value.join(", "):x.value)}`).join("<br>")}</div><div class="button-row"><button class="button button--primary" data-action="save-project">Save Project</button><button class="button" data-action="favorite-result">${p.favorite?"♥ Favorited":"♡ Favorite"}</button><button class="button" data-action="export-project">Export JSON</button><button class="button" data-action="edit-result">Edit</button><button class="button" data-action="duplicate-result">Duplicate</button><button class="button" data-action="create-another">Create Another</button><button class="button" data-action="back-dashboard">Return to Dashboard</button><button class="button" data-action="home">Return Home</button><button class="button" data-action="switch-studio">Switch Studio</button></div></article></section>`;}
+function persistResult(){state.project.title=document.querySelector("[data-result-title]")?.value.trim()||state.form.title||state.project.title;state.project=store.saveProject(state.project);store.clearDraft(state.studio);state.dirty=false;toast("Project saved");state.workflow&&state.route==="builder"?renderBuilder():renderResult();}
+
+function renderProjects(){let items=store.allProjects();if(state.route==="favorites")items=items.filter(p=>p.favorite);if(state.filter!=="all")items=items.filter(p=>p.studio===state.filter);if(state.builderFilter!=="all")items=items.filter(p=>p.builderType===state.builderFilter);if(state.query)items=items.filter(p=>p.title.toLowerCase().includes(state.query.toLowerCase()));items.sort((a,b)=>state.sort==="oldest"?new Date(a.updatedAt)-new Date(b.updatedAt):state.sort==="alpha"?a.title.localeCompare(b.title):new Date(b.updatedAt)-new Date(a.updatedAt));const builderTypes=[...new Set(store.allProjects().map(p=>p.builderType))].sort();main.innerHTML=`<section class="screen"><div class="section-heading"><div><p class="eyebrow">Your creative library</p><h1 class="display-title">${state.route==="favorites"?"Favorites":"Projects"}</h1></div><button class="button" data-action="import-project">Import Project</button></div><div class="project-tools"><input type="search" data-project-query value="${esc(state.query)}" placeholder="Search by title" aria-label="Search projects"><select data-project-filter aria-label="Filter by studio"><option value="all">All Studios</option>${Object.values(studios).map(s=>`<option value="${s.id}" ${state.filter===s.id?"selected":""}>${s.short}</option>`).join("")}</select><select data-project-sort aria-label="Sort projects"><option value="newest">Newest</option><option value="oldest" ${state.sort==="oldest"?"selected":""}>Oldest</option><option value="alpha" ${state.sort==="alpha"?"selected":""}>Alphabetical</option></select></div><div class="project-tools"><select data-builder-filter aria-label="Filter by builder"><option value="all">All builder types</option>${builderTypes.map(x=>`<option ${state.builderFilter===x?"selected":""}>${esc(x)}</option>`).join("")}</select></div><div class="card-grid">${items.map(projectCard).join("")||`<div class="empty-state"><h2>No projects here yet</h2><p>Create something in one of Nyvera’s three studios, or adjust your filters.</p><button class="button button--primary" data-action="switch-studio">Choose a Studio</button></div>`}</div></section>`;}
+function projectCard(p){return `<article class="project-card"><div><p class="eyebrow">${studios[p.studio]?.short||p.studio}</p><h2 class="section-title">${esc(p.title)}</h2><p class="section-copy">${esc(p.builderType)} · Updated ${new Date(p.updatedAt).toLocaleDateString()}</p></div><div class="project-card__meta"><span class="badge">${esc(p.status)}</span>${p.favorite?'<span class="badge">♥ Favorite</span>':""}</div><div class="button-row"><button class="button button--primary" data-project-action="open" data-studio="${p.studio}" data-id="${p.id}">Edit</button><button class="button" data-project-action="favorite" data-studio="${p.studio}" data-id="${p.id}">${p.favorite?"Unfavorite":"Favorite"}</button><button class="button" data-project-action="duplicate" data-studio="${p.studio}" data-id="${p.id}">Duplicate</button><button class="button" data-project-action="export" data-studio="${p.studio}" data-id="${p.id}">Export</button><button class="button button--danger" data-project-action="delete" data-studio="${p.studio}" data-id="${p.id}">Delete</button></div></article>`;}
+function openProject(studioId,id){const p=store.getProject(studioId,id);if(!p)return toast("That project could not be found.","error");state.studio=studioId;const s=studio(),builder=s.builders.find(b=>b.name===p.builderType)||s.builders[0],legacy=fieldsFor(studioId,builder.name);state.builder=builder;state.workflow=workflowFor(studioId,legacy);state.fields=state.workflow?flatWorkflowFields(state.workflow):legacy;state.form=migrateWorkflowData(studioId,clone(p.formData));state.project=p;state.result={prompt:p.generatedPrompt,negative:p.negativePrompt,mockupPrompt:p.mockupPrompt||"",summary:p.selectionSummary};state.step=state.workflow?9:0;navigate("result");}
+
+function renderHistory(){const items=["character","kids","sticker"].flatMap(s=>store.history(s)).sort((a,b)=>new Date(b.generatedAt)-new Date(a.generatedAt));main.innerHTML=`<section class="screen"><div class="section-heading"><div><p class="eyebrow">Prompt history</p><h1 class="display-title">Recent generations</h1></div><button class="button button--danger" data-action="clear-history">Clear All History</button></div><div class="history-list">${items.map(x=>`<article class="project-card"><p class="eyebrow">${studios[x.studio].short}</p><h2>${esc(x.title)}</h2><p>${esc(x.builderType)} · ${new Date(x.generatedAt).toLocaleString()}</p><div class="button-row"><button class="button" data-project-action="open" data-studio="${x.studio}" data-id="${x.projectId}">Open</button><button class="button button--danger" data-history-delete="${x.id}" data-studio="${x.studio}">Delete</button></div></article>`).join("")||'<div class="empty-state">Prompt history is empty.</div>'}</div></section>`;}
+
+function renderSettings(){const s=store.settings();main.innerHTML=`<section class="screen"><p class="eyebrow">Preferences and data</p><h1 class="display-title">Settings</h1><div class="settings-grid"><section class="panel"><h2>Experience</h2>${toggle("sound","Sound Effects",s.sound)}${toggle("ambience","Background Ambience",s.ambience)}${toggle("animations","Animations",s.animations)}${toggle("reducedMotion","Reduced Motion",s.reducedMotion)}${toggle("highContrast","High Contrast",s.highContrast)}${toggle("autosave","Autosave",s.autosave)}${toggle("confirmDelete","Confirm Before Delete",s.confirmDelete)}<label class="setting-row"><span>Text Size</span><select data-setting="textSize"><option value="normal">Normal</option><option value="large" ${s.textSize==="large"?"selected":""}>Large</option></select></label></section><section class="panel"><h2>Studio preferences</h2><label class="setting-row"><span>Default Studio</span><select data-setting="defaultStudio">${Object.values(studios).map(x=>`<option value="${x.id}" ${s.defaultStudio===x.id?"selected":""}>${x.short}</option>`).join("")}</select></label>${toggle("rememberLastStudio","Remember Last Studio",s.rememberLastStudio)}<label class="setting-row"><span>History Limit</span><select data-setting="historyLimit"><option>50</option><option ${s.historyLimit==100?"selected":""}>100</option><option ${s.historyLimit==200?"selected":""}>200</option></select></label></section><section class="panel"><h2>Your data</h2><div class="button-row"><button class="button" data-action="export-all">Export All Data</button><button class="button" data-action="import-all">Import All Data</button></div><hr><div class="button-row"><button class="button button--danger" data-reset-studio="character">Reset Character Studio</button><button class="button button--danger" data-reset-studio="kids">Reset Kids Studio</button><button class="button button--danger" data-reset-studio="sticker">Reset Sticker Studio</button><button class="button button--danger" data-action="reset-all">Reset Complete App</button></div></section><section class="panel"><h2>About Nyvera</h2><p>Nyvera builds production-ready prompts and project specifications. It does not directly generate finished images and requires no account or backend.</p><p><strong>App Version</strong><br>${APP_VERSION}</p></section></div></section>`;}
+function toggle(id,label,checked){return `<label class="setting-row"><span>${label}</span><input type="checkbox" data-setting="${id}" ${checked?"checked":""}></label>`;}
+
+function showDialog(title,body,actions=[{label:"Close",value:"close"}]){dialogLayer.innerHTML=`<div class="dialog-backdrop" data-dialog-close><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><h2 id="dialog-title">${esc(title)}</h2><div>${body}</div><div class="button-row">${actions.map(a=>`<button class="button ${a.primary?"button--primary":""} ${a.danger?"button--danger":""}" data-dialog-value="${a.value}">${a.label}</button>`).join("")}</div></section></div>`;dialogLayer.querySelector(".dialog button")?.focus();}
+function closeDialog(){dialogLayer.innerHTML="";}
+function showStyleMe(){showDialog(`${studio().short} Style Me`,`<label class="field"><span>Describe a simple concept</span><textarea id="style-concept" placeholder="${studio().id==="character"?"A confident businesswoman":studio().id==="kids"?"A happy girl starting kindergarten":"Luxury self-care sticker pack"}"></textarea></label><p>Your proposal will be shown before it replaces current selections.</p>`,[{label:"Cancel",value:"close"},{label:"Propose Style",value:"propose-style",primary:true}]);}
+function proposeStyle(concept){const proposal={...clone(defaults[state.studio]),...styledSuggestion(studio(),concept)};showDialog("Review the proposed style",`<ul>${Object.entries(proposal).slice(0,16).map(([k,v])=>`<li><strong>${esc(titleCase(k))}:</strong> ${esc(Array.isArray(v)?v.join(", "):v)}</li>`).join("")}</ul>`,[{label:"Cancel",value:"close"},{label:"Regenerate Style",value:"style-me"},{label:"Accept Style",value:"accept-style",primary:true}]);dialogLayer.dataset.proposal=JSON.stringify(proposal);}
+function showTemplates(){showDialog(`${studio().short} Templates`,`<div class="builder-grid">${studio().templates.map((name,i)=>`<button class="builder-card" data-template-index="${i}"><span class="builder-card__icon">${iconSvg("sheet")}</span><span><strong>${esc(name)}</strong><small>Editable professional starting point</small></span></button>`).join("")}</div>`);}
+function surprise(){const concepts=state.studio==="character"?["Confident entrepreneur","Mature church elegance","Senior style icon","Creative director"]:state.studio==="kids"?["Young reader at school","Cozy winter baby","Teen future leader","Bedtime toddler"]:["Holographic business icons","Cozy reading sticker sheet","Faith encouragement pack","Luxury self-care sticker pack"];const concept=concepts[Math.floor(Math.random()*concepts.length)],proposal={...clone(defaults[state.studio]),...styledSuggestion(studio(),concept)};showDialog("Your compatible surprise",`<p class="lead">${esc(concept)}</p><ul>${Object.entries(proposal).slice(0,14).map(([k,v])=>`<li><strong>${esc(titleCase(k))}:</strong> ${esc(Array.isArray(v)?v.join(", "):v)}</li>`).join("")}</ul>`,[{label:"Surprise Me Again",value:"surprise-again"},{label:"Use This Concept",value:"accept-surprise",primary:true}]);dialogLayer.dataset.proposal=JSON.stringify(proposal);}
+
+async function copyText(text){try{await navigator.clipboard.writeText(text);toast("Copied to clipboard");}catch(error){console.error("Clipboard failed",error);showDialog("Copy this text",`<textarea readonly>${esc(text)}</textarea><p>Your browser blocked automatic copying. Select the text and copy it manually.</p>`);}}
+function download(name,content,type="text/plain"){try{const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast("Download prepared");}catch(error){console.error("Download failed",error);toast("The download could not be prepared.","error");}}
+function exportProject(p){download(`nyvera-${p.studio}-${slug(p.title)}-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({...p,type:"nyvera-project"},null,2),"application/json");}
+function handleProjectFile(file){if(!file||file.size>2_000_000)return toast("Choose a Nyvera JSON file smaller than 2 MB.","error");file.text().then(text=>{let data;try{data=JSON.parse(text);}catch(error){throw new Error("The selected file is not valid JSON.");}if(data.type!=="nyvera-project"||!studios[data.studio]||!data.formData)throw new Error("This is not a valid Nyvera project export.");showDialog("Import project preview",`<p><strong>${esc(data.title)}</strong><br>${esc(studios[data.studio].short)} · ${esc(data.builderType)}</p>`,[{label:"Cancel",value:"close"},{label:"Import",value:"confirm-project-import",primary:true}]);dialogLayer.dataset.import=JSON.stringify(data);}).catch(error=>{console.error(error);toast(error.message,"error")});}
+
+document.addEventListener("input",event=>{if(event.target.matches("[data-field]"))readField(event.target);if(event.target.matches("[data-result-title]")){state.project.title=event.target.value;state.dirty=true;}if(event.target.matches("[data-project-query]")){state.query=event.target.value;renderProjects();document.querySelector("[data-project-query]")?.focus();}});
+document.addEventListener("change",event=>{
+  if(event.target.matches("[data-field]"))readField(event.target);
+  if(event.target.matches("[data-setting]")){const key=event.target.dataset.setting,value=event.target.type==="checkbox"?event.target.checked:event.target.value;store.saveSettings({[key]:key==="historyLimit"?Number(value):value});applySettings();toast("Setting saved");}
+  if(event.target.matches("[data-project-filter]")){state.filter=event.target.value;renderProjects();}if(event.target.matches("[data-project-sort]")){state.sort=event.target.value;renderProjects();}if(event.target.matches("[data-builder-filter]")){state.builderFilter=event.target.value;renderProjects();}
 });
-
-function activeProject() {
-  const id = creationEngine.settings.get().activeProjectId;
-  return creationEngine.projects.get(id) || creationEngine.projects.list()[0] || null;
-}
-
-function setActiveProject(id) {
-  creationEngine.settings.set({ activeProjectId: id });
-}
-
-function readableLabel(key) {
-  return String(key)
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/[-_]/g, " ")
-    .replace(/^./, (letter) => letter.toUpperCase());
-}
-
-function answerList(project) {
-  return Object.entries(project?.data?.answers || {})
-    .filter(([, value]) => String(value ?? "").trim())
-    .map(([key, value]) => [readableLabel(key), String(value)]);
-}
-
-function renderProject() {
-  const project = activeProject();
-  if (!project) {
-    projectScreen.querySelector("#project-detail-title").textContent = "No project selected";
-    projectScreen.querySelector("#project-detail-description").textContent = "Start a creation to build your first adaptive project.";
-    projectScreen.querySelector("#project-detail-meta").replaceChildren();
-    projectScreen.querySelector("#project-detail-answers").innerHTML = '<div class="empty-state empty-state--compact"><h3>Your creative work starts here</h3><p>Vyrelix will keep every answer organized on this device.</p><button class="button button--primary" type="button" data-route="create" data-create-reset>Start creating</button></div>';
-    projectScreen.querySelectorAll("[data-project-detail-favorite], [data-project-edit], [data-project-continue], [data-project-export], [data-project-duplicate], [data-project-archive]").forEach((button) => {
-      button.disabled = true;
-    });
-    return;
-  }
-
-  projectScreen.querySelectorAll("button").forEach((button) => { button.disabled = false; });
-  projectScreen.querySelector("#project-detail-title").textContent = project.name;
-  projectScreen.querySelector("#project-detail-type").textContent = project.category || project.type;
-  projectScreen.querySelector("#project-detail-description").textContent = project.description;
-  projectScreen.querySelector("#project-detail-mark").textContent = (project.category || project.type || "V").slice(0, 1).toUpperCase();
-  const favorite = projectScreen.querySelector("[data-project-detail-favorite]");
-  favorite.textContent = project.favorite ? "♥" : "♡";
-  favorite.setAttribute("aria-pressed", String(project.favorite));
-  favorite.setAttribute("aria-label", `${project.favorite ? "Remove" : "Add"} project ${project.favorite ? "from" : "to"} favorites`);
-  projectScreen.querySelector("[data-project-archive]").textContent = project.status === "archived" ? "Restore" : "Archive";
-  if (project.status === "archived") {
-    projectScreen.querySelector("[data-project-detail-favorite]").disabled = true;
-    projectScreen.querySelector("[data-project-edit]").disabled = true;
-    projectScreen.querySelector('[data-project-continue="visual"]').disabled = true;
-  }
-
-  const meta = [
-    ["Mode", modeNames[project.data?.creationMode] || "Adaptive"],
-    ["Status", project.status],
-    ["Updated", new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(project.modifiedAt))]
-  ];
-  projectScreen.querySelector("#project-detail-meta").replaceChildren(...meta.map(([term, value]) => {
-    const wrapper = document.createElement("div");
-    const dt = document.createElement("dt");
-    const dd = document.createElement("dd");
-    dt.textContent = term;
-    dd.textContent = value;
-    wrapper.append(dt, dd);
-    return wrapper;
-  }));
-
-  const answers = answerList(project);
-  const root = projectScreen.querySelector("#project-detail-answers");
-  root.replaceChildren(...(answers.length ? answers.map(([label, value]) => {
-    const item = document.createElement("article");
-    const heading = document.createElement("strong");
-    const copy = document.createElement("p");
-    heading.textContent = label;
-    copy.textContent = value;
-    item.append(heading, copy);
-    return item;
-  }) : [Object.assign(document.createElement("p"), { className: "text-muted", textContent: "No additional answers were saved for this project." })]));
-}
-
-function uniqueCopyName(project) {
-  const names = new Set(creationEngine.projects.list({ includeArchived: true }).map((item) => item.name.toLocaleLowerCase()));
-  let count = 1;
-  let candidate = `${project.name} Copy`;
-  while (names.has(candidate.toLocaleLowerCase())) {
-    count += 1;
-    candidate = `${project.name} Copy ${count}`;
-  }
-  return candidate;
-}
-
-function announceProjectsChanged() {
-  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
-  refreshSaved();
-  renderProject();
-}
-
-function getSavedItems() {
-  const projects = creationEngine.projects.list({ includeArchived: true }).map((project) => ({
-    ...project,
-    kind: "project",
-    title: project.name,
-    subtitle: `${project.category || project.type} · ${project.status} · ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(project.modifiedAt))}`,
-    createdAt: new Date(project.modifiedAt).getTime()
-  }));
-  return [...projects, ...storage.getPrompts()]
-    .filter((item) => state.filter === "all" || (state.filter === "archived" ? item.status === "archived" : item.kind === state.filter && item.status !== "archived"))
-    .filter((item) => item.title.toLocaleLowerCase().includes(state.query))
-    .sort((left, right) => right.createdAt - left.createdAt);
-}
-
-function refreshSaved() {
-  const items = getSavedItems();
-  document.querySelector("#saved-count").textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
-  renderSaved(items, savedList);
-}
-
-async function ensureCreationExperience() {
-  if (creationController) return creationController;
-  const { initializeCreationExperience } = await import("./creation/creationExperience.js");
-  creationController = initializeCreationExperience({
-    root: document.querySelector('[data-screen="create"]'),
-    engine: creationEngine,
-    navigate: navigation.navigate,
-    showToast
-  });
-  return creationController;
-}
-
-async function ensurePromptStudio() {
-  if (promptController) return promptController;
-  const { initializePromptStudio } = await import("./prompt/promptUI.js");
-  promptController = await initializePromptStudio({
-    engine: creationEngine,
-    navigate: navigation.navigate,
-    showToast,
-    onPromptsChanged: refreshSaved
-  });
-  return promptController;
-}
-
-async function ensureVisualStudio() {
-  const project = activeProject();
-  if (visualController) {
-    if (visualProjectId !== project?.id) {
-      visualController.load({ initial: project?.data?.visual, projectType: project?.type || "Object" });
-      visualProjectId = project?.id || "";
-    }
-    return visualController;
-  }
-  const { initializeVisualStudio } = await import("./visual/visualUI.js");
-  visualController = initializeVisualStudio({
-    root: document.querySelector('[data-screen="visual"]'),
-    initial: project?.data?.visual,
-    projectType: project?.type || "Object",
-    showToast,
-    onApply: (visual, engine) => {
-      const current = activeProject();
-      if (!current) return;
-      const primary = engine.getAsset("color", visual.colors.primaryId)?.name;
-      creationEngine.projects.update(current.id, {
-        data: { ...current.data, visual },
-        colorPalette: primary ? [primary] : current.colorPalette,
-        artStyle: engine.getAsset("artStyle", visual.artStyleId)?.name || current.artStyle,
-        theme: engine.getAsset("mood", visual.moodId)?.name || current.theme
-      }, "visual direction updated");
-      announceProjectsChanged();
-      navigation.navigate("project");
-    }
-  });
-  visualProjectId = project?.id || "";
-  return visualController;
-}
-
-function openProject(id) {
-  const project = creationEngine.projects.get(id);
-  if (!project) return;
-  setActiveProject(id);
-  renderProject();
-  navigation.navigate("project");
-}
-
-function bindProjectActions() {
-  projectScreen.addEventListener("click", async (event) => {
-    const project = activeProject();
-    if (!project) return;
-    try {
-      if (event.target.closest("[data-project-detail-favorite]")) {
-        creationEngine.projects.favorite(project.id);
-        announceProjectsChanged();
-      }
-      if (event.target.closest("[data-project-edit]")) {
-        const controller = await ensureCreationExperience();
-        controller.resumeProject(project);
-        navigation.navigate("create");
-      }
-      if (event.target.closest('[data-project-continue="prompt"]')) {
-        setActiveProject(project.id);
-        const controller = await ensurePromptStudio();
-        controller.selectProject?.(project.id);
-        navigation.navigate("prompt");
-      }
-      if (event.target.closest('[data-project-continue="visual"]')) {
-        setActiveProject(project.id);
-        await ensureVisualStudio();
-        navigation.navigate("visual");
-      }
-      if (event.target.closest("[data-project-export]")) {
-        downloadProject(project);
-        showToast("Project export prepared");
-      }
-      if (event.target.closest("[data-project-duplicate]")) {
-        const copy = creationEngine.projects.duplicate(project.id, uniqueCopyName(project));
-        setActiveProject(copy.id);
-        announceProjectsChanged();
-        showToast("Project duplicated");
-      }
-      if (event.target.closest("[data-project-archive]")) {
-        if (project.status === "archived") creationEngine.projects.restore(project.id);
-        else creationEngine.projects.archive(project.id);
-        announceProjectsChanged();
-        navigation.navigate("saved");
-        showToast(project.status === "archived" ? "Project restored" : "Project archived");
-      }
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
-
-}
-
-function bindSavedActions() {
-  savedList.addEventListener("click", (event) => {
-    const open = event.target.closest("[data-project-open]");
-    if (open) {
-      openProject(open.dataset.projectOpen);
-      return;
-    }
-    const remove = event.target.closest("[data-delete-id]");
-    if (remove?.dataset.deleteKind === "prompt") {
-      storage.removePrompt(remove.dataset.deleteId);
-      refreshSaved();
-      showToast("Prompt deleted", "deleted");
-      return;
-    }
-    const action = event.target.closest("[data-project-action]");
-    if (!action) return;
-    const project = creationEngine.projects.get(action.dataset.projectId);
-    if (!project) return;
-    try {
-      if (action.dataset.projectAction === "favorite") creationEngine.projects.favorite(project.id);
-      if (action.dataset.projectAction === "menu") {
-        const options = project.status === "archived" ? ["Open", "Restore"] : ["Open", "Duplicate", "Archive"];
-        openBottomSheet({
-          heading: project.name,
-          content: options.map((label) => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "button button--outlined button--wide";
-            button.dataset.savedMenu = label.toLocaleLowerCase();
-            button.dataset.projectId = project.id;
-            button.textContent = label;
-            return button;
-          })
-        });
-      }
-      announceProjectsChanged();
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
-
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-saved-menu]");
-    if (!button) return;
-    const project = creationEngine.projects.get(button.dataset.projectId);
-    if (!project) return;
-    try {
-      if (button.dataset.savedMenu === "open") openProject(project.id);
-      if (button.dataset.savedMenu === "duplicate") {
-        const copy = creationEngine.projects.duplicate(project.id, uniqueCopyName(project));
-        openProject(copy.id);
-      }
-      if (button.dataset.savedMenu === "archive") creationEngine.projects.archive(project.id);
-      if (button.dataset.savedMenu === "restore") creationEngine.projects.restore(project.id);
-      closeBottomSheet();
-      announceProjectsChanged();
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
-}
-
-function addDataPortability() {
-  const information = document.querySelector('[data-screen="settings"] .settings-group:last-of-type');
-  const section = document.createElement("section");
-  section.className = "settings-group";
-  section.innerHTML = '<h2 class="section-title">Your data</h2><p class="body-text text-muted">Projects stay in this browser. Export a portable project before clearing browser data or moving devices.</p><div class="button-row"><button class="button button--outlined" type="button" data-export-active>Export current</button><label class="button button--outlined" for="project-import">Import project</label><input class="sr-only" id="project-import" type="file" accept="application/json,.json"></div>';
-  information.before(section);
-  section.querySelector("[data-export-active]").addEventListener("click", () => {
-    const project = activeProject();
-    if (!project) return showToast("Create or open a project first", "error");
-    downloadProject(project);
-  });
-  section.querySelector("#project-import").addEventListener("change", async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.size > 2_000_000) return showToast("Project files must be smaller than 2 MB", "error");
-    try {
-      const imported = await readProjectFile(file);
-      delete imported.id;
-      imported.name = `${imported.name} Imported`;
-      const project = creationEngine.projects.create(imported);
-      setActiveProject(project.id);
-      announceProjectsChanged();
-      openProject(project.id);
-      showToast("Project imported");
-    } catch (error) {
-      showToast(error.message, "error");
-    } finally {
-      event.target.value = "";
-    }
-  });
-}
-
-function bindGeneralEvents() {
-  document.querySelectorAll("[data-enter-vyrelix]").forEach((trigger) => trigger.addEventListener("click", () => {
-    const launch = document.querySelector("#launch-screen");
-    launch?.classList.add("is-leaving");
-    window.setTimeout(() => launch?.remove(), 420);
-  }));
-  document.addEventListener("click", (event) => {
-    const card = event.target.closest("[data-project-open]");
-    if (card && !savedList.contains(card)) openProject(card.dataset.projectOpen);
-  });
-  document.addEventListener("keydown", (event) => {
-    const card = event.target.closest?.("[data-project-open]");
-    if (card && (event.key === "Enter" || event.key === " ")) {
-      event.preventDefault();
-      openProject(card.dataset.projectOpen);
-    }
-  });
-  document.querySelectorAll('[data-route="create"]').forEach((trigger) => trigger.addEventListener("click", () => {
-    pendingCreationOptions = {
-      reset: trigger.hasAttribute("data-create-reset"),
-      mode: trigger.dataset.createMode || null,
-      template: trigger.dataset.template || null,
-      category: trigger.dataset.createCategory || null,
-      collection: trigger.dataset.createCollection || null
-    };
-  }));
-  document.querySelectorAll("[data-dialog]").forEach((button) => button.addEventListener("click", () => {
-    const about = button.dataset.dialog === "about";
-    openDialog(about ? "About Vyrelix" : "Privacy", about
-      ? "Vyrelix is one adaptive creative platform for shaping ideas, visual direction, and production-ready creative briefs."
-      : "Projects and preferences stay in this browser. Vyrelix does not display developer information or transmit your creative work.");
-  }));
-  document.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
-    state.filter = button.dataset.filter;
-    document.querySelectorAll("[data-filter]").forEach((item) => {
-      const active = item === button;
-      item.classList.toggle("is-active", active);
-      item.setAttribute("aria-selected", String(active));
-    });
-    refreshSaved();
-  }));
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeDialog();
-      closeBottomSheet();
-    }
-  });
-}
-
-function renderSavedLooks() {
-  const grid = document.querySelector("#saved-look-grid");
-  if (!grid) return;
-  const looks = creationEngine.settings.get().savedCharacterLooks || [];
-  if (!looks.length) {
-    grid.innerHTML = '<div class="empty-state empty-state--compact"><h3>Your saved looks will appear here</h3><p>Save an outfit from the Character Builder to reuse it later.</p></div>';
-    return;
-  }
-  grid.replaceChildren();
-  looks.forEach((look) => {
-    const card = document.createElement("article");
-    card.className = "saved-look-card";
-    const mark = document.createElement("span");
-    mark.className = "saved-look-card__mark";
-    mark.textContent = "✦";
-    const copy = document.createElement("div");
-    const title = document.createElement("strong");
-    title.textContent = look.name || "Saved character look";
-    const detail = document.createElement("small");
-    detail.textContent = `${look.answers?.top || look.answers?.outfit || "Complete look"} · ${look.answers?.shoes || "Open footwear"}`;
-    copy.append(title, detail);
-    const use = document.createElement("button");
-    use.type = "button";
-    use.className = "button button--outlined";
-    use.textContent = "Use look";
-    use.dataset.route = "create";
-    use.addEventListener("click", () => {
-      pendingCreationOptions = { reset: true, lookId: look.id };
-    });
-    card.append(mark, copy, use);
-    grid.append(card);
-  });
-}
-
-navigation = createNavigation({
-  onRouteChange: (route) => {
-    if (route === "saved") refreshSaved();
-    if (route === "project") renderProject();
-    if (route === "library") renderSavedLooks();
-    if (route === "create") {
-      const options = pendingCreationOptions || {};
-      pendingCreationOptions = null;
-      ensureCreationExperience().then((controller) => controller.start(options)).catch(() => showToast("Creator could not be opened", "error"));
-    }
-    if (route === "visual") ensureVisualStudio().catch(() => showToast("Visual direction could not be opened", "error"));
-    if (["prompt", "prompt-preview", "prompt-history"].includes(route)) {
-      ensurePromptStudio().then((controller) => {
-        if (route === "prompt") controller.selectProject?.(activeProject()?.id);
-        if (route === "prompt-history") controller.renderHistory();
-      }).catch(() => showToast("Creative brief builder could not be opened", "error"));
-    }
-  }
+document.addEventListener("click",event=>{
+  const editStep=event.target.closest("[data-edit-step]");if(editStep&&state.workflow){state.step=Number(editStep.dataset.editStep);state.returnToReview=true;renderBuilder();focusMain();return}
+const correction=event.target.closest("[data-conflict-fix]");if(correction){const fix=correction.dataset.conflictFix;if(fix==="short-hair")state.form.hairLength=state.form.hairTexture;if(fix==="clear-background-detail")state.form.backgroundDetail="";if(fix==="baby-build")state.form.build="Baby Build";if(fix==="toddler-build")state.form.build="Toddler Build";if(fix==="remove-teen-makeup")delete state.form.teenMakeup;if(fix==="pajama-scene")state.form.environment=state.studio==="kids"?"Bedroom":"Bedroom";if(fix==="bridal-scene"){state.form.environment="Custom";state.form.backgroundDetail="Realistic elegant wedding venue"}if(fix==="athletic-scene"){state.form.environment="Custom";state.form.backgroundDetail="Realistic activity-focused fitness setting"}if(fix==="school-scene")state.form.environment="Classroom";state.dirty=true;scheduleAutosave();renderBuilder();return}
+  const nav=event.target.closest("[data-nav]");if(nav){if(nav.dataset.nav==="create"){const preferred=store.settings().rememberLastStudio?sessionStorage.getItem("nyvera_last_studio"):store.settings().defaultStudio;preferred&&studios[preferred]?openStudio(preferred):navigate("home");}else navigate(nav.dataset.nav);return;}
+  const st=event.target.closest("[data-studio]");if(st&&!st.dataset.projectAction){openStudio(st.dataset.studio);return;}
+  const builder=event.target.closest("[data-builder]");if(builder){startBuilder(builder.dataset.builder);return;}
+  const projectAction=event.target.closest("[data-project-action]");if(projectAction){const p=store.getProject(projectAction.dataset.studio,projectAction.dataset.id),action=projectAction.dataset.projectAction;if(action==="open")openProject(projectAction.dataset.studio,projectAction.dataset.id);if(action==="favorite"){store.toggleFavorite(p.studio,p.id);renderProjects();}if(action==="duplicate"){store.duplicateProject(p);toast("Project duplicated");renderProjects();}if(action==="export")exportProject(p);if(action==="delete"){const remove=()=>{store.deleteProject(p.studio,p.id);toast("Project deleted");renderProjects();};store.settings().confirmDelete?showDialog("Delete this project?",`<p>${esc(p.title)} will be removed from this device.</p>`,[{label:"Cancel",value:"close"},{label:"Delete",value:`delete:${p.studio}:${p.id}`,danger:true}]):remove();}return;}
+  const historyDelete=event.target.closest("[data-history-delete]");if(historyDelete){store.deleteHistory(historyDelete.dataset.studio,historyDelete.dataset.historyDelete);renderHistory();return;}
+  const template=event.target.closest("[data-template-index]");if(template){const name=studio().templates[Number(template.dataset.templateIndex)],seed={...clone(defaults[state.studio]),...styledSuggestion(studio(),name),title:name};closeDialog();startBuilder(studio().builders[0].id,seed,name);return;}
+  const action=event.target.closest("[data-action]")?.dataset.action;if(!action)return;
+  if(action==="enter")navigate("home");if(action==="home")navigate("home");if(action==="switch-studio")navigate("home");if(action==="back-dashboard")navigate("studio");if(action==="previous"){state.step=Math.max(0,state.step-1);renderBuilder();}if(action==="continue")continueBuilder();if(action==="clear-step"){(state.workflow?state.workflow[state.step].fields:[state.fields[state.step]]).forEach(f=>delete state.form[f.id]);state.result=null;state.dirty=true;scheduleAutosave();renderBuilder();}if(action==="save-exit"){scheduleAutosave();setTimeout(()=>navigate("studio"),500);}if(action==="generate")generateResult();if(action==="auto-balance"){autoBalance(state.form);state.dirty=true;scheduleAutosave();renderBuilder();}if(action==="style-me")showStyleMe();if(action==="surprise-me")surprise();if(action==="templates")showTemplates();if(action==="continue-draft"){const d=store.draft(state.studio);if(!d)return toast("No unfinished draft is saved yet.","error");startBuilder(d.builderId,d.formData);state.step=Math.min(d.step||0,state.workflow?9:state.fields.length-1);renderBuilder();}if(action==="history")navigate("history");if(action==="save-project")persistResult();if(action==="favorite-result"){state.project.favorite=!state.project.favorite;if(state.project.id)state.project=store.saveProject(state.project);state.workflow&&state.route==="builder"?renderBuilder():renderResult();}if(action==="edit-result"){if(state.workflow){state.step=8;state.returnToReview=false}navigate("builder");}if(action==="duplicate-result"){state.project={...state.project,id:null,title:`${state.project.title} Copy`};state.form.title=state.project.title;persistResult();}if(action==="create-another")startBuilder(state.builder.id);if(action==="download-txt")download(`nyvera-${state.studio}-${slug(state.project.title)}-${new Date().toISOString().slice(0,10)}.txt`,`${state.project.title}\n\nMAIN PROMPT\n${state.result.prompt}\n\nNEGATIVE PROMPT\n${state.result.negative}`);if(action==="export-project")exportProject({...state.project,...state.result});if(action==="import-project")document.querySelector("#project-import").click();if(action==="export-all")download(`nyvera-all-data-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(store.exportAll(),null,2),"application/json");if(action==="import-all")document.querySelector("#all-data-import").click();if(action==="clear-history")showDialog("Clear all prompt history?","<p>Saved projects will remain. History entries from all three studios will be removed.</p>",[{label:"Cancel",value:"close"},{label:"Clear history",value:"confirm-clear-history",danger:true}]);if(action==="reset-all")showDialog("Reset complete Nyvera app?","<p>All projects, drafts, favorites, history, and settings on this device will be permanently removed.</p>",[{label:"Cancel",value:"close"},{label:"Reset everything",value:"confirm-reset-all",danger:true}]);
 });
+document.addEventListener("click",event=>{const copy=event.target.closest("[data-copy]");if(copy)copyText(copy.dataset.copy==="main"?state.result.prompt:state.result.negative);const reset=event.target.closest("[data-reset-studio]");if(reset)showDialog(`Reset ${studios[reset.dataset.resetStudio].short}?`,`<p>Only this studio’s projects, draft, favorites, and history will be removed.</p>`,[{label:"Cancel",value:"close"},{label:"Reset studio",value:`reset:${reset.dataset.resetStudio}`,danger:true}]);});
+dialogLayer.addEventListener("click",event=>{
+  if(event.target.matches("[data-dialog-close]"))return closeDialog();const button=event.target.closest("[data-dialog-value]");if(!button)return;const value=button.dataset.dialogValue;if(value==="close")closeDialog();if(value==="propose-style"){const concept=document.querySelector("#style-concept")?.value.trim();if(!concept)return toast("Describe a concept first.","error");proposeStyle(concept);}if(value==="style-me")showStyleMe();if(value==="accept-style"||value==="accept-surprise"){const proposal=JSON.parse(dialogLayer.dataset.proposal||"{}");closeDialog();startBuilder(studio().builders[0].id,proposal);}if(value==="surprise-again")surprise();if(value.startsWith("delete:")){const [,s,id]=value.split(":");store.deleteProject(s,id);closeDialog();toast("Project deleted");renderProjects();}if(value.startsWith("reset:")){store.resetStudio(value.split(":")[1]);closeDialog();toast("Studio data reset");}if(value==="confirm-clear-history"){["character","kids","sticker"].forEach(s=>store.clearHistory(s));closeDialog();renderHistory();}if(value==="confirm-reset-all"){store.resetAll();closeDialog();applySettings();navigate("home");toast("Nyvera reset complete");}if(value==="confirm-project-import"){const data=JSON.parse(dialogLayer.dataset.import||"{}");data.id=null;data.title=`${data.title} Imported`;store.saveProject(data);closeDialog();toast("Project imported");navigate("projects");}if(value==="import-merge"||value==="import-replace"){const data=JSON.parse(dialogLayer.dataset.import||"{}");store.importAll(data,value==="import-merge"?"merge":"replace");closeDialog();applySettings();toast("Nyvera data imported");renderSettings();}
+});
+document.querySelector("#project-import").addEventListener("change",event=>{handleProjectFile(event.target.files?.[0]);event.target.value="";});
+document.querySelector("#all-data-import").addEventListener("change",event=>{const file=event.target.files?.[0];if(!file)return;file.text().then(text=>{const data=JSON.parse(text);if(data.type!=="nyvera-backup")throw new Error("This is not a valid Nyvera all-data backup.");showDialog("Import all Nyvera data",`<p>Choose Merge to preserve current records, or Replace to overwrite each studio after confirmation.</p>`,[{label:"Cancel",value:"close"},{label:"Merge",value:"import-merge",primary:true},{label:"Replace",value:"import-replace",danger:true}]);dialogLayer.dataset.import=JSON.stringify(data);}).catch(error=>{console.error(error);toast(error.message||"The backup could not be read.","error")});event.target.value="";});
+document.addEventListener("click",event=>{
+  const saveExit=event.target.closest?.('[data-action="save-exit"]');
+  const mockupCopy=event.target.closest?.('[data-copy="mockup"]');
+  if(saveExit){event.preventDefault();event.stopImmediatePropagation();clearTimeout(autosaveTimer);store.saveDraft(state.studio,{builderType:state.builder.name,builderId:state.builder.id,formData:state.form,step:state.step,projectId:state.project?.id||null});state.dirty=false;toast("Draft saved");navigate("studio");}
+  if(mockupCopy){event.preventDefault();event.stopImmediatePropagation();copyText(state.result.mockupPrompt);}
+},true);
+window.addEventListener("popstate",()=>{const hash=location.hash;if(hash.includes("/builder/"))state.route="builder";else if(hash.includes("/result"))state.route="result";else if(hash.includes("-studio/dashboard"))state.route="studio";else state.route=hash.replace(/^#\//,"")||"home";render();});
+window.addEventListener("beforeunload",event=>{if(state.dirty){event.preventDefault();event.returnValue="";}});
+store.on(detail=>{if(detail.type==="corrupt")toast("Some saved data was damaged. Nyvera kept the app usable; reset only the affected studio from Settings if needed.","error");if(detail.type==="quota")toast("Browser storage is full. Export your data before removing older projects.","error");});
 
-initializeDashboard({ engine: creationEngine, navigate: navigation.navigate, showToast });
-initializeSettings(() => openDialog("Clear local storage?", "This permanently removes projects, prompts, history, and preferences from this device.", { destructive: true }));
-initializeRipples();
-initializeModals();
-initializeBottomSheets();
-initializeForms();
-initializeLoading();
-bindProjectActions();
-bindSavedActions();
-bindGeneralEvents();
-addDataPortability();
-document.querySelectorAll("[data-app-version]").forEach((item) => {
-  item.textContent = `${APP_VERSION} · Universal Creative Platform`;
-});
-createSearchController({
-  input: document.querySelector("#saved-search"),
-  suggestions: document.querySelector("#search-suggestions"),
-  clearButton: document.querySelector("[data-search-clear]"),
-  getItems: getSavedItems,
-  onQuery: debounce((query) => {
-    state.query = query;
-    refreshSaved();
-  }, 100)
-});
-document.querySelector("#confirm-clear").addEventListener("click", () => {
-  storage.clear();
-  creationEngine.storage.clear();
-  refreshSaved();
-  closeDialog();
-  document.dispatchEvent(new CustomEvent("vyrelix:projects-changed"));
-  showToast("Local data cleared", "deleted");
-});
-refreshSaved();
-renderProject();
-renderSavedLooks();
-if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
-}
+applySettings();
+setTimeout(()=>{loading.classList.add("is-done");app.hidden=false;state.route="welcome";render();setTimeout(()=>loading.remove(),500);},store.settings().reducedMotion?80:900);
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(error=>console.error("Nyvera service worker registration failed",error)));

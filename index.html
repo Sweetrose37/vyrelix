@@ -1,514 +1,72 @@
 <!doctype html>
-<html lang="en" data-theme="soft">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#F8F3EA">
-    <meta name="description" content="Vyrelix is a private, adaptive creative platform for shaping ideas, visual direction, and production-ready creative briefs.">
-    <meta name="referrer" content="no-referrer">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-    <meta name="color-scheme" content="dark light">
-    <title>Vyrelix</title>
-    <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="icon" href="./assets/icons/vyrelix-mark.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./css/variables.css">
-    <link rel="stylesheet" href="./css/typography.css">
-    <link rel="stylesheet" href="./css/layout.css">
-    <link rel="stylesheet" href="./css/components.css">
-    <link rel="stylesheet" href="./css/components/buttons.css">
-    <link rel="stylesheet" href="./css/components/forms.css">
-    <link rel="stylesheet" href="./css/components/modals.css">
-    <link rel="stylesheet" href="./css/components/navigation.css">
-    <link rel="stylesheet" href="./css/components/toast.css">
-    <link rel="stylesheet" href="./css/components/animations.css">
-    <link rel="stylesheet" href="./css/animations.css">
-    <link rel="stylesheet" href="./css/utilities.css">
-    <link rel="stylesheet" href="./css/mobile.css">
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/core/cards.css">
-    <link rel="stylesheet" href="./css/core/dashboard.css">
-    <link rel="stylesheet" href="./css/core/projects.css">
-    <link rel="stylesheet" href="./css/core/creation.css">
-    <link rel="stylesheet" href="./css/visual/visual.css">
-    <link rel="stylesheet" href="./css/visual/preview.css">
-    <link rel="stylesheet" href="./css/visual/selectors.css">
-    <link rel="stylesheet" href="./css/prompt/prompt.css">
-    <link rel="stylesheet" href="./css/prompt/preview.css">
-  </head>
-  <body>
-    <noscript>Vyrelix requires JavaScript to run.</noscript>
-    <a class="skip-link" href="#screen-stack">Skip to creative workspace</a>
+<html lang="en" data-theme="nyvera">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17091f">
+  <meta name="description" content="Nyvera is a premium prompt-building app for adult characters, kids creations, and professional sticker products.">
+  <meta property="og:title" content="Nyvera — Character, Kids & Sticker Studios">
+  <meta property="og:description" content="Three creative studios. One powerful imagination.">
+  <meta property="og:type" content="website">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nyvera">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https:; media-src 'self' https: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Nyvera — Character, Kids & Sticker Studios</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/nyvera-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/nyvera.css">
+  <link rel="stylesheet" href="./css/radio.css">
+</head>
+<body>
+  <noscript>Nyvera requires JavaScript to build and save creative prompts.</noscript>
+  <a class="skip-link" href="#app-main">Skip to Nyvera</a>
 
-    <section class="launch-screen" id="launch-screen" aria-labelledby="launch-title">
-      <div class="launch-screen__glow launch-screen__glow--one" aria-hidden="true"></div>
-      <div class="launch-screen__glow launch-screen__glow--two" aria-hidden="true"></div>
-      <div class="launch-screen__content">
-        <div class="launch-screen__brand">
-          <span class="brand-mark brand-mark--launch" aria-hidden="true"><span>V</span></span>
-          <span class="launch-screen__wordmark">VYRELIX</span>
-        </div>
-        <p class="eyebrow">One intelligent creative world</p>
-        <h1 class="launch-screen__title" id="launch-title">Your imagination<br>belongs <em>here.</em></h1>
-        <p class="launch-screen__copy">Build characters, fashion, stories, brands, stickers, worlds, and ideas that have never existed before.</p>
-        <div class="launch-screen__actions">
-          <button class="button button--primary button--wide" type="button" data-enter-vyrelix>Enter Vyrelix <span aria-hidden="true">→</span></button>
-          <button class="button button--outlined button--wide" type="button" data-enter-vyrelix data-route="create" data-create-reset data-create-category="person">Open Character Builder</button>
-        </div>
-        <p class="launch-screen__promise"><span aria-hidden="true">✦</span> One platform. Infinite possibilities.</p>
+  <div class="ambient" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div id="loading-screen" class="loading-screen" role="status" aria-live="polite">
+    <div class="emblem emblem--loading" aria-hidden="true"><span>N</span></div>
+    <p class="wordmark">NYVERA</p>
+    <p class="loading-tagline">Where Imagination Becomes Art</p>
+    <div class="loading-track"><span></span></div>
+  </div>
+
+  <div id="app" class="app-shell" hidden>
+    <header class="topbar">
+      <button class="brand" type="button" data-action="home" aria-label="Nyvera home">
+        <span class="emblem" aria-hidden="true">N</span><span>NYVERA</span>
+      </button>
+      <div class="topbar__actions">
+        <span id="save-status" class="save-status" role="status" aria-live="polite"></span>
+        <button class="icon-button radio-launch" type="button" data-radio-open aria-label="Open Nyvera Live Radio" title="Live Radio"><img src="./assets/icons/radio.svg" alt=""></button>
+        <button class="icon-button" type="button" data-action="switch-studio" aria-label="Switch studio" title="Switch studio">✦</button>
       </div>
-    </section>
+    </header>
 
-    <div class="device-shell" id="app">
-      <div class="ambient ambient-one" aria-hidden="true"></div>
-      <div class="ambient ambient-two" aria-hidden="true"></div>
+    <main id="app-main" tabindex="-1"></main>
 
-      <div class="app-shell" id="app-shell">
-        <header class="top-bar">
-          <button class="brand-lockup" type="button" data-route="home" aria-label="Go to Home">
-            <span class="brand-mark brand-mark--small" aria-hidden="true"><span>V</span></span>
-            <span>VYRELIX</span>
-          </button>
-          <button class="icon-button" type="button" data-route="create" data-create-reset aria-label="Start a new creation">
-            <span aria-hidden="true">＋</span>
-          </button>
-        </header>
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button type="button" data-nav="home" aria-label="Home"><span aria-hidden="true">⌂</span><small>Home</small></button>
+      <button type="button" data-nav="create" aria-label="Create"><span aria-hidden="true">＋</span><small>Create</small></button>
+      <button type="button" data-nav="projects" aria-label="Projects"><span aria-hidden="true">▤</span><small>Projects</small></button>
+      <button type="button" data-nav="favorites" aria-label="Favorites"><span aria-hidden="true">♡</span><small>Favorites</small></button>
+      <button type="button" data-nav="settings" aria-label="Settings"><span aria-hidden="true">⚙</span><small>Settings</small></button>
+    </nav>
+  </div>
 
-        <main class="screen-stack" id="screen-stack">
-          <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
-            <div class="hero">
-              <div class="eyebrow"><span></span> Universal creative engine</div>
-              <h1 class="large-title" id="home-title">Imagine it.<br><em>Create it.</em></h1>
-              <p class="body-text text-muted">Characters, fashion, books, brands, stickers, apps, and everything in between. One intelligent engine brings it together.</p>
-              <button class="button button--primary button--wide ripple" type="button" data-route="create" data-create-reset data-create-mode="guided">
-                Explore what you can create <span aria-hidden="true">→</span>
-              </button>
-            </div>
+  <audio id="nyvera-radio-audio" preload="none"></audio>
+  <div id="nyvera-radio-root"></div>
 
-            <section class="section-block creative-universe" aria-labelledby="creative-universe-title">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Made for every imagination</p>
-                  <h2 class="medium-title" id="creative-universe-title">Choose what you want to build</h2>
-                </div>
-                <button class="text-button" type="button" data-route="create" data-create-reset data-create-mode="guided">View all</button>
-              </div>
-              <div class="universe-feature-row" aria-label="Featured creative categories">
-                <button class="universe-card universe-card--character" type="button" data-route="create" data-create-reset data-create-category="person">
-                  <span class="universe-card__icon" aria-hidden="true">✦</span>
-                  <span><strong>Character Builder</strong><small>Build every detail from face to fashion</small></span>
-                  <span class="universe-card__arrow" aria-hidden="true">›</span>
-                </button>
-                <button class="universe-card universe-card--stories" type="button" data-route="create" data-create-reset data-create-collection="books">
-                  <span class="universe-card__icon" aria-hidden="true">▤</span>
-                  <span><strong>Books &amp; Stories</strong><small>Covers, picture books, and story worlds</small></span>
-                  <span class="universe-card__arrow" aria-hidden="true">›</span>
-                </button>
-              </div>
-              <div class="universe-category-scroll" aria-label="Creative categories">
-                <button type="button" data-route="create" data-create-reset data-create-category="woman"><span aria-hidden="true">♀</span><strong>Women</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="man"><span aria-hidden="true">♂</span><strong>Men</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="teen"><span aria-hidden="true">◇</span><strong>Teens</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="child"><span aria-hidden="true">★</span><strong>Children</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="toddler"><span aria-hidden="true">♡</span><strong>Toddlers</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="baby"><span aria-hidden="true">☺</span><strong>Babies</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="sticker"><span aria-hidden="true">✿</span><strong>Sticker Packs</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="logo"><span aria-hidden="true">◆</span><strong>Logos</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="packaging"><span aria-hidden="true">▣</span><strong>Packaging</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="product"><span aria-hidden="true">■</span><strong>Products</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="wedding-invitation"><span aria-hidden="true">✧</span><strong>Invitations</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="social-media-graphic"><span aria-hidden="true">@</span><strong>Social Media</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="app-screen"><span aria-hidden="true">▦</span><strong>Mobile Apps</strong></button>
-                <button type="button" data-route="create" data-create-reset data-create-category="poster"><span aria-hidden="true">▶</span><strong>Posters</strong></button>
-              </div>
-            </section>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <div id="dialog-layer"></div>
+  <input id="project-import" type="file" accept="application/json,.json" hidden>
+  <input id="all-data-import" type="file" accept="application/json,.json" hidden>
 
-            <section class="section-block dashboard-summary" aria-labelledby="dashboard-title">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Project dashboard</p>
-                  <h2 class="medium-title" id="dashboard-title">Your creative universe</h2>
-                </div>
-                <span class="badge">UCE</span>
-              </div>
-              <div class="dashboard-stats" id="dashboard-stats" aria-live="polite"></div>
-            </section>
-
-            <section class="section-block" aria-labelledby="quick-title">
-              <div class="section-heading">
-                <h2 class="medium-title" id="quick-title">Quick create</h2>
-                <span class="badge badge--soft">One engine</span>
-              </div>
-              <div class="card-grid">
-                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset data-create-mode="describe" aria-label="Start a new creation">
-                  <span class="card-icon" aria-hidden="true">✦</span>
-                  <span>
-                    <strong>New creation</strong>
-                    <small>Describe anything you want to make</small>
-                  </span>
-                  <span aria-hidden="true">›</span>
-                </button>
-                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset data-create-mode="guided" aria-label="Open Creative Builder">
-                  <span class="card-icon" aria-hidden="true">🪄</span>
-                  <span><strong>Creative Builder</strong><small>Choose details from expandable sections</small></span>
-                  <span aria-hidden="true">›</span>
-                </button>
-                <button class="card card--interactive quick-card" type="button" data-route="create" data-create-reset data-create-mode="inspire" aria-label="Start creating with inspiration">
-                  <span class="card-icon" aria-hidden="true">⟳</span>
-                  <span>
-                    <strong>Inspire me</strong>
-                    <small>Generate and mix creative ideas</small>
-                  </span>
-                  <span aria-hidden="true">›</span>
-                </button>
-              </div>
-            </section>
-
-            <section class="section-block template-strip" aria-labelledby="templates-title">
-              <div class="section-heading">
-                <h2 class="medium-title" id="templates-title">Templates</h2>
-                <span class="caption">Professional starting points</span>
-              </div>
-              <div class="template-scroll" aria-label="Available project templates">
-                <button type="button" data-route="create" data-template="Blank" data-create-reset>Blank</button>
-                <button type="button" data-route="create" data-template="Fantasy" data-create-reset>Fantasy</button>
-                <button type="button" data-route="create" data-template="Sci-Fi" data-create-reset>Sci-Fi</button>
-                <button type="button" data-route="create" data-template="Modern" data-create-reset>Modern</button>
-                <button type="button" data-route="create" data-template="Anime" data-create-reset>Anime</button>
-                <button type="button" data-route="create" data-template="Realistic" data-create-reset>Realistic</button>
-                <button type="button" data-route="create" data-template="Custom" data-create-reset>Custom</button>
-              </div>
-            </section>
-
-            <section class="section-block" aria-labelledby="projects-title">
-              <div class="section-heading">
-                <h2 class="medium-title" id="projects-title">Recent projects</h2>
-                <button class="text-button" type="button" data-route="saved">View all</button>
-              </div>
-              <div class="project-tools">
-                <label class="search-field project-search">
-                  <span aria-hidden="true">⌕</span>
-                  <span class="sr-only">Search projects by name, tag, category, date, favorite, or status</span>
-                  <input type="search" id="project-search" placeholder="Search every project" aria-label="Search all projects">
-                </label>
-                <div class="project-tool-row">
-                  <label>
-                    <span class="sr-only">Filter project status</span>
-                    <select id="project-status-filter" aria-label="Filter projects by status">
-                      <option value="all">All statuses</option>
-                      <option value="draft">Drafts</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span class="sr-only">Sort projects</span>
-                    <select id="project-sort" aria-label="Sort projects">
-                      <option value="modified-desc">Recently modified</option>
-                      <option value="name-asc">Name A–Z</option>
-                      <option value="created-desc">Recently created</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
-              <div class="project-feed" id="dashboard-projects" aria-live="polite"></div>
-            </section>
-          </section>
-
-          <section class="screen creation-screen creation-os" data-screen="create" aria-labelledby="creation-title">
-            <div class="screen-heading creation-heading">
-              <div>
-                <p class="eyebrow" id="creation-stage-label">Universal Creative Engine</p>
-                <h1 class="large-title" id="creation-title">Create anything</h1>
-              </div>
-              <button class="icon-button" type="button" data-creative-reset aria-label="Start a new creation">＋</button>
-            </div>
-            <p class="sr-only" id="creation-live-status" aria-live="polite">Choose how you want to create.</p>
-            <div id="creative-experience-root"></div>
-          </section>
-
-          <section class="screen project-detail-screen" data-screen="project" aria-labelledby="project-detail-title">
-            <div class="screen-heading screen-heading--compact">
-              <button class="icon-button" type="button" data-route="saved" aria-label="Back to projects">‹</button>
-              <div class="screen-heading__center">
-                <p class="eyebrow" id="project-detail-type">Creative project</p>
-                <h1 class="medium-title" id="project-detail-title">Project</h1>
-              </div>
-              <button class="icon-button" type="button" data-project-detail-favorite aria-label="Add project to favorites" aria-pressed="false">♡</button>
-            </div>
-            <section class="project-hero-card" aria-labelledby="project-goal-title">
-              <div class="project-hero-card__mark" id="project-detail-mark" aria-hidden="true">V</div>
-              <div>
-                <p class="eyebrow">Creative goal</p>
-                <h2 class="medium-title" id="project-goal-title">Your direction</h2>
-                <p class="body-text" id="project-detail-description"></p>
-              </div>
-            </section>
-            <dl class="project-detail-meta" id="project-detail-meta"></dl>
-            <section class="project-answer-panel" aria-labelledby="project-answers-title">
-              <div class="section-heading">
-                <h2 class="medium-title" id="project-answers-title">Creative direction</h2>
-                <button class="text-button" type="button" data-project-edit>Continue editing</button>
-              </div>
-              <div id="project-detail-answers"></div>
-            </section>
-            <div class="project-detail-actions">
-              <button class="card card--interactive" type="button" data-project-continue="prompt"><span class="card-icon" aria-hidden="true">🛠</span><span><strong>Advanced Controls</strong><small>Camera, composition, seed, negative prompt, and Prompt Inspector</small></span><span aria-hidden="true">›</span></button>
-              <button class="card card--interactive" type="button" data-project-continue="visual"><span class="card-icon" aria-hidden="true">◈</span><span><strong>Shape visual direction</strong><small>Refine color, material, composition, mood, and style</small></span><span aria-hidden="true">›</span></button>
-            </div>
-            <div class="project-detail-toolbar">
-              <button type="button" data-project-export>Export</button>
-              <button type="button" data-project-duplicate>Duplicate</button>
-              <button type="button" data-project-archive>Archive</button>
-            </div>
-          </section>
-
-          <section class="screen visual-studio" data-screen="visual" aria-labelledby="visual-title">
-            <div class="screen-heading screen-heading--compact">
-              <button class="icon-button" type="button" data-route="project" aria-label="Back to project">‹</button>
-              <div class="screen-heading__center">
-                <p class="eyebrow">Universal creation</p>
-                <h1 class="medium-title" id="visual-title">Visual Engine</h1>
-              </div>
-              <button class="icon-button" type="button" data-random-visual aria-label="Randomize all compatible visual selections">⟳</button>
-            </div>
-
-            <div id="visual-preview-root">
-              <div class="generate-loader" role="status" aria-label="Loading Universal Visual Engine">
-                <span aria-hidden="true">◈</span><div><strong>Opening Visual Engine</strong><small>Loading reusable visual datasets…</small></div>
-              </div>
-            </div>
-
-            <div class="visual-template-row">
-              <label>
-                <span>Visual template</span>
-                <select id="visual-template" aria-label="Choose a visual template"></select>
-              </label>
-              <button class="button button--secondary" type="button" data-random-current>Random</button>
-            </div>
-
-            <div class="visual-group-tabs" id="visual-groups" role="group" aria-label="Visual category groups"></div>
-            <div class="visual-category-tabs" id="visual-categories" role="group" aria-label="Visual categories"></div>
-
-            <div class="visual-tools">
-              <label class="search-field">
-                <span aria-hidden="true">⌕</span>
-                <input type="search" id="visual-search" placeholder="Search visual assets" aria-label="Search the active visual dataset">
-              </label>
-              <div class="visual-filter-row">
-                <label>
-                  <span class="sr-only">Filter visual assets by category</span>
-                  <select id="visual-category-filter" aria-label="Filter visual assets by category"></select>
-                </label>
-                <div class="visual-view-toggle" role="group" aria-label="Visual asset view">
-                  <button class="is-active" type="button" data-visual-view="all" aria-pressed="true" aria-label="Show all visual assets">All</button>
-                  <button type="button" data-visual-view="favorites" aria-pressed="false" aria-label="Show favorite visual assets">♡</button>
-                  <button type="button" data-visual-view="recent" aria-pressed="false" aria-label="Show recent visual assets">↶</button>
-                </div>
-              </div>
-              <p class="caption visual-result-count" id="visual-result-count" aria-live="polite"></p>
-            </div>
-
-            <div class="visual-assets" id="visual-assets" aria-live="polite"></div>
-
-            <div class="visual-actions">
-              <button class="button button--outlined" type="button" data-save-visual>Save preset</button>
-              <button class="button button--primary" type="button" data-apply-visual>Apply visual</button>
-            </div>
-          </section>
-
-          <section class="screen prompt-studio" data-screen="prompt" aria-labelledby="prompt-studio-title">
-            <div class="screen-heading">
-              <div><p class="eyebrow">Professional controls</p><h1 class="large-title" id="prompt-studio-title">Advanced Controls</h1></div>
-              <button class="icon-button" type="button" data-random-prompt aria-label="Randomize compatible prompt direction">↻</button>
-            </div>
-            <div class="notice"><span aria-hidden="true">✓</span><p>Vyrelix handles prompt engineering automatically. These optional controls are available when you want camera, composition, seed, negative prompt, or Prompt Inspector access.</p></div>
-            <form id="prompt-form" class="prompt-form">
-              <label class="field"><span>Project <b aria-hidden="true">*</b></span><select name="projectId" required aria-label="Project to generate from"><option value="">Choose a saved project</option></select></label>
-              <div class="prompt-form__pair">
-                <label class="field"><span>Prompt type</span><select name="promptType" aria-label="Prompt type"></select></label>
-                <label class="field"><span>Seed</span><input name="seed" type="number" inputmode="numeric" min="1" max="2147483647" placeholder="Project seed" aria-label="Prompt seed"></label>
-              </div>
-              <label class="field"><span>Subject focus</span><input name="subject" type="text" maxlength="120" placeholder="Uses the project title by default" aria-label="Subject focus"></label>
-              <label class="field"><span>Environment</span><input name="environment" type="text" maxlength="160" placeholder="A rainlit observatory above the clouds" aria-label="Prompt environment"></label>
-              <div class="prompt-form__pair">
-                <label class="field"><span>Lighting</span><select name="lighting" aria-label="Prompt lighting"><option>Soft daylight</option><option>Blue hour</option><option>Rim light</option><option>Volumetric glow</option><option>Cinematic balanced lighting</option></select></label>
-                <label class="field"><span>Camera</span><select name="camera" aria-label="Prompt camera"><option>Eye level</option><option>Low angle</option><option>Wide establishing</option><option>Close portrait</option></select></label>
-              </div>
-              <label class="field"><span>Composition</span><select name="composition" aria-label="Prompt composition"><option>Clear visual hierarchy</option><option>Centered</option><option>Rule of thirds</option><option>Symmetrical</option><option>Dynamic diagonal</option></select></label>
-              <label class="field"><span>Additional direction</span><textarea name="additional" rows="3" maxlength="320" placeholder="Atmosphere, storytelling details, or constraints…" aria-label="Additional prompt direction"></textarea></label>
-              <section class="negative-panel" aria-labelledby="negative-title">
-                <label class="switch-row"><span><strong id="negative-title">Negative prompt</strong><small>Prevent common visual defects</small></span><input type="checkbox" name="negativeEnabled" role="switch" aria-label="Enable negative prompt" checked><i aria-hidden="true"></i></label>
-                <label class="field"><span class="sr-only">Negative prompt terms</span><textarea name="negativePrompt" rows="3" aria-label="Edit negative prompt terms"></textarea></label>
-                <button class="text-button" type="button" data-save-negative>Save as preset</button>
-              </section>
-            </form>
-            <section class="prompt-live card" id="prompt-live-preview" aria-labelledby="live-preview-title">
-              <div class="prompt-preview__heading"><div><p class="eyebrow">Updates instantly</p><h2 class="section-title" id="live-preview-title">Live preview</h2></div><span data-prompt-length>Concise</span></div>
-              <p data-preview-prompt>Choose a project to preview a prompt.</p>
-              <p class="sr-only" data-preview-negative></p><p class="sr-only" data-preview-summary></p><p class="sr-only" data-preview-character></p>
-              <div class="prompt-metrics" aria-label="Live prompt metrics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
-            </section>
-            <div class="prompt-shortcuts">
-              <button class="card card--interactive" type="button" data-route="prompt-history"><span class="card-icon" aria-hidden="true">↶</span><span><strong>Prompt versions</strong><small>Review previous generated directions</small></span><span aria-hidden="true">›</span></button>
-            </div>
-            <div class="generate-dock"><button class="button button--generate button--wide ripple" type="button" id="generate-prompt" disabled><span class="button__spark" aria-hidden="true">✦</span><span data-generate-label>Refresh prompt</span></button></div>
-          </section>
-
-          <section class="screen prompt-preview-screen" data-screen="prompt-preview" aria-labelledby="prompt-preview-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Inspector">‹</button><div class="screen-heading__center"><p class="eyebrow">Generation complete</p><h1 class="medium-title" id="prompt-preview-title" data-preview-title>Prompt preview</h1></div><button class="icon-button" type="button" data-favorite-prompt aria-label="Favorite generated prompt" aria-pressed="false">♡</button></div>
-            <section class="prompt-output-card">
-              <div class="prompt-preview__heading"><span class="badge" data-preview-type>Ready</span><span data-prompt-length>Concise</span></div><h2 class="section-title">Formatted prompt</h2><p class="prompt-output" data-preview-prompt>Generate a prompt to see it here.</p>
-              <div class="prompt-action-grid"><button class="button button--copy" type="button" data-copy-part="prompt">Copy prompt</button><button class="button button--copy" type="button" data-copy-part="json">Copy JSON</button></div>
-            </section>
-            <section class="prompt-output-card"><h2 class="section-title">Negative prompt</h2><p class="prompt-output prompt-output--muted" data-preview-negative>Disabled</p><button class="button button--copy" type="button" data-copy-part="negative">Copy negative</button></section>
-            <section class="prompt-output-card"><h2 class="section-title">Project summary</h2><p class="prompt-output" data-preview-summary>No project selected.</p><h3 class="caption">Creative direction</h3><p class="prompt-output prompt-output--muted" data-preview-character>No additional direction available.</p><button class="button button--copy" type="button" data-copy-part="summary">Copy summary</button></section>
-            <div class="prompt-metrics prompt-metrics--large" aria-label="Prompt statistics"><span><b data-word-count>0</b> words</span><span><b data-character-count>0</b> characters</span></div>
-            <section class="export-panel" aria-labelledby="export-title"><div><p class="eyebrow">Portable files</p><h2 class="section-title" id="export-title">Export prompt</h2></div><div class="export-actions"><button type="button" data-export-format="txt">TXT</button><button type="button" data-export-format="md">Markdown</button><button type="button" data-export-format="json">JSON</button></div></section>
-            <button class="card card--interactive full-card" type="button" data-route="project"><span class="card-icon" aria-hidden="true">✦</span><span><strong>Return to project</strong><small>Keep refining this creative direction</small></span><span aria-hidden="true">›</span></button>
-          </section>
-
-          <section class="screen prompt-history-screen" data-screen="prompt-history" aria-labelledby="prompt-history-title">
-            <div class="screen-heading screen-heading--compact"><button class="icon-button" type="button" data-route="prompt" aria-label="Back to Prompt Inspector">‹</button><div class="screen-heading__center"><p class="eyebrow">Saved automatically</p><h1 class="medium-title" id="prompt-history-title">Prompt versions</h1></div><span class="badge" id="prompt-history-count">0 prompts</span></div>
-            <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="prompt-history-search" placeholder="Search prompts" aria-label="Search prompt history"></label>
-            <div class="prompt-history-list" id="prompt-history-list" aria-live="polite"></div>
-          </section>
-
-          <section class="screen" data-screen="saved" aria-labelledby="saved-title">
-            <div class="screen-heading">
-              <div><p class="eyebrow">Universal collection</p><h1 class="large-title" id="saved-title">Projects</h1></div>
-              <span class="badge" id="saved-count">0 items</span>
-            </div>
-            <div class="search-combobox" data-search-root>
-            <label class="search-field">
-              <span aria-hidden="true">⌕</span>
-              <input type="search" id="saved-search" placeholder="Search your projects" aria-label="Search saved projects" aria-controls="search-suggestions" aria-expanded="false" autocomplete="off">
-              <button class="search-clear is-hidden" type="button" aria-label="Clear search" data-search-clear>×</button>
-            </label>
-            <div class="search-suggestions is-hidden" id="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
-            </div>
-            <div class="segmented segmented--four" role="tablist" aria-label="Saved item type">
-              <button class="is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
-              <button type="button" role="tab" aria-selected="false" data-filter="project">Projects</button>
-              <button type="button" role="tab" aria-selected="false" data-filter="prompt">Prompts</button>
-              <button type="button" role="tab" aria-selected="false" data-filter="archived">Archive</button>
-            </div>
-            <div class="saved-list" id="saved-list"></div>
-          </section>
-
-          <section class="screen library-screen" data-screen="library" aria-labelledby="library-title">
-            <div class="screen-heading">
-              <div><p class="eyebrow">Creative library</p><h1 class="large-title" id="library-title">Discover</h1></div>
-              <span class="badge">Curated</span>
-            </div>
-            <p class="body-text text-muted library-intro">Explore inspiration, professional starting points, and reusable visual directions without leaving the Universal Creative Engine.</p>
-            <div class="library-feature-grid">
-              <button class="card card--interactive library-feature" type="button" data-route="create" data-create-reset data-create-mode="inspire">
-                <span class="card-icon" aria-hidden="true">🎲</span>
-                <span><strong>Inspiration</strong><small>Curated concepts, palettes, and styles</small></span>
-                <span aria-hidden="true">›</span>
-              </button>
-              <button class="card card--interactive library-feature" type="button" data-route="create" data-create-reset data-create-mode="guided">
-                <span class="card-icon" aria-hidden="true">🪄</span>
-                <span><strong>Creative Builder</strong><small>Explore every category and expandable option</small></span>
-                <span aria-hidden="true">›</span>
-              </button>
-            </div>
-            <section class="section-block" aria-labelledby="library-templates-title">
-              <div class="section-heading"><h2 class="medium-title" id="library-templates-title">Starting styles</h2><span class="caption">Editable</span></div>
-              <div class="template-scroll" aria-label="Creative starting styles">
-                <button type="button" data-route="create" data-template="Blank" data-create-reset>Blank</button>
-                <button type="button" data-route="create" data-template="Fantasy" data-create-reset>Fantasy</button>
-                <button type="button" data-route="create" data-template="Sci-Fi" data-create-reset>Sci-Fi</button>
-                <button type="button" data-route="create" data-template="Modern" data-create-reset>Modern</button>
-                <button type="button" data-route="create" data-template="Anime" data-create-reset>Anime</button>
-                <button type="button" data-route="create" data-template="Realistic" data-create-reset>Realistic</button>
-              </div>
-            </section>
-            <section class="section-block" aria-labelledby="saved-looks-title">
-              <div class="section-heading">
-                <h2 class="medium-title" id="saved-looks-title">Saved character looks</h2>
-                <span class="caption">Reusable outfits</span>
-              </div>
-              <div class="saved-look-grid" id="saved-look-grid">
-                <div class="empty-state empty-state--compact">
-                  <h3>Your saved looks will appear here</h3>
-                  <p>Save an outfit from the Character Builder to reuse it later.</p>
-                </div>
-              </div>
-            </section>
-            <section class="settings-group library-privacy-note">
-              <h2 class="section-title">Your creative collection</h2>
-              <p class="body-text text-muted">Favorites, templates, and inspiration stay private in this browser unless you export them.</p>
-              <button class="button button--outlined button--wide" type="button" data-route="saved">View saved projects</button>
-            </section>
-          </section>
-
-          <section class="screen" data-screen="settings" aria-labelledby="settings-title">
-            <div class="screen-heading"><div><p class="eyebrow">Your Vyrelix</p><h1 class="large-title" id="settings-title">Profile</h1></div></div>
-            <section class="settings-group">
-              <h2 class="section-title">Experience</h2>
-              <label class="switch-row">
-                <span><strong>Midnight mode</strong><small>Switch to the deeper evening palette</small></span>
-                <input type="checkbox" id="dark-mode-toggle" role="switch" aria-label="Midnight mode">
-                <i aria-hidden="true"></i>
-              </label>
-              <div class="divider"></div>
-              <label class="switch-row">
-                <span><strong>Animations</strong><small>Motion and transition effects</small></span>
-                <input type="checkbox" id="animation-toggle" role="switch" aria-label="Animations" checked>
-                <i aria-hidden="true"></i>
-              </label>
-            </section>
-            <section class="settings-group">
-              <h2 class="section-title">Information</h2>
-              <button class="settings-link" type="button" data-dialog="about"><span>About Vyrelix</span><span aria-hidden="true">›</span></button>
-              <div class="divider"></div>
-              <button class="settings-link" type="button" data-dialog="privacy"><span>Privacy</span><span aria-hidden="true">›</span></button>
-              <div class="divider"></div>
-              <div class="settings-link"><span>Version</span><span class="caption" data-app-version>5.0.0 · Universal Creative Platform</span></div>
-            </section>
-            <button class="button button--danger button--wide" type="button" id="clear-storage">Clear local storage</button>
-          </section>
-
-        </main>
-
-        <nav class="bottom-nav bottom-nav--five" aria-label="Primary navigation">
-          <button class="nav-item is-active" type="button" data-route="home" aria-label="Home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
-          <button class="nav-item" type="button" data-route="create" data-create-reset aria-label="Create anything"><span aria-hidden="true">✦</span><small>Create</small></button>
-          <button class="nav-item" type="button" data-route="saved" aria-label="Projects"><span aria-hidden="true">▱</span><small>Projects</small></button>
-          <button class="nav-item" type="button" data-route="library" aria-label="Creative Library"><span aria-hidden="true">▦</span><small>Library</small></button>
-          <button class="nav-item" type="button" data-route="settings" aria-label="Profile"><span aria-hidden="true">◉</span><small>Profile</small></button>
-        </nav>
-      </div>
-    </div>
-
-    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
-
-    <div class="modal-backdrop is-hidden" id="modal-backdrop" data-modal-backdrop>
-      <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-copy">
-        <div class="dialog__preview is-hidden" id="dialog-preview" role="img" aria-label="Preview placeholder"></div>
-        <div class="dialog__icon" id="dialog-icon" aria-hidden="true">V</div>
-        <h2 class="medium-title" id="dialog-title">Vyrelix</h2>
-        <p class="body-text" id="dialog-copy"></p>
-        <div class="button-row">
-          <button class="button button--outlined" type="button" data-close-modal>Close</button>
-          <button class="button button--danger is-hidden" type="button" id="confirm-clear">Clear data</button>
-        </div>
-      </section>
-    </div>
-
-    <div class="sheet-backdrop is-hidden" id="sheet-backdrop" data-sheet-backdrop>
-      <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" data-sheet>
-        <button class="sheet-handle" type="button" data-close-sheet aria-label="Close prompt anatomy"></button>
-        <h2 class="medium-title" id="sheet-title">Prompt anatomy</h2>
-        <ol class="anatomy-list">
-          <li><span>01</span><div><strong>Subject</strong><small>Who or what anchors the image?</small></div></li>
-          <li><span>02</span><div><strong>Environment</strong><small>Where does the moment happen?</small></div></li>
-          <li><span>03</span><div><strong>Direction</strong><small>Lighting, camera, color, and mood.</small></div></li>
-        </ol>
-        <button class="button button--primary button--wide" type="button" data-close-sheet>Got it</button>
-      </section>
-    </div>
-
-    <script type="module" src="./js/app.js"></script>
-  </body>
+  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/radio.js"></script>
+</body>
 </html>

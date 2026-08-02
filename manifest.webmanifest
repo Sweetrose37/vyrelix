@@ -1,17 +1,17 @@
 {
-  "name": "Vyrelix Universal Creative Platform",
-  "short_name": "Vyrelix",
-  "description": "A private, adaptive creative platform for ideas, visual direction, and production-ready creative briefs.",
+  "name": "Nyvera — Character, Kids & Sticker Studios",
+  "short_name": "Nyvera",
+  "description": "A premium mobile-first prompt builder with adult character, human child, and professional sticker studios.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F8F3EA",
-  "theme_color": "#F8F3EA",
+  "background_color": "#100713",
+  "theme_color": "#17091f",
   "orientation": "any",
   "categories": ["design", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "./assets/icons/vyrelix-mark.svg",
+      "src": "./assets/icons/nyvera-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

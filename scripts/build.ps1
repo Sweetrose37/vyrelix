@@ -13,25 +13,42 @@ if (Test-Path -LiteralPath $distRoot) {
 
 New-Item -ItemType Directory -Force -Path $distRoot | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot "index.html") -Destination $distRoot
-Copy-Item -LiteralPath (Join-Path $projectRoot "css") -Destination $distRoot -Recurse
-Copy-Item -LiteralPath (Join-Path $projectRoot "js") -Destination $distRoot -Recurse
-Copy-Item -LiteralPath (Join-Path $projectRoot "utilities") -Destination $distRoot -Recurse
-Copy-Item -LiteralPath (Join-Path $projectRoot "assets") -Destination $distRoot -Recurse
+New-Item -ItemType Directory -Force -Path (Join-Path $distRoot "css") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $distRoot "js") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $distRoot "assets") | Out-Null
+Copy-Item -LiteralPath (Join-Path $projectRoot "css\nyvera.css") -Destination (Join-Path $distRoot "css")
+Copy-Item -LiteralPath (Join-Path $projectRoot "css\radio.css") -Destination (Join-Path $distRoot "css")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\app.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-data.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-prompts.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-storage.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\nyvera-workflows.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio-explorer.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio-service.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "js\radio-storage.js") -Destination (Join-Path $distRoot "js")
+Copy-Item -LiteralPath (Join-Path $projectRoot "assets") -Destination $distRoot -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $projectRoot "manifest.webmanifest") -Destination $distRoot
 Copy-Item -LiteralPath (Join-Path $projectRoot "service-worker.js") -Destination $distRoot
 New-Item -ItemType File -Force -Path (Join-Path $distRoot ".nojekyll") | Out-Null
 
 $required = @(
   (Join-Path $distRoot "index.html"),
-  (Join-Path $distRoot "css\style.css"),
+  (Join-Path $distRoot "css\nyvera.css"),
+  (Join-Path $distRoot "css\radio.css"),
   (Join-Path $distRoot "js\app.js"),
   (Join-Path $distRoot "manifest.webmanifest"),
   (Join-Path $distRoot "service-worker.js"),
-  (Join-Path $distRoot "utilities\helpers.js"),
+  (Join-Path $distRoot "js\nyvera-prompts.js"),
+  (Join-Path $distRoot "js\nyvera-workflows.js"),
+  (Join-Path $distRoot "js\radio.js"),
+  (Join-Path $distRoot "js\radio-explorer.js"),
+  (Join-Path $distRoot "js\radio-service.js"),
+  (Join-Path $distRoot "js\radio-storage.js"),
   (Join-Path $distRoot ".nojekyll")
 )
 foreach ($path in $required) {
   if (-not (Test-Path -LiteralPath $path)) { throw "Build output is missing $path" }
 }
 
-Write-Output "Vyrelix GitHub Pages build created at $distRoot"
+Write-Output "Nyvera GitHub Pages build created at $distRoot"

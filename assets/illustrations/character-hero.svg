@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" role="img" aria-labelledby="t d">
+ <title id="t">Nyvera adult character studio</title><desc id="d">Original editorial illustration of four diverse adult figures in realistic clothing surrounded by fashion and portrait motifs.</desc>
+ <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#5c206b"/><stop offset="1" stop-color="#16091c"/></linearGradient><linearGradient id="gold"><stop stop-color="#fff0bd"/><stop offset="1" stop-color="#b9823d"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="9"/></filter></defs>
+ <rect x="8" y="8" width="624" height="504" rx="42" fill="url(#bg)" stroke="#e3bd72" stroke-opacity=".45"/>
+ <circle cx="370" cy="232" r="164" fill="none" stroke="url(#gold)" stroke-width="8"/><circle cx="370" cy="232" r="139" fill="none" stroke="#fff0bd" stroke-opacity=".22"/>
+ <g opacity=".2" stroke="#e3bd72"><path d="M30 92h580M30 142h580M30 192h580M30 242h580M30 292h580M30 342h580M30 392h580"/><path d="M80 32v456M130 32v456M180 32v456M230 32v456M280 32v456M330 32v456M380 32v456M430 32v456M480 32v456M530 32v456"/></g>
+ <g stroke="#f4d99e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="#8c4d31"><circle cx="360" cy="166" r="47"/><path d="M318 159c6-57 78-76 94-10-22-15-56-19-94 10z" fill="#1c101d"/><path d="M323 215q37-23 74 0l22 180H300z" fill="#f2e6d4"/><path d="M323 222l37 64 37-64" fill="#6e214f"/><path d="M300 395h119"/></g>
+  <g fill="#5e3526"><circle cx="218" cy="196" r="36"/><path d="M181 191q4-49 40-48 38 3 41 46-34-21-81 2z" fill="#27131e"/><path d="M188 235q30-17 60 0l13 132h-89z" fill="#25354d"/><path d="M190 242l28 35 29-35" fill="#fff0bd"/></g>
+  <g fill="#c47c53"><circle cx="488" cy="198" r="36"/><path d="M450 195q11-54 75-33l-5 44q-29-32-70-11z" fill="#5a342a"/><path d="M458 236q31-17 61 0l16 132h-94z" fill="#7c316e"/><path d="M461 246h55"/></g>
+  <g fill="#9d6045"><circle cx="110" cy="252" r="29"/><path d="M82 246q2-36 27-39 30 0 31 40-30-18-58-1z" fill="#15111d"/><path d="M84 283q25-13 50 0l13 91H70z" fill="#a66f38"/></g>
+ </g>
+ <g fill="#fff0bd"><circle cx="77" cy="65" r="4"/><circle cx="556" cy="78" r="5"/><circle cx="580" cy="333" r="3"/><path d="M548 112l5 12 12 5-12 5-5 12-5-12-12-5 12-5z"/></g>
+ <g fill="#241229" stroke="#e3bd72" stroke-width="2"><rect x="45" y="106" width="94" height="70" rx="15"/><path d="M69 150q23-43 46 0" fill="none"/><rect x="490" y="407" width="107" height="61" rx="15"/><circle cx="516" cy="438" r="12" fill="#7e388f"/><circle cx="548" cy="438" r="12" fill="#d66d98"/><circle cx="579" cy="438" r="12" fill="#e3bd72"/></g>
+</svg>

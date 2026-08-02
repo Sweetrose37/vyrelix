@@ -1,4 +1,4 @@
-name: Deploy Vyrelix to GitHub Pages
+name: Deploy Nyvera to GitHub Pages
 
 on:
   push:

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 400" role="img" aria-label="Books, children, clouds, and school supplies line-art decoration">
+ <g fill="none" stroke="#704a7c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M64 97q22-39 57-7 42-24 64 19 35-1 42 33H54q-13-27 10-45z" fill="#fff" fill-opacity=".25"/>
+  <path d="M258 130a142 142 0 01234 27" stroke="#e8a743" stroke-width="13"/><path d="M269 134a130 130 0 01212 26" stroke="#d46694" stroke-width="10"/><path d="M280 140a118 118 0 01191 23" stroke="#66bcd5" stroke-width="8"/>
+  <circle cx="270" cy="211" r="35"/><path d="M235 205q9-47 65-30l4 37M239 254q31-21 62 0l12 105h-87z"/><path d="M242 286l-62-24 9 70 70 17zM299 286l56-25-6 70-66 18z" fill="#fff" fill-opacity=".22"/>
+  <circle cx="403" cy="227" r="31"/><path d="M372 222q7-41 41-37 29 4 23 44M377 265q27-17 53 0l17 86h-87z"/><rect x="373" y="294" width="66" height="50" rx="6" fill="#fff" fill-opacity=".22"/>
+  <g transform="rotate(-14 115 280)"><rect x="104" y="225" width="21" height="111" rx="7"/><path d="M104 225l10-22 11 22"/></g>
+  <path d="M85 359h79M94 347h61M70 367h103"/><path d="M88 169l5 12 12 5-12 5-5 12-5-12-12-5 12-5zM457 77l5 12 12 5-12 5-5 12-5-12-12-5 12-5z"/>
+  <path d="M36 245q19-28 40 0 27-14 36 15H28q-6-14 8-15z" fill="#fff" fill-opacity=".25"/>
+ </g>
+</svg>

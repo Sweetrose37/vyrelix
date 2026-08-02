@@ -1,9 +1,10 @@
 {
-  "name": "vyrelix",
-  "version": "5.0.0",
+  "name": "nyvera",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build.ps1"
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build.ps1",
+    "test": "node --test tests/*.test.mjs"
   }
 }
