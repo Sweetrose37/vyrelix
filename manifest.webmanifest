@@ -1,15 +1,29 @@
 {
   "name": "Nyvera — Character, Kids & Sticker Studios",
   "short_name": "Nyvera",
+  "id": "./",
   "description": "A premium mobile-first prompt builder with adult character, human child, and professional sticker studios.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#100713",
   "theme_color": "#17091f",
   "orientation": "any",
   "categories": ["design", "productivity", "lifestyle"],
   "icons": [
+    {
+      "src": "./assets/icons/nyvera-mark-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/nyvera-mark-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "./assets/icons/nyvera-mark.svg",
       "sizes": "any",

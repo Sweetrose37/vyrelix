@@ -31,6 +31,8 @@ test("recent locations are deduplicated and bounded to 25",()=>{
 });
 test("iHeart live station pages become official responsive dark-theme embeds",()=>{
   assert.equal(service.iheartEmbedUrl("https://www.iheart.com/live/jingle-ball-radio-9165/"),"https://www.iheart.com/live/jingle-ball-radio-9165/?embed=true&theme=dark");
+  assert.equal(service.iheartEmbedUrl('<iframe src="https://www.iheart.com/live/jingle-ball-radio-9165/?embed=true&amp;theme=light"></iframe>'),"https://www.iheart.com/live/jingle-ball-radio-9165/?embed=true&theme=dark");
+  assert.equal(service.iheartStationPageUrl("www.iheart.com/live/jingle-ball-radio-9165/?cmp=share"),"https://www.iheart.com/live/jingle-ball-radio-9165/");
   assert.equal(service.iheartEmbedUrl("https://evil.example/live/fake-1234/"),"");
   assert.equal(service.iheartEmbedUrl("https://www.iheart.com/podcast/example-1234/"),"");
 });

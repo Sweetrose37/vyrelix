@@ -8,12 +8,23 @@ const HLS_URL=/\.m3u8(?:\?|$)/i;
 let servers=[];
 
 export const IHEART_DIRECTORY="https://www.iheart.com/live/";
-export function iheartEmbedUrl(value){
+function iheartUrlCandidate(value){
+  const text=String(value||"").trim().replace(/&amp;/gi,"&").replace(/&quot;/gi,'"');
+  const embedded=text.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+  const linked=text.match(/https:\/\/[^\s"'<>]+/i)?.[0];
+  const candidate=embedded||linked||text;
+  return /^www\./i.test(candidate)?`https://${candidate}`:candidate;
+}
+export function iheartStationPageUrl(value){
   try{
-    const url=new URL(String(value||"").trim());
-    if(url.protocol!=="https:"||!/(^|\.)iheart\.com$/i.test(url.hostname)||!/^\/live\/[^/]+-\d+\/?$/i.test(url.pathname))return "";
-    url.hostname="www.iheart.com";url.search="?embed=true&theme=dark";url.hash="";return url.href;
+    const url=new URL(iheartUrlCandidate(value));
+    if(url.protocol!=="https:"||!/(^|\.)iheart\.com$/i.test(url.hostname)||!/^\/live\/[^/?#]+-\d+\/?$/i.test(url.pathname))return "";
+    url.hostname="www.iheart.com";url.pathname=`${url.pathname.replace(/\/$/,"")}/`;url.search="";url.hash="";return url.href;
   }catch{return ""}
+}
+export function iheartEmbedUrl(value){
+  const page=iheartStationPageUrl(value);if(!page)return "";
+  const url=new URL(page);url.searchParams.set("embed","true");url.searchParams.set("theme","dark");return url.href;
 }
 
 const clean=value=>String(value??"").replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,500);
